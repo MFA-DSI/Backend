@@ -1,0 +1,835 @@
+openapi: 3.0.0
+info:
+  title: API de Gestion des Rapports d'Activité
+  version: 1.0.0
+  description: API pour la gestion des rapports d'activité hebdomadaires, mensuels et trimestriels des départements.
+
+security:
+  - bearerAuth: []
+paths:
+  /login:
+    post:
+      summary: Authentification de l'utilisateur
+      tags: [User]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Authentification réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Identifiants incorrects
+
+  /signup:
+    post:
+      summary: Inscription de l'utilisateur
+      tags: [User]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Utilisateur créé avec succès
+
+  /logout:
+    post:
+      summary: Déconnexion de l'utilisateur
+      tags: [User]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Token de l'utilisateur pour la déconnexion
+      responses:
+        '200':
+          description: Déconnexion réussie
+        '400':
+          description: Token invalide ou absent
+
+  /user/information/{id}:
+    get:
+      summary: Récupérer les informations d'un utilisateur
+      tags: [User]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID de l'utilisateur
+      responses:
+        '200':
+          description: Détails de l'utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    delete:
+      summary: Supprimer un utilisateur
+      tags: [User]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID de l'utilisateur à supprimer
+      responses:
+        '200':
+          description: Utilisateur supprimé avec succès
+        '404':
+          description: Utilisateur non trouvé
+
+  /departments:
+    get:
+      summary: Récupérer tous les départements
+      tags: [Department]
+      responses:
+        '200':
+          description: Liste des départements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Department'
+
+    put:
+      summary: Créer ou mettre à jour un département
+      tags: [Department]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Department'
+      responses:
+        '200':
+          description: Département créé ou mis à jour avec succès
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+  /departments/{id}:
+    get:
+      summary: Récupérer les informations d'un département
+      tags: [Department]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID du département
+      responses:
+        '200':
+          description: Détails du département
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Department'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+    delete:
+      summary: Supprimer un département
+      tags: [Department]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID du département à supprimer
+      responses:
+        '200':
+          description: Département supprimé avec succès
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+  /reports:
+    get:
+      summary: Récupérer tous les rapports
+      tags: [Report]
+      parameters:
+        - in: query
+          name: departmentId
+          schema:
+            type: string
+          description: Filtrer les rapports par département
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Date de début pour le filtre des rapports
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: Date de fin pour le filtre des rapports
+        - in: query
+          name: period
+          schema:
+            type: string
+          description: Période pour filtrer les rapports (weekly, monthly, quarterly)
+      responses:
+        '200':
+          description: Liste des rapports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+    put:
+      summary: Créer ou mettre à jour un rapport
+      tags: [Report]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Report'
+      responses:
+        '200':
+          description: Rapport créé ou mis à jour avec succès
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+
+  /reports/weekly:
+    get:
+      summary: Récupérer les rapports hebdomadaires
+      tags: [Report]
+      parameters:
+        - in: query
+          name: departmentId
+          schema:
+            type: string
+          description: Filtrer les rapports par département
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Date de début pour le filtre des rapports hebdomadaires
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: Date de fin pour le filtre des rapports hebdomadaires
+      responses:
+        '200':
+          description: Liste des rapports hebdomadaires
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+  /reports/monthly:
+    get:
+      summary: Récupérer les rapports mensuels
+      tags: [Report]
+      parameters:
+        - in: query
+          name: departmentId
+          schema:
+            type: string
+          description: Filtrer les rapports par département
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Date de début pour le filtre des rapports mensuels
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: Date de fin pour le filtre des rapports mensuels
+      responses:
+        '200':
+          description: Liste des rapports mensuels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+  /reports/quarterly:
+    get:
+      summary: Récupérer les rapports trimestriels
+      tags: [Report]
+      parameters:
+        - in: query
+          name: departmentId
+          schema:
+            type: string
+          description: Filtrer les rapports par département
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Date de début pour le filtre des rapports trimestriels
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: Date de fin pour le filtre des rapports trimestriels
+      responses:
+        '200':
+          description: Liste des rapports trimestriels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+  /reports/{id}:
+    get:
+      summary: Récupérer un rapport par ID
+      tags: [Report]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID du rapport
+      responses:
+        '200':
+          description: Détails du rapport
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+    delete:
+      summary: Supprimer un rapport
+      tags: [Report]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID du rapport à supprimer
+      responses:
+        '200':
+          description: Rapport supprimé avec succès
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+  /notifications:
+    get:
+      summary: Récupérer les notifications
+      tags: [Notification]
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+          description: ID de l'utilisateur pour filtrer les notifications
+      responses:
+        '200':
+          description: Liste des notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [admin, director, employee]
+        departmentId:
+          type: string
+          description: L'ID du département auquel l'utilisateur est rattaché
+        poste:
+          type: string
+          description: Le poste de l'utilisateur
+        grade:
+          type: string
+          description: Le grade de l'utilisateur
+      required:
+        - username
+        - email
+        - password
+        - role
+        - departmentId
+        - poste
+        - grade
+
+    Department:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/Report'
+      required:
+        - name
+
+    Report:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+          description: L'activité principale du rapport
+        subActivities:
+          type: array
+          items:
+            type: string
+          description: Liste des sous-activités
+        kpi:
+          type: string
+          description: Le KPI associé au rapport
+        observation:
+          type: string
+          description: Observations/commentaires sur le rapport, en attente de validation
+        isObservationValidated:
+          type: boolean
+          description: Indique si l'observation a été validée par le responsable du département
+        status:
+          type: string
+          enum: [in_progress, to_do]
+          description: Statut de l'activité (en cours, à faire)
+        percentageCompleted:
+          type: number
+          format: float
+          description: Le pourcentage des tâches complètes (requis si le statut est "in_progress")
+        departmentId:
+          type: string
+          description: L'ID du département auquel le rapport est associé
+        period:
+          type: string
+          description: Période de réalisation du rapport (temps de création ou temps de réalisation)
+      required:
+        - title
+        - kpi
+        - observation
+        - isObservationValidated
+        - status
+        - departmentId
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+          description: ID de l'utilisateur à qui la notification est destinée
+        message:
+          type: string
+          description: Contenu de la notification
+        date:
+          type: string
+          format: date-time
+          description: Date de la notification
+      required:
+        - userId
+        - message
+        - date
+    Exception:
+      type: object
+      properties:
+        type:
+          type: string
+        message:
+          type: string
+    BadRequestException:
+      allOf:
+        - $ref: '#/components/schemas/Exception'
+      example:
+        type: BadRequestException
+        message: Bad request
+    NotAuthorizedException:
+      allOf:
+        - $ref: '#/components/schemas/Exception'
+      example:
+        type: NotAuthorizedException
+        message: Not authorized
+    ResourceNotFoundException:
+      allOf:
+        - $ref: '#/components/schemas/Exception'
+      example:
+        type: ResourceNotFoundException
+        message: Resource of type <T> identified by <I> not found
+    TooManyRequestsException:
+      allOf:
+        - $ref: '#/components/schemas/Exception'
+      example:
+        type: TooManyRequestsException
+        message: Too many requests
+    InternalServerException:
+      allOf:
+        - $ref: '#/components/schemas/Exception'
+      example:
+        type: InternalServerException
+        message: Unexpected error
