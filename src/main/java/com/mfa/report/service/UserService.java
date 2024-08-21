@@ -1,6 +1,6 @@
 package com.mfa.report.service;
 
-import com.mfa.report.model.User;
+import com.mfa.report.repository.model.User;
 import com.mfa.report.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

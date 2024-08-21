@@ -1,4 +1,4 @@
-package com.mfa.report.endpoints.rest.controller;
+package com.mfa.report.endpoint.rest.controller.health;
 
 
 import org.springframework.web.bind.annotation.GetMapping;

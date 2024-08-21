@@ -5,7 +5,7 @@ import com.mfa.report.endpoint.rest.model.Auth;
 import com.mfa.report.endpoint.rest.model.Principal;
 import com.mfa.report.endpoint.rest.model.Role;
 import com.mfa.report.endpoint.rest.model.SignUp;
-import com.mfa.report.model.User;
+import com.mfa.report.repository.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -30,10 +30,12 @@ public class AuthService {
     public String signIn(Auth toAuth){
         String email = toAuth.getEmail();
         UserDetails principal = userDetailsServiceImpl.loadUserByUsername(email);
+        User user = userService.getUserByUserMail(email);
         if(!passwordEncoder.matches(toAuth.getPassword(),principal.getPassword())){
             throw new UsernameNotFoundException("Wrong Password!");
         }
-        return jwtService.generateToken(principal);
+
+        return jwtService.generateToken(principal, user.getId());
     }
 
 
@@ -58,7 +60,8 @@ public class AuthService {
                         ).get(0);
 
         Principal principal = Principal.builder().user(createdUser).build();
-        return  jwtService.generateToken(principal);
+
+        return  jwtService.generateToken(principal, principal.getUser().getId());
     }
 
     public User whoami(HttpServletRequest request) {

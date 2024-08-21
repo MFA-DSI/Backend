@@ -1,6 +1,6 @@
 package com.mfa.report.endpoint.rest.model;
 
-import com.mfa.report.model.User;
+import com.mfa.report.repository.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;

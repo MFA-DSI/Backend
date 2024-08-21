@@ -1,7 +1,7 @@
 package com.mfa.report.service;
 
 import com.mfa.report.endpoint.rest.model.Principal;
-import com.mfa.report.model.User;
+import com.mfa.report.repository.model.User;
 
 
 import lombok.AllArgsConstructor;
@@ -20,11 +20,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private final UserService userService;
 
-    /**
-     * @param username
-     * @return
-     * @throws UsernameNotFoundException
-     */
+
     @Override
     public UserDetails loadUserByUsername(String mail) throws UsernameNotFoundException {
         User user = userService.getUserByUserMail(mail);
