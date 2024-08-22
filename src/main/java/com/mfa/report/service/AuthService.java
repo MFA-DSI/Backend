@@ -26,6 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final  String AUTHORIZATION_HEADER = "Authorization";
     private  final int BEARER_PREFIX_COUNT = 7;
+    private final DirectionService directionService;
 
     public String signIn(Auth toAuth){
         String email = toAuth.getEmail();
@@ -53,7 +54,10 @@ public class AuthService {
                                         User.builder()
                                                 .username(toSignUp.getUsername())
                                                 .email(toSignUp.getEmail())
-                                                .role(Role.USER)
+                                                .firstname(toSignUp.getFirstname())
+                                                .lastname(toSignUp.getLastname())
+                                                .direction(directionService.getDirectionById(toSignUp.getDirectionId()))
+                                                .role(Role.user)
                                                 .password(hashedPassword)
                                                 .build()
                                 )

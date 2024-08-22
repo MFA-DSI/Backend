@@ -1,7 +1,4 @@
-package com.mfa.report.endpoint.rest.model;
-
-import com.mfa.report.endpoint.rest.model.DTO.ActivityDTO;
-import com.mfa.report.endpoint.rest.model.DTO.DirectionDTO;
+package com.mfa.report.endpoint.rest.model.DTO;
 
 import java.util.List;
 
