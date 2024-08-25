@@ -1,13 +1,7 @@
-package com.mfa.report.repository.model;
+package com.mfa.report.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,11 +26,15 @@ public class Activity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
+
+    @NotBlank(message = "Activity description is mandatory")
+    private String description;
     private String prediction;
-    private LocalDate date;
+    private LocalDate creationDatetime;
     private String observation;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToOne(cascade = CascadeType.ALL)
+    @NotBlank(message = "Activity mission is mandatory")
     private Mission mission;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -46,7 +44,7 @@ public class Activity {
     private List<Task> taskList;
 
     @OneToMany(mappedBy = "activity",cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<NextTask> newTaskList;
+    private List<NextTask> nexTaskList;
 
     @OneToMany(mappedBy = "activity",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Recommendation> recommendations;

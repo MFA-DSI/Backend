@@ -10,3 +10,5 @@ CREATE TABLE IF NOT EXISTS "user"(
     role VARCHAR NOT NULL
 );
 
+create index if not exists user_id_index on "user" (id);
+

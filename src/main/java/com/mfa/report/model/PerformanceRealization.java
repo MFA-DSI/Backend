@@ -1,4 +1,4 @@
-package com.mfa.report.repository.model;
+package com.mfa.report.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,8 @@ public class PerformanceRealization {
     private Long KPI;
     private String realization;
 
-    @OneToOne(targetEntity = Activity.class,fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToOne
+    @JoinColumn(name = "activity_id")
     private Activity activity;
 
 }

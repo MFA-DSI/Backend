@@ -5,7 +5,7 @@ import com.mfa.report.endpoint.rest.model.Auth;
 import com.mfa.report.endpoint.rest.model.Principal;
 import com.mfa.report.endpoint.rest.model.Role;
 import com.mfa.report.endpoint.rest.model.SignUp;
-import com.mfa.report.repository.model.User;
+import com.mfa.report.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;

@@ -1,7 +1,7 @@
 package com.mfa.report.repository;
 
 
-import com.mfa.report.repository.model.User;
+import com.mfa.report.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,0 +1,34 @@
+package com.mfa.report.endpoint.rest.mapper;
+
+import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
+import com.mfa.report.model.Direction;
+import com.mfa.report.model.Mission;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
+
+@Component
+@AllArgsConstructor
+public class MissionMapper {
+    private final  DirectionMapper directionMapper;
+    private final ActivityMapper activityMapper;
+
+
+    public MissionDTO toDomain(Mission mission){
+        return MissionDTO.builder()
+                .id(mission.getId())
+                .name(mission.getDescription())
+                .directionDTO(directionMapper.toDomain(mission.getDirection()))
+                .activityDTOList(mission.getActivity().stream().map(activityMapper::toDomain).collect(Collectors.toList()))
+                .build();
+    }
+
+
+    public Mission toRest(MissionDTO mission, Direction direction){
+        return Mission.builder()
+                .description(mission.getName())
+                .direction(direction)
+                .build();
+    }
+}

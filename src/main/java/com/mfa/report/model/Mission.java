@@ -1,4 +1,5 @@
-package com.mfa.report.repository.model;
+package com.mfa.report.model;
+
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,23 +9,27 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDate;
+import java.util.List;
+
 @Entity
-@Table(name = "\"next_task\"")
+@Table(name = "\"mission\"")
 @Getter
 @Setter
 @ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NextTask {
+public class Mission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  String id;
-    private LocalDate date;
+    private String id;
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private Activity activity;
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Direction direction;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "activity_id")
+    private List<Activity> activity;
 }

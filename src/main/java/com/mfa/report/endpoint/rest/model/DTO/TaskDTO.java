@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Data
 public class TaskDTO {
     private String id;
-    private String name;
+    private String description;
     private LocalDate due_datetime;
+    private String activityId;
 }

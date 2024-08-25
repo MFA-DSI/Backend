@@ -18,6 +18,6 @@ import java.time.LocalDate;
 public class PerfRealizationDTO {
     private String id;
     private Long performanceIndicators;
-    private String realisation;
-    private LocalDate due_datetime;
+    private String realization;
+    private String activityId;
 }

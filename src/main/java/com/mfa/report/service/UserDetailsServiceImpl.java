@@ -1,7 +1,7 @@
 package com.mfa.report.service;
 
 import com.mfa.report.endpoint.rest.model.Principal;
-import com.mfa.report.repository.model.User;
+import com.mfa.report.model.User;
 
 
 import lombok.AllArgsConstructor;

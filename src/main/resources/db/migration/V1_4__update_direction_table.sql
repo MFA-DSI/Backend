@@ -25,3 +25,4 @@ ALTER TABLE mission
 ADD CONSTRAINT fk_missions_directions
 FOREIGN KEY (direction_id)
 REFERENCES direction(id);
+

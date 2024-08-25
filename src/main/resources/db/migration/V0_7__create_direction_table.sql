@@ -6,3 +6,5 @@ CREATE TABLE IF NOT EXISTS "direction"(
     responsible_id VARCHAR,
     mission_id VARCHAR
 );
+
+create index if not exists direction_id_index on "direction" (id);

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 @AllArgsConstructor
@@ -15,11 +16,12 @@ import java.time.LocalDate;
 @Data
 public class ActivityDTO {
     private String id;
-    private String Name;
+    private String description;
     private String observation;
     private LocalDate dueDatetime;
-    private TaskDTO task ;
-    private NextTaskDTO nextTask;
-    private RecommendationDTO recommendation;
+    private List<TaskDTO> task ;
+    private List<NextTaskDTO> nextTask;
+    private List<RecommendationDTO> recommendation;
     private PerfRealizationDTO perfRealizationDTO;
+    private String missionId;
 }

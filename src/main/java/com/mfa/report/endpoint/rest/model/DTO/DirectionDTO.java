@@ -6,13 +6,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Data
-
 public class DirectionDTO {
     private String id;
     private String name;
-    private UserDTO responsible;
+    private List<UserDTO> responsible;
+    private List<MissionDTO> mission;
 }
