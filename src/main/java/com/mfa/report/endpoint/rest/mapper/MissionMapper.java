@@ -19,8 +19,8 @@ public class MissionMapper {
         return MissionDTO.builder()
                 .id(mission.getId())
                 .name(mission.getDescription())
-                .directionDTO(directionMapper.toDomain(mission.getDirection()))
-                .activityDTOList(mission.getActivity().stream().map(activityMapper::toDomain).collect(Collectors.toList()))
+                .direction(directionMapper.toDomain(mission.getDirection()))
+                .activityList(mission.getActivity().stream().map(activityMapper::toDomain).collect(Collectors.toList()))
                 .build();
     }
 

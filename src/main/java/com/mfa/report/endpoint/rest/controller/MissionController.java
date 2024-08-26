@@ -57,24 +57,23 @@ public class MissionController {
 
     @PostMapping("/mission/create")
     @Transactional
-    public Mission createMission(@RequestParam(name = "directionId") String directionId,@RequestBody  MissionDTO missionDTO){
-        if (directionId == null) {
-            throw new IllegalArgumentException("Direction ID must not be null");
-        }
-
+    public MissionDTO createMission(@RequestParam(name = "directionId") String directionId,@RequestBody  MissionDTO missionDTO){
         Direction direction = directionService.getDirectionById(directionId);
 
         Mission mission = mapper.toRest(missionDTO,direction);
 
 
         List<Activity> activityList = new ArrayList<>();
-        for(ActivityDTO activityDTO : missionDTO.getActivityDTOList()){
-          Activity activity =  activityService.saveActivityDetails(activityDTO);
+        for(ActivityDTO activityDTO : missionDTO.getActivityList()){
+          Activity activity =  activityMapper.toRest(activityDTO);
+
           Activity activity1 =  associatedEntitiesService.AttachEntitiesToActivity(activity, activityDTO.getTask(), activityDTO.getNextTask(), activityDTO.getRecommendation(), activityDTO.getPerfRealizationDTO());
-            activityList.add(activity1);
+            activityService.crUpdateActivity(activity1);
+          activityList.add(activity1);
         }
+
         mission.setActivity(activityList);
         service.crUpdateMission(mission);
-        return mission;
+        return mapper.toDomain(mission);
     }
 }

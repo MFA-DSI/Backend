@@ -16,5 +16,4 @@ public class DirectionDTO {
     private String id;
     private String name;
     private List<UserDTO> responsible;
-    private List<MissionDTO> mission;
 }

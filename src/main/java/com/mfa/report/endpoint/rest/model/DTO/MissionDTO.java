@@ -16,6 +16,6 @@ import lombok.NoArgsConstructor;
 public class MissionDTO {
     private String id;
     private String name;
-    private DirectionDTO directionDTO;
-    private List<ActivityDTO> activityDTOList;
+    private DirectionDTO direction;
+    private List<ActivityDTO> activityList;
 }

@@ -34,6 +34,7 @@ public class ActivityMapper {
 
     public Activity toRest(ActivityDTO activityDTO){
         return Activity.builder()
+                .description(activityDTO.getDescription())
                 .prediction(activityDTO.getDescription())
                 .observation(activityDTO.getObservation())
                 .creationDatetime(activityDTO.getDueDatetime())

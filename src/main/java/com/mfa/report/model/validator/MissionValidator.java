@@ -24,7 +24,7 @@ public class MissionValidator implements Consumer<Mission> {
     }
 
     public void accept(MissionDTO missionDTO,Mission mission){
-        if (!Objects.equals(mission.getDirection().getId(), missionDTO.getDirectionDTO().getId())){
+        if (!Objects.equals(mission.getDirection().getId(), missionDTO.getDirection().getId())){
             throw new BadRequestException("La mission d'une direction ne doit pas être soumise par une autre direction");
         }
     }
