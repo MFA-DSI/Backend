@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -34,19 +35,33 @@ public class AssociatedEntitiesService {
 
 
     @Async
-    public void saveTaskAsync(Task task){
-        taskService.crUpdateTask(task);
+    public CompletableFuture<Void> saveTaskAsync(Task task) {
+        try {
+            taskService.crUpdateTask(task);
+            return CompletableFuture.completedFuture(null);
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
+
     @Async
-    public void saveRecommendationAsync(Recommendation recommendation){
+    public CompletableFuture<Void> saveRecommendationAsync(Recommendation recommendation) {
         recommendationService.crUpdateRecommendation(recommendation);
+        return CompletableFuture.completedFuture(null);
     }
 
+
     @Async
-    public void saveNextTaskAsync(NextTask nextTask){
-        nextTaskService.crUpdateNextTask(nextTask);
+    public CompletableFuture<Void> saveNextTaskAsync(NextTask nextTask) {
+        try {
+            nextTaskService.crUpdateNextTask(nextTask);
+            return CompletableFuture.completedFuture(null);
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
+
 
 
     @Async
