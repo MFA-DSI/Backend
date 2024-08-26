@@ -30,6 +30,5 @@ public class Mission {
     private Direction direction;
 
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "activity_id")
     private List<Activity> activity;
 }

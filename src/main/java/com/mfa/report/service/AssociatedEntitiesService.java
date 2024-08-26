@@ -8,10 +8,7 @@ import com.mfa.report.endpoint.rest.model.DTO.NextTaskDTO;
 import com.mfa.report.endpoint.rest.model.DTO.PerfRealizationDTO;
 import com.mfa.report.endpoint.rest.model.DTO.RecommendationDTO;
 import com.mfa.report.endpoint.rest.model.DTO.TaskDTO;
-import com.mfa.report.model.NextTask;
-import com.mfa.report.model.PerformanceRealization;
-import com.mfa.report.model.Recommendation;
-import com.mfa.report.model.Task;
+import com.mfa.report.model.*;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -57,25 +54,31 @@ public class AssociatedEntitiesService {
         return performanceRealization1;
     }
 
-    public void AttachEntitiesToActivity(String activityId, List<TaskDTO> taskList, List<NextTaskDTO> nextTaskList, List<RecommendationDTO> recommendations, PerfRealizationDTO perfRealizationDTO){
+    public Activity AttachEntitiesToActivity(Activity activity, List<TaskDTO> taskList, List<NextTaskDTO> nextTaskList, List<RecommendationDTO> recommendations, PerfRealizationDTO perfRealizationDTO){
 
         taskList.forEach(task -> {
-            task.setActivityId(activityId);
+            task.setActivityId(activity.getId());
             saveTaskAsync(taskMapper.toRest(task));
         });
+        activity.setTaskList(taskList.stream().map(taskMapper::toRest).toList());
 
         nextTaskList.forEach(nextTaskDTO -> {
-                    nextTaskDTO.setActivityId(activityId);
+                    nextTaskDTO.setActivityId(activity.getId());
                     saveNextTaskAsync(nextTaskMapper.toRest(nextTaskDTO));
                 }
         );
+        activity.setNexTaskList(nextTaskList.stream().map(nextTaskMapper::toRest).toList());
 
         recommendations.forEach(recommendationDTO ->{
-            recommendationDTO.setActivityId(activityId);
+            recommendationDTO.setActivityId(activity.getId());
             saveRecommendationAsync(recommendationMapper.toRest(recommendationDTO));
         });
+        activity.setRecommendations(recommendations.stream().map(recommendationMapper::toRest).toList());
 
-            perfRealizationDTO.setActivityId(activityId);
-            savePerformanceRealizationAsync(perfRealizationMapper.toRest(perfRealizationDTO));
+            perfRealizationDTO.setActivityId(activity.getId());
+            PerformanceRealization performanceRealization = savePerformanceRealizationAsync(perfRealizationMapper.toRest(perfRealizationDTO));
+            activity.setPerformanceRealization(performanceRealization);
+
+            return activity;
     }
 }

@@ -26,7 +26,6 @@ public class PerformanceRealization {
     private String realization;
 
     @OneToOne
-    @JoinColumn(name = "activity_id")
     private Activity activity;
 
 }

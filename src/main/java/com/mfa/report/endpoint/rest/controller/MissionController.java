@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,13 +66,15 @@ public class MissionController {
 
         Mission mission = mapper.toRest(missionDTO,direction);
 
-        service.crUpdateMission(mission);
 
+        List<Activity> activityList = new ArrayList<>();
         for(ActivityDTO activityDTO : missionDTO.getActivityDTOList()){
-            activityService.saveActivityDetails(activityDTO);
-            associatedEntitiesService.AttachEntitiesToActivity(activityDTO.getId(),activityDTO.getTask(),activityDTO.getNextTask(),activityDTO.getRecommendation(),activityDTO.getPerfRealizationDTO());
+          Activity activity =  activityService.saveActivityDetails(activityDTO);
+          Activity activity1 =  associatedEntitiesService.AttachEntitiesToActivity(activity, activityDTO.getTask(), activityDTO.getNextTask(), activityDTO.getRecommendation(), activityDTO.getPerfRealizationDTO());
+            activityList.add(activity1);
         }
-
+        mission.setActivity(activityList);
+        service.crUpdateMission(mission);
         return mission;
     }
 }
