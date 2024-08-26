@@ -68,10 +68,11 @@ public class MissionController {
         List<Activity> activityList = new ArrayList<>();
         for(ActivityDTO activityDTO : missionDTO.getActivityList()){
           Activity activity =  activityMapper.toRest(activityDTO);
-            log.info(String.valueOf(activity));
+
           Activity activity1 =  associatedEntitiesService.AttachEntitiesToActivity(activity, activityDTO.getTask(), activityDTO.getNextTask(), activityDTO.getRecommendation(), activityDTO.getPerfRealizationDTO());
-            activityService.crUpdateActivity(activity1);
-            log.info(String.valueOf(activity1));
+
+          activityService.crUpdateActivity(activity1);
+
           activityList.add(activity1);
         }
 

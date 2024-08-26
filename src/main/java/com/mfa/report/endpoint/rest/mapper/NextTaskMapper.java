@@ -1,7 +1,10 @@
 package com.mfa.report.endpoint.rest.mapper;
 
 import com.mfa.report.endpoint.rest.model.DTO.NextTaskDTO;
+import com.mfa.report.endpoint.rest.model.DTO.TaskDTO;
+import com.mfa.report.model.Activity;
 import com.mfa.report.model.NextTask;
+import com.mfa.report.model.Task;
 import com.mfa.report.service.ActivityService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,6 +26,14 @@ public class NextTaskMapper {
         return NextTask.builder()
                 .description(nextTask.getDescription())
                 .dueDatetime(nextTask.getDueDatetime())
+                .build();
+    }
+
+    public NextTask toRestSave(NextTaskDTO nextTask, Activity activity){
+        return NextTask.builder()
+                .description(nextTask.getDescription())
+                .dueDatetime(nextTask.getDueDatetime())
+                .activity(activity)
                 .build();
     }
 }

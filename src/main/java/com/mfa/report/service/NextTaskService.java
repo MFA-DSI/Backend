@@ -23,7 +23,7 @@ public class NextTaskService {
     }
 
 
-    public NextTask addNextTask(NextTask nextTask){
+    public NextTask crUpdateNextTask(NextTask nextTask){
          return nextTaskRepository.save(nextTask);
     }
 

@@ -10,12 +10,14 @@ import com.mfa.report.endpoint.rest.model.DTO.RecommendationDTO;
 import com.mfa.report.endpoint.rest.model.DTO.TaskDTO;
 import com.mfa.report.model.*;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class AssociatedEntitiesService {
@@ -32,18 +34,18 @@ public class AssociatedEntitiesService {
 
 
     @Async
-    public Task saveTaskAsync(Task task){
-        return taskService.crUpdateTask(task);
+    public void saveTaskAsync(Task task){
+        taskService.crUpdateTask(task);
     }
 
     @Async
-    public Recommendation saveRecommendationAsync(Recommendation recommendation){
-        return recommendationService.crUpdateRecommendation(recommendation);
+    public void saveRecommendationAsync(Recommendation recommendation){
+        recommendationService.crUpdateRecommendation(recommendation);
     }
 
     @Async
-    public NextTask saveNextTaskAsync(NextTask nextTask){
-        return nextTaskService.addNextTask(nextTask);
+    public void saveNextTaskAsync(NextTask nextTask){
+        nextTaskService.crUpdateNextTask(nextTask);
     }
 
 
@@ -56,20 +58,24 @@ public class AssociatedEntitiesService {
 
         taskList.forEach(task -> {
             task.setActivityId(activity.getId());
-            saveTaskAsync(taskMapper.toRest(task));
+            saveTaskAsync(taskMapper.ToRestSave(task,activity));
         });
         activity.setTaskList(taskList.stream().map(taskMapper::toRest).toList());
 
+
         nextTaskList.forEach(nextTaskDTO -> {
                     nextTaskDTO.setActivityId(activity.getId());
-                    saveNextTaskAsync(nextTaskMapper.toRest(nextTaskDTO));
+                   saveNextTaskAsync(nextTaskMapper.toRestSave(nextTaskDTO,activity));
                 }
         );
+
         activity.setNexTaskList(nextTaskList.stream().map(nextTaskMapper::toRest).toList());
+
+
 
         recommendations.forEach(recommendationDTO ->{
             recommendationDTO.setActivityId(activity.getId());
-            saveRecommendationAsync(recommendationMapper.toRest(recommendationDTO));
+            saveRecommendationAsync(recommendationMapper.toRestSave(recommendationDTO,activity));
         });
         activity.setRecommendations(recommendations.stream().map(recommendationMapper::toRest).toList());
 

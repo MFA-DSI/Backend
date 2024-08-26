@@ -2,6 +2,7 @@ package com.mfa.report.endpoint.rest.mapper;
 
 
 import com.mfa.report.endpoint.rest.model.DTO.TaskDTO;
+import com.mfa.report.model.Activity;
 import com.mfa.report.model.Task;
 import com.mfa.report.service.ActivityService;
 import lombok.AllArgsConstructor;
@@ -14,15 +15,23 @@ public class TaskMapper {
     public TaskDTO toDomain(Task task){
         return TaskDTO.builder()
                 .id(task.getId())
-                .due_datetime(task.getDueDatetime())
+                .dueDatetime(task.getDueDatetime())
                 .description(task.getDescription())
                 .build();
     }
 
     public Task toRest(TaskDTO task){
         return Task.builder()
-                .dueDatetime(task.getDue_datetime())
+                .dueDatetime(task.getDueDatetime())
                 .description(task.getDescription())
+                .build();
+    }
+
+    public Task ToRestSave(TaskDTO task, Activity activity){
+        return  Task.builder()
+                .description(task.getDescription())
+                .dueDatetime(task.getDueDatetime())
+                .activity(activity)
                 .build();
     }
 }

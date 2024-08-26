@@ -2,6 +2,7 @@ package com.mfa.report.endpoint.rest.mapper;
 
 
 import com.mfa.report.endpoint.rest.model.DTO.RecommendationDTO;
+import com.mfa.report.model.Activity;
 import com.mfa.report.model.Recommendation;
 import com.mfa.report.service.ActivityService;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,16 @@ public class RecommendationMapper {
                 .description(recommendationDTO.getDescription())
                 .approved(recommendationDTO.isValidate_status())
                 .creationDatetime(recommendationDTO.getCommitDatetime())
+                .build();
+    }
+
+    public Recommendation toRestSave(RecommendationDTO recommendationDTO, Activity activity){
+        return Recommendation.builder()
+                .creationDatetime(recommendationDTO.getCommitDatetime())
+                .description(recommendationDTO.getDescription())
+                .approved(recommendationDTO.isValidate_status())
+                .creationDatetime(recommendationDTO.getCommitDatetime())
+                .activity(activity)
                 .build();
     }
 }

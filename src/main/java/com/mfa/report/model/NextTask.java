@@ -1,5 +1,6 @@
 package com.mfa.report.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,9 @@ public class NextTask {
     @NotBlank(message = "Next task description is mandatory")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    @JoinColumn(name = "activity_id")
+    @ManyToOne
+    @NotBlank(message = "next task activity is mandatory")
+    @JoinColumn(name = "activity_id", referencedColumnName = "id")
+    @JsonIgnore
     private Activity activity;
 }

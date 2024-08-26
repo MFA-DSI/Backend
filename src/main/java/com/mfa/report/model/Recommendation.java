@@ -1,5 +1,6 @@
 package com.mfa.report.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -35,5 +36,6 @@ public class Recommendation {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "activity_id")
+    @JsonIgnore
     private Activity activity;
 }
