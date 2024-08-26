@@ -26,14 +26,17 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final  String AUTHORIZATION_HEADER = "Authorization";
     private  final int BEARER_PREFIX_COUNT = 7;
+    private final DirectionService directionService;
 
     public String signIn(Auth toAuth){
         String email = toAuth.getEmail();
         UserDetails principal = userDetailsServiceImpl.loadUserByUsername(email);
+        User user = userService.getUserByUserMail(email);
         if(!passwordEncoder.matches(toAuth.getPassword(),principal.getPassword())){
             throw new UsernameNotFoundException("Wrong Password!");
         }
-        return jwtService.generateToken(principal);
+
+        return jwtService.generateToken(principal, user.getId());
     }
 
 
@@ -51,14 +54,18 @@ public class AuthService {
                                         User.builder()
                                                 .username(toSignUp.getUsername())
                                                 .email(toSignUp.getEmail())
-                                                .role(Role.USER)
+                                                .firstname(toSignUp.getFirstname())
+                                                .lastname(toSignUp.getLastname())
+                                                .direction(directionService.getDirectionById(toSignUp.getDirectionId()))
+                                                .role(Role.user)
                                                 .password(hashedPassword)
                                                 .build()
                                 )
                         ).get(0);
 
         Principal principal = Principal.builder().user(createdUser).build();
-        return  jwtService.generateToken(principal);
+
+        return  jwtService.generateToken(principal, principal.getUser().getId());
     }
 
     public User whoami(HttpServletRequest request) {

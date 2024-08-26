@@ -43,6 +43,7 @@ public class SecurityConf {
                                 auth.requestMatchers(GET,"/ping").permitAll()
                                         .requestMatchers("/users/signup").permitAll()
                                         .requestMatchers("/users/login").permitAll()
+                                        .requestMatchers("/direction/**").permitAll()
                                         .anyRequest()
                                         .permitAll()
                 )

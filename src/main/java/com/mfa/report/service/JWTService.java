@@ -35,9 +35,10 @@ public class JWTService {
         return claimsResolvers.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails,String userId) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
+                .claim("userId",userId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY_DURATION))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
