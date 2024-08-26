@@ -31,27 +31,25 @@ public class AssociatedEntitiesService {
 
 
 
+    @Async
     public Task saveTaskAsync(Task task){
-        Task task1 = taskService.crUpdateTask(task);
-        return task1;
+        return taskService.crUpdateTask(task);
     }
 
-
+    @Async
     public Recommendation saveRecommendationAsync(Recommendation recommendation){
-        Recommendation recommendation1 = recommendationService.crUpdateRecommendation(recommendation);
-        return recommendation1;
+        return recommendationService.crUpdateRecommendation(recommendation);
     }
 
-
+    @Async
     public NextTask saveNextTaskAsync(NextTask nextTask){
-        NextTask nextTask1 = nextTaskService.addNextTask(nextTask);
-        return nextTask1;
+        return nextTaskService.addNextTask(nextTask);
     }
 
 
+    @Async
     public PerformanceRealization savePerformanceRealizationAsync(PerformanceRealization performanceRealization){
-        PerformanceRealization performanceRealization1 = performanceRealizationService.crUpdatePerformance(performanceRealization);
-        return performanceRealization1;
+        return performanceRealizationService.crUpdatePerformance(performanceRealization);
     }
 
     public Activity AttachEntitiesToActivity(Activity activity, List<TaskDTO> taskList, List<NextTaskDTO> nextTaskList, List<RecommendationDTO> recommendations, PerfRealizationDTO perfRealizationDTO){

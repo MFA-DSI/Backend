@@ -25,6 +25,7 @@ public class ActivityMapper {
                 .description(activity.getDescription())
                 .dueDatetime(activity.getCreationDatetime())
                 .observation(activity.getObservation())
+                .prediction(activity.getPrediction())
                 .task(activity.getTaskList().stream().map(taskMapper::toDomain).collect(Collectors.toList()))
                 .nextTask(activity.getNexTaskList().stream().map(nextTaskMapper::toDomain).collect(Collectors.toList()))
                 .perfRealizationDTO(perfRealizationMapper.toDomain(activity.getPerformanceRealization()) )
@@ -35,7 +36,7 @@ public class ActivityMapper {
     public Activity toRest(ActivityDTO activityDTO){
         return Activity.builder()
                 .description(activityDTO.getDescription())
-                .prediction(activityDTO.getDescription())
+                .prediction(activityDTO.getPrediction())
                 .observation(activityDTO.getObservation())
                 .creationDatetime(activityDTO.getDueDatetime())
                 .build();

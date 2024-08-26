@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 @AllArgsConstructor
 public class PerfRealizationMapper {
-    private final ActivityService activityService;
+
+
     public PerfRealizationDTO toDomain (PerformanceRealization performanceRealization){
         return PerfRealizationDTO.builder()
                 .id(performanceRealization.getId())

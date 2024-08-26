@@ -11,6 +11,7 @@ import com.mfa.report.model.validator.MissionValidator;
 import com.mfa.report.service.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @RequestMapping("/direction/")
 @CrossOrigin(origins = "*")
+@Slf4j
 public class MissionController {
 
     private final MissionService service;
@@ -43,8 +45,8 @@ public class MissionController {
     }
 
     @GetMapping("/mission/all")
-    public List<MissionDTO> getAllMission(@RequestParam(name = "directionId") String directionId){
-        return service.getMissionByDirectionId(directionId).stream().map(mapper::toDomain).toList();
+    public List<Mission> getAllMission(@RequestParam(name = "directionId") String directionId){
+        return service.getMissionByDirectionId(directionId);
     }
 
    // public List<MissionDTO> updateMission(@RequestBody MissionDTO missionDTO , @RequestParam String directionId){
@@ -66,9 +68,10 @@ public class MissionController {
         List<Activity> activityList = new ArrayList<>();
         for(ActivityDTO activityDTO : missionDTO.getActivityList()){
           Activity activity =  activityMapper.toRest(activityDTO);
-
+            log.info(String.valueOf(activity));
           Activity activity1 =  associatedEntitiesService.AttachEntitiesToActivity(activity, activityDTO.getTask(), activityDTO.getNextTask(), activityDTO.getRecommendation(), activityDTO.getPerfRealizationDTO());
             activityService.crUpdateActivity(activity1);
+            log.info(String.valueOf(activity1));
           activityList.add(activity1);
         }
 

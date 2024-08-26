@@ -18,6 +18,7 @@ public class ActivityDTO {
     private String id;
     private String description;
     private String observation;
+    private String prediction;
     private LocalDate dueDatetime;
     private List<TaskDTO> task ;
     private List<NextTaskDTO> nextTask;

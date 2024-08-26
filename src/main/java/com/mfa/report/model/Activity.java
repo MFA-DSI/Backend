@@ -37,7 +37,7 @@ public class Activity {
     @NotBlank(message = "Activity mission is mandatory")
     private Mission mission;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne
     private PerformanceRealization performanceRealization;
 
     @OneToMany(mappedBy = "activity",cascade = CascadeType.ALL,orphanRemoval = true)
