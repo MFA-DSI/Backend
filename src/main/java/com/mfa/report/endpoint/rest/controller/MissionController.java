@@ -7,6 +7,7 @@ import com.mfa.report.endpoint.rest.model.DTO.ActivityDTO;
 import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
 import com.mfa.report.model.*;
 import com.mfa.report.model.validator.ActivityValidator;
+import com.mfa.report.model.validator.DirectionValidator;
 import com.mfa.report.model.validator.MissionValidator;
 import com.mfa.report.service.*;
 import jakarta.transaction.Transactional;
@@ -39,6 +40,8 @@ public class MissionController {
 
     private final MissionValidator missionValidator;
     private final ActivityValidator activityValidator;
+    private final DirectionValidator directionValidator;
+
     @GetMapping("/mission/{id}")
     public MissionDTO getMissionById(@PathVariable  String id){
         return mapper.toDomain(service.getMissionById(id));
@@ -60,22 +63,23 @@ public class MissionController {
 
     @PostMapping("/mission/create")
     @Transactional
-    public MissionDTO createMission(@RequestParam(name = "directionId") String directionId,@RequestBody  MissionDTO missionDTO){
+    public MissionDTO createMission(@RequestParam(name = "directionId") String directionId,@RequestParam(name = "userId") String userId,@RequestBody  MissionDTO missionDTO){
         Direction direction = directionService.getDirectionById(directionId);
-
+        directionValidator.acceptUser(direction,userId);
         Mission mission = mapper.toRest(missionDTO,direction);
 
 
-        List<Activity> activityList = new ArrayList<>();
-        for(ActivityDTO activityDTO : missionDTO.getActivityList()){
-          Activity activity =  activityMapper.toRest(activityDTO);
-
-          Activity activity1 =  associatedEntitiesService.AttachEntitiesToActivity(activity, activityDTO.getTask(), activityDTO.getNextTask(), activityDTO.getRecommendation(), activityDTO.getPerfRealizationDTO());
-
-          activityService.crUpdateActivity(activity1);
-
-          activityList.add(activity1);
-        }
+        List<Activity> activityList = missionDTO.getActivityList().stream()
+                .map(activityDTO -> {
+                    Activity activity = activityMapper.toRest(activityDTO);
+                    return associatedEntitiesService.AttachEntitiesToActivity(activity,
+                            activityDTO.getTask(),
+                            activityDTO.getNextTask(),
+                            activityDTO.getRecommendation(),
+                            activityDTO.getPerfRealizationDTO());
+                })
+                .peek(activityService::crUpdateActivity)
+                .collect(Collectors.toList());
 
         mission.setActivity(activityList);
         service.crUpdateMission(mission);

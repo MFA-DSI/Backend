@@ -4,11 +4,13 @@ import com.mfa.report.model.Direction;
 import com.mfa.report.model.User;
 import com.mfa.report.repository.DirectionRepository;
 import com.mfa.report.repository.exception.BadRequestException;
+import com.mfa.report.repository.exception.ForbiddenException;
 import com.mfa.report.service.DirectionService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -29,5 +31,15 @@ public class DirectionValidator implements Consumer<Direction> {
     @Override
     public void accept(Direction direction) {
      Set<String> violationsMessage = new HashSet<>();
+
+    }
+
+
+    public void acceptUser(Direction direction,String userId){
+        boolean isResponsible = direction.getResponsible().stream()
+                .anyMatch(user -> user.getId().equals(userId));
+        if(!isResponsible){
+            throw new ForbiddenException("The responsible of one direction cannot post mission to other direction");
+        }
     }
 }

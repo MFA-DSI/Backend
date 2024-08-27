@@ -1,10 +1,7 @@
 package com.mfa.report.service;
 
 
-import com.mfa.report.endpoint.rest.model.Auth;
-import com.mfa.report.endpoint.rest.model.Principal;
-import com.mfa.report.endpoint.rest.model.Role;
-import com.mfa.report.endpoint.rest.model.SignUp;
+import com.mfa.report.endpoint.rest.model.*;
 import com.mfa.report.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -28,7 +25,7 @@ public class AuthService {
     private  final int BEARER_PREFIX_COUNT = 7;
     private final DirectionService directionService;
 
-    public String signIn(Auth toAuth){
+    public AuthResponse signIn(Auth toAuth){
         String email = toAuth.getEmail();
         UserDetails principal = userDetailsServiceImpl.loadUserByUsername(email);
         User user = userService.getUserByUserMail(email);
@@ -36,11 +33,18 @@ public class AuthService {
             throw new UsernameNotFoundException("Wrong Password!");
         }
 
-        return jwtService.generateToken(principal, user.getId());
+        return AuthResponse.builder()
+                .token(jwtService.generateToken(principal, user.getId()))
+                .userId(user.getId())
+                .directionId(user.getDirection().getId())
+                .build();
+
+
+
     }
 
 
-    public String signUp(SignUp  toSignUp){
+    public AuthResponse signUp(SignUp  toSignUp){
         String email = toSignUp.getEmail();
         User existingUser = userService.getUserByUserMail(email);
         if(Objects.nonNull(existingUser)){
@@ -66,7 +70,13 @@ public class AuthService {
         directionService.saveNewUserToResponsible(toSignUp.getDirectionId(),createdUser);
         Principal principal = Principal.builder().user(createdUser).build();
 
-        return  jwtService.generateToken(principal, principal.getUser().getId());
+        return  AuthResponse.builder()
+                .token(jwtService.generateToken(principal, principal.getUser().getId()))
+                .userId(createdUser.getId())
+                .directionId(toSignUp.getDirectionId())
+                .build();
+
+
     }
 
     public User whoami(HttpServletRequest request) {
