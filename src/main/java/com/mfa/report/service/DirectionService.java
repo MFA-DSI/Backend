@@ -1,5 +1,6 @@
 package com.mfa.report.service;
 
+import com.mfa.report.model.User;
 import com.mfa.report.repository.DirectionRepository;
 import com.mfa.report.model.Direction;
 import com.mfa.report.repository.exception.NotFoundException;
@@ -24,5 +25,11 @@ public class DirectionService {
 
     public List<Direction> getAllDirection(){
         return repository.findAll();
+    }
+
+    public Direction saveNewUserToResponsible(String id,User user){
+        Direction direction = repository.getById(id);
+        direction.getResponsible().add(user);
+        return repository.save(direction);
     }
 }

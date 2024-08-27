@@ -46,6 +46,7 @@ public class AuthService {
         if(Objects.nonNull(existingUser)){
             throw new DuplicateKeyException("User with the email address: " + email + " already exists.");
         }
+
         String hashedPassword = passwordEncoder.encode(toSignUp.getPassword());
         User createdUser =
                 userService
@@ -62,7 +63,7 @@ public class AuthService {
                                                 .build()
                                 )
                         ).get(0);
-
+        directionService.saveNewUserToResponsible(toSignUp.getDirectionId(),createdUser);
         Principal principal = Principal.builder().user(createdUser).build();
 
         return  jwtService.generateToken(principal, principal.getUser().getId());

@@ -45,8 +45,9 @@ public class MissionController {
     }
 
     @GetMapping("/mission/all")
-    public List<Mission> getAllMission(@RequestParam(name = "directionId") String directionId){
-        return service.getMissionByDirectionId(directionId);
+    public List<MissionDTO> getAllMission(@RequestParam(name = "directionId") String directionId){
+
+        return service.getMissionByDirectionId(directionId).stream().map(mapper::toDomain).toList() ;
     }
 
    // public List<MissionDTO> updateMission(@RequestBody MissionDTO missionDTO , @RequestParam String directionId){

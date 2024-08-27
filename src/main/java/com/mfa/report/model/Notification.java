@@ -29,6 +29,7 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @NotBlank(message = "notification responsible is mandatory")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
