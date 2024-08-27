@@ -4,6 +4,7 @@ package com.mfa.report.endpoint.rest.controller;
 import com.mfa.report.endpoint.rest.mapper.DirectionMapper;
 import com.mfa.report.endpoint.rest.model.DTO.DirectionDTO;
 
+import com.mfa.report.endpoint.rest.model.DTO.DirectionNameDTO;
 import com.mfa.report.model.Direction;
 import com.mfa.report.repository.exception.BadRequestException;
 import com.mfa.report.repository.exception.NotFoundException;
@@ -31,15 +32,12 @@ public class DirectionController {
         Direction direction = service.getDirectionById(id);
         return mapper.toDomain(direction);
     }
-    @GetMapping("/direction/all")
-    public List<DirectionDTO> getAllDirection(){
-        return service.getAllDirection().stream().map(mapper::toDomain).collect(Collectors.toList());
+    @GetMapping("/all")
+    public List<DirectionNameDTO> getAllDirection(){
+        return service.getAllDirection().stream().map(mapper::toSignDomain).collect(Collectors.toList());
     }
 
-
-
-
-    @PutMapping("/direction/edit")
+    @PutMapping("/edit")
     public ResponseEntity<Direction> crUpdateDirection(@RequestBody DirectionDTO directionDTO,@RequestParam (name = "directionId") String directionId){
 
         Direction direction = service.getDirectionById(directionId);
