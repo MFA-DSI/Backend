@@ -1,6 +1,7 @@
 package com.mfa.report.repository;
 
 import com.mfa.report.model.Activity;
+import com.mfa.report.repository.Dao.ActivityDAO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
