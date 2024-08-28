@@ -27,7 +27,7 @@ public class DirectionController {
     private final DirectionMapper mapper;
 
 
-    @GetMapping("/direction/{id}")
+    @GetMapping("/{id}")
     public DirectionDTO getDirectionById(@RequestParam  String id){
         Direction direction = service.getDirectionById(id);
         return mapper.toDomain(direction);
@@ -38,17 +38,11 @@ public class DirectionController {
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<Direction> crUpdateDirection(@RequestBody DirectionDTO directionDTO,@RequestParam (name = "directionId") String directionId){
+    public ResponseEntity<DirectionNameDTO> crUpdateDirection(@RequestBody DirectionDTO directionDTO,@RequestParam (name = "directionId") String directionId){
 
         Direction direction = service.getDirectionById(directionId);
-        if(direction != null){
-            service.save(direction);
-            return ResponseEntity.ok(direction);
-        }else {
-            Direction direction1 = new Direction();
-            direction1.setName(directionDTO.getName());
-            service.save(direction1);
-            return ResponseEntity.status(HttpStatus.CREATED).body(direction1);
+        direction.setName(directionDTO.getName());
+       service.save(direction);
+            return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toSignDomain(direction));
         }
-    }
 }

@@ -13,6 +13,7 @@ import com.mfa.report.service.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ public class MissionController {
     }
 
     @GetMapping("/mission/all")
+    @Cacheable(value = "mission", key = "#directionId")
     public List<MissionDTO> getAllMission(@RequestParam(name = "directionId") String directionId){
 
         return service.getMissionByDirectionId(directionId).stream().map(mapper::toDomain).toList() ;
