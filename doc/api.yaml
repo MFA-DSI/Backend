@@ -1,11 +1,13 @@
 openapi: 3.0.0
 info:
-  title: API de Gestion des Rapports d'Activité
+  title: API de Gestion d'Activité
   version: 1.0.0
   description: API pour la gestion des rapports d'activité hebdomadaires, mensuels et trimestriels des départements.
 
 security:
   - bearerAuth: []
+
+
 paths:
   /login:
     post:
@@ -31,8 +33,30 @@ paths:
                 properties:
                   token:
                     type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
         '401':
-          description: Identifiants incorrects
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
 
   /signup:
     post:
@@ -42,10 +66,42 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/NewUser'
+
       responses:
-        '201':
-          description: Utilisateur créé avec succès
+        '200':
+          description: Authentification réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
 
   /logout:
     post:
@@ -64,7 +120,11 @@ paths:
         '200':
           description: Déconnexion réussie
         '400':
-          description: Token invalide ou absent
+          description: Token not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
 
   /user/information/{id}:
     get:
@@ -84,6 +144,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: User not fount
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
 
   /users/{id}:
     delete:
@@ -98,14 +188,42 @@ paths:
           description: ID de l'utilisateur à supprimer
       responses:
         '200':
-          description: Utilisateur supprimé avec succès
+          description: User deleted
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
         '404':
-          description: Utilisateur non trouvé
+          description: User not fount
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
 
-  /departments:
+  /direction:
     get:
       summary: Récupérer tous les départements
-      tags: [Department]
+      tags: [Direction]
       responses:
         '200':
           description: Liste des départements
@@ -114,16 +232,20 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Department'
+                  $ref: '#/components/schemas/Direction'
 
     put:
       summary: Créer ou mettre à jour un département
-      tags: [Department]
+      tags: [Direction]
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Department'
+              type: object
+              properties:
+                name:
+                  type: string
+
       responses:
         '200':
           description: Département créé ou mis à jour avec succès
@@ -152,10 +274,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/InternalServerException'
 
-  /departments/{id}:
+
+  /direction/{id}:
     get:
       summary: Récupérer les informations d'un département
-      tags: [Department]
+      tags: [Direction]
       parameters:
         - in: path
           name: id
@@ -169,7 +292,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Department'
+                $ref: '#/components/schemas/Direction'
         '400':
           description: Bad Request
           content:
@@ -203,7 +326,7 @@ paths:
 
     delete:
       summary: Supprimer un département
-      tags: [Department]
+      tags: [Direction]
       parameters:
         - in: path
           name: id
@@ -251,7 +374,7 @@ paths:
       tags: [Report]
       parameters:
         - in: query
-          name: departmentId
+          name: missionId
           schema:
             type: string
           description: Filtrer les rapports par département
@@ -361,7 +484,7 @@ paths:
       tags: [Report]
       parameters:
         - in: query
-          name: departmentId
+          name: DirectionId
           schema:
             type: string
           description: Filtrer les rapports par département
@@ -417,7 +540,7 @@ paths:
       tags: [Report]
       parameters:
         - in: query
-          name: departmentId
+          name: DirectionId
           schema:
             type: string
           description: Filtrer les rapports par département
@@ -479,7 +602,7 @@ paths:
       tags: [Report]
       parameters:
         - in: query
-          name: departmentId
+          name: DirectionId
           schema:
             type: string
           description: Filtrer les rapports par département
@@ -630,7 +753,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/InternalServerException'
 
-  /notifications:
+  /notification:
     get:
       summary: Récupérer les notifications
       tags: [Notification]
@@ -640,6 +763,7 @@ paths:
           schema:
             type: string
           description: ID de l'utilisateur pour filtrer les notifications
+
       responses:
         '200':
           description: Liste des notifications
@@ -649,6 +773,116 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Notification'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+    put:
+      summary: Approver ou rejeter un recommandation ou commentaire
+      tags: [Notification]
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Direction'
+      responses:
+        '200':
+          description: Liste des rapports trimestriels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestException'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedException'
+        '404':
+          description: Resource Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundException'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsException'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerException'
+
+
+  /recommandation:
+    put:
+      summary: Ajouter un recommandation ou commentaire
+      tags: [Recommandation]
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Direction'
+      responses:
+        '200':
+          description: Liste des rapports trimestriels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recommandation'
+
         '400':
           description: Bad Request
           content:
@@ -701,7 +935,7 @@ components:
         role:
           type: string
           enum: [admin, director, employee]
-        departmentId:
+        DirectionId:
           type: string
           description: L'ID du département auquel l'utilisateur est rattaché
         poste:
@@ -715,21 +949,55 @@ components:
         - email
         - password
         - role
-        - departmentId
-        - poste
-        - grade
+        - DirectionId
 
-    Department:
+    UserToSite:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+
+        role:
+          type: string
+          enum: [admin, director, employee]
+        poste:
+          type: string
+          description: Le poste de l'utilisateur
+
+
+    NewUser:
+      type: object
+      properties:
+        id:
+          type: string
+        firstname:
+          type: string
+        lastanme:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        directionId:
+          type: string
+
+    Direction:
       type: object
       properties:
         id:
           type: string
         name:
           type: string
-        reports:
+        responsable:
           type: array
           items:
-            $ref: '#/components/schemas/Report'
+            $ref: '#/components/schemas/UserToSite'
       required:
         - name
 
@@ -738,44 +1006,11 @@ components:
       properties:
         id:
           type: string
-        title:
-          type: string
-          description: L'activité principale du rapport
-        subActivities:
-          type: array
+        activities:
+          type : array
           items:
-            type: string
-          description: Liste des sous-activités
-        kpi:
-          type: string
-          description: Le KPI associé au rapport
-        observation:
-          type: string
-          description: Observations/commentaires sur le rapport, en attente de validation
-        isObservationValidated:
-          type: boolean
-          description: Indique si l'observation a été validée par le responsable du département
-        status:
-          type: string
-          enum: [in_progress, to_do]
-          description: Statut de l'activité (en cours, à faire)
-        percentageCompleted:
-          type: number
-          format: float
-          description: Le pourcentage des tâches complètes (requis si le statut est "in_progress")
-        departmentId:
-          type: string
-          description: L'ID du département auquel le rapport est associé
-        period:
-          type: string
-          description: Période de réalisation du rapport (temps de création ou temps de réalisation)
-      required:
-        - title
-        - kpi
-        - observation
-        - isObservationValidated
-        - status
-        - departmentId
+            $ref : '#/components/schemas/Activity'
+
 
     Notification:
       type: object
@@ -796,6 +1031,103 @@ components:
         - userId
         - message
         - date
+
+    Activity:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        prevision:
+          type: string
+        observation:
+          type: string
+        date:
+          type: string
+        mission:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mission'
+        task:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        next_task:
+          type: array
+          items:
+            $ref: '#/components/schemas/Next_Task'
+        recommandation:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommandation'
+        perf_realisation:
+          type: array
+          items:
+            $ref: '#/components/schemas/Perf_realisation'
+
+    Mission:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        direction:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/Direction'
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+        reportId:
+          type: string
+
+    Next_Task:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+        reportId:
+          type: string
+
+    Recommandation:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        validate_status:
+          type: boolean
+
+    Perf_realisation:
+      type: object
+      properties:
+        id:
+          type: string
+        indicator_performance:
+          type: string
+        realisation:
+          type: string
+        date:
+          type: string
+
+
+
+
+
     Exception:
       type: object
       properties:
@@ -819,7 +1151,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/Exception'
       example:
-        type: ResourceNotFoundException
+        type: Resource specified Not Found
         message: Resource of type <T> identified by <I> not found
     TooManyRequestsException:
       allOf:
