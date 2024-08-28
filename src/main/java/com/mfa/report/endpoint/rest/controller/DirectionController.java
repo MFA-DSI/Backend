@@ -28,7 +28,7 @@ public class DirectionController {
 
 
     @GetMapping("/{id}")
-    public DirectionDTO getDirectionById(@RequestParam  String id){
+    public DirectionDTO getDirectionById(@PathVariable  String id){
         Direction direction = service.getDirectionById(id);
         return mapper.toDomain(direction);
     }
