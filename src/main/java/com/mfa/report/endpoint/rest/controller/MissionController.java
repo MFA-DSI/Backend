@@ -109,6 +109,7 @@ public class MissionController {
 
     mission.setActivity(activityList);
     service.crUpdateMission(mission);
+
     return mapper.toDomain(mission);
   }
 }

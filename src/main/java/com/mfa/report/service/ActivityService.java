@@ -27,6 +27,10 @@ public class ActivityService {
         .orElseThrow(() -> new NotFoundException("activity with id." + id + " not found "));
   }
 
+  public List<Activity> getActivities(){
+    return repository.findAll();
+  }
+
   public Activity crUpdateActivity(Activity activity) {
     return repository.save(activity);
   }

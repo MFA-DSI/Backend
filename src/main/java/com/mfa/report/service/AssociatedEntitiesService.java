@@ -8,11 +8,7 @@ import com.mfa.report.endpoint.rest.model.DTO.NextTaskDTO;
 import com.mfa.report.endpoint.rest.model.DTO.PerfRealizationDTO;
 import com.mfa.report.endpoint.rest.model.DTO.RecommendationDTO;
 import com.mfa.report.endpoint.rest.model.DTO.TaskDTO;
-import com.mfa.report.model.Activity;
-import com.mfa.report.model.NextTask;
-import com.mfa.report.model.PerformanceRealization;
-import com.mfa.report.model.Recommendation;
-import com.mfa.report.model.Task;
+import com.mfa.report.model.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -103,5 +99,12 @@ public class AssociatedEntitiesService {
     activity.setPerformanceRealization(performanceRealization);
 
     return activity;
+  }
+
+  @Async
+  public void attachActivitiesToMission(List<Activity> activity, Mission mission){
+      activity.forEach(activity1 ->
+              activity1.setMission(mission)
+              );
   }
 }

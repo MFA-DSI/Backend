@@ -1,7 +1,6 @@
 package com.mfa.report.repository;
 
 import com.mfa.report.model.Activity;
-import com.mfa.report.repository.Dao.ActivityDAO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -15,4 +14,5 @@ public interface ActivityRepository extends JpaRepository<Activity, String> {
   @Query(
       "SELECT a FROM Activity a LEFT JOIN FETCH a.taskList t LEFT JOIN FETCH a.nexTaskList nt LEFT JOIN FETCH a.recommendations r WHERE a.id = :id")
   Activity findByIdWithActivityDetails(String id);
+
 }

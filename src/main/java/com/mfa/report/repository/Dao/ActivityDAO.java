@@ -23,23 +23,24 @@ public class ActivityDAO {
     private EntityManager entityManager;
 
 
-    public List<Activity> findActivitiesByDateRangeAndDirection(LocalDate startDate, LocalDate endDate, String missionId) {
+    public List<Activity> findActivitiesByDateRangeAndDirection(LocalDate startDate, LocalDate endDate, String directionId) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Activity> query = cb.createQuery(Activity.class);
         Root<Activity> activity = query.from(Activity.class);
 
         List<Predicate> predicates = new ArrayList<>();
 
-        // Filtre sur les dates
+        // Filter by date range
         if (startDate != null && endDate != null) {
-            predicates.add(cb.between(activity.get("creationDatetime"), startDate, endDate));
+            predicates.add(cb.between(activity.get("date"), startDate, endDate));
         }
 
-        // Filtre sur la direction
-        if (missionId != null && !missionId.isEmpty()) {
-            predicates.add(cb.equal(activity.get("mission").get("id"), missionId));
+        // Filter by directionId
+        if (directionId != null && !directionId.isEmpty()) {
+            predicates.add(cb.equal(activity.get("mission").get("direction").get("id"), directionId));
         }
 
+        // Build the query
         query.where(cb.and(predicates.toArray(new Predicate[0])));
 
         return entityManager.createQuery(query).getResultList();

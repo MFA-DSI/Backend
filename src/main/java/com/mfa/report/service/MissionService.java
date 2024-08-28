@@ -29,6 +29,9 @@ public class MissionService {
   }
 
   public Mission crUpdateMission(Mission mission) {
-    return repository.save(mission);
+   Mission mission1 = repository.save(mission);
+   mission1.getActivity().forEach(activity -> activity.setMission(mission1));
+
+   return mission1;
   }
 }
