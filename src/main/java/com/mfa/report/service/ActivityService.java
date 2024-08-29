@@ -8,8 +8,11 @@ import com.mfa.report.repository.exception.NotFoundException;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -56,14 +59,24 @@ public class ActivityService {
 
   public List<Activity> getActivitiesForWeek(LocalDate weekStartDate, String directionId) {
     LocalDate weekEndDate = weekStartDate.plusDays(6);
-    return repository.findByDirectionAndDate(weekStartDate,weekEndDate);
+    ModelMapper modelMapper = new ModelMapper();
+    List<Activity> activities = repository.findByDirectionAndDate(directionId,weekStartDate,weekEndDate).stream()
+            .map(row -> modelMapper.map(row, Activity.class))
+            .collect(Collectors.toList());
+    return activities ;
   }
 
   public List<Activity> getActivitiesForMonth(int year, int month, String directionId) {
     LocalDate monthStartDate = LocalDate.of(year, month, 1);
     LocalDate monthEndDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth());
     log.info(String.valueOf("direction : "+directionId ));
-    return repository.findByDirectionAndDate(monthStartDate,monthEndDate);
+    ModelMapper modelMapper = new ModelMapper();
+    List<Object> test = repository.findByDirectionAndDate(directionId,monthStartDate,monthEndDate);
+
+    List<Activity> activities = test.stream()
+            .map(row -> modelMapper.map(row, Activity.class))
+            .collect(Collectors.toList());
+    return activities;
   }
 
   public List<Activity> getActivitiesForQuarter(int year, int quarter, String directionId) {
@@ -89,6 +102,10 @@ public class ActivityService {
           default -> throw new IllegalArgumentException("Invalid quarter: " + quarter);
         };
 
-    return repository.findByDirectionAndDate(quarterStartDate,quarterEndDate);
+    ModelMapper modelMapper = new ModelMapper();
+    List<Activity> activities = repository.findByDirectionAndDate(directionId,quarterStartDate,quarterEndDate).stream()
+            .map(row -> modelMapper.map(row, Activity.class))
+            .collect(Collectors.toList());
+    return activities ;
   }
 }

@@ -35,5 +35,5 @@ public class Direction {
 
   @OneToMany private List<User> responsible;
 
-  @OneToMany @JsonIgnore private List<Mission> mission;
+  @OneToMany(mappedBy = "direction") @JsonIgnore private List<Mission> mission;
 }

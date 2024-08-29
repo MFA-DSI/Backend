@@ -115,6 +115,7 @@ public class MissionController {
   }
 
   @GetMapping("/mission/week")
+  @Cacheable(value = "mission", key = "#directionId")
   public List<MissionDTO> getActivitiesForWeek(
       @RequestParam LocalDate weekStartDate, @RequestParam String directionId) {
     return service.getActivitiesForWeek(weekStartDate, directionId).stream()
@@ -123,6 +124,7 @@ public class MissionController {
   }
 
   @GetMapping("/mission/month")
+  @Cacheable(value = "mission", key = "#directionId")
   public List<MissionDTO> getActivitiesForMonth(
       @RequestParam int year, @RequestParam int month, @RequestParam String directionId) {
     return service.getActivitiesForMonth(year, month, directionId).stream()
@@ -131,6 +133,7 @@ public class MissionController {
   }
 
   @GetMapping("/mission/quarter")
+  @Cacheable(value = "mission", key = "#directionId")
   public List<MissionDTO> getActivitiesForQuarter(
       @RequestParam int year, @RequestParam int quarter, @RequestParam String directionId) {
     return service.getActivitiesForQuarter(year, quarter, directionId).stream()

@@ -38,7 +38,7 @@ public class NextTask {
 
   @ManyToOne
   @NotBlank(message = "next task activity is mandatory")
-  @JoinColumn(name = "activity_id", referencedColumnName = "id")
+  @JoinColumn(name = "activity_id")
   @JsonIgnore
   private Activity activity;
 }

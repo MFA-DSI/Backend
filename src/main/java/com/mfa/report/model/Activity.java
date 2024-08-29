@@ -1,14 +1,6 @@
 package com.mfa.report.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.util.List;
@@ -42,9 +34,12 @@ public class Activity {
 
   @ManyToOne(cascade = CascadeType.ALL)
   @NotBlank(message = "Activity mission is mandatory")
+  @JoinColumn(name = "mission_id")
   private Mission mission;
 
-  @OneToOne private PerformanceRealization performanceRealization;
+  @OneToOne
+  @JoinColumn(name = "performance_realization_id")
+  private PerformanceRealization performanceRealization;
 
   @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Task> taskList;
