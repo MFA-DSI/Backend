@@ -18,6 +18,7 @@ import com.mfa.report.service.PerformanceRealizationService;
 import com.mfa.report.service.RecommendationService;
 import com.mfa.report.service.TaskService;
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -111,5 +112,29 @@ public class MissionController {
     service.crUpdateMission(mission);
 
     return mapper.toDomain(mission);
+  }
+
+  @GetMapping("/mission/week")
+  public List<MissionDTO> getActivitiesForWeek(
+      @RequestParam LocalDate weekStartDate, @RequestParam String directionId) {
+    return service.getActivitiesForWeek(weekStartDate, directionId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toUnmodifiableList());
+  }
+
+  @GetMapping("/mission/month")
+  public List<MissionDTO> getActivitiesForMonth(
+      @RequestParam int year, @RequestParam int month, @RequestParam String directionId) {
+    return service.getActivitiesForMonth(year, month, directionId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toUnmodifiableList());
+  }
+
+  @GetMapping("/mission/quarter")
+  public List<MissionDTO> getActivitiesForQuarter(
+      @RequestParam int year, @RequestParam int quarter, @RequestParam String directionId) {
+    return service.getActivitiesForQuarter(year, quarter, directionId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toUnmodifiableList());
   }
 }

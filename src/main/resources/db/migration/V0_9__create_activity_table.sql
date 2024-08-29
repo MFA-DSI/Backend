@@ -7,9 +7,6 @@ CREATE TABLE IF NOT EXISTS "activity"(
     creation_datetime timestamp with time zone,
     observation VARCHAR,
     mission_id VARCHAR,
-    task_id VARCHAR,
-    recommendation_id VARCHAR,
-    next_task_id VARCHAR,
     performance_realization_id VARCHAR
 );
 

@@ -42,6 +42,8 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
+        // TODO: review role based request
+
         if (!Objects.isNull(email)
                 && Objects.isNull(SecurityContextHolder.getContext().getAuthentication())) {
             UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);

@@ -9,8 +9,10 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ActivityService {
@@ -54,15 +56,14 @@ public class ActivityService {
 
   public List<Activity> getActivitiesForWeek(LocalDate weekStartDate, String directionId) {
     LocalDate weekEndDate = weekStartDate.plusDays(6);
-    return activityDAO.findActivitiesByDateRangeAndDirection(
-        weekStartDate, weekEndDate, directionId);
+    return repository.findByDirectionAndDate(weekStartDate,weekEndDate);
   }
 
   public List<Activity> getActivitiesForMonth(int year, int month, String directionId) {
     LocalDate monthStartDate = LocalDate.of(year, month, 1);
     LocalDate monthEndDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth());
-    return activityDAO.findActivitiesByDateRangeAndDirection(
-        monthStartDate, monthEndDate, directionId);
+    log.info(String.valueOf("direction : "+directionId ));
+    return repository.findByDirectionAndDate(monthStartDate,monthEndDate);
   }
 
   public List<Activity> getActivitiesForQuarter(int year, int quarter, String directionId) {
@@ -88,7 +89,6 @@ public class ActivityService {
           default -> throw new IllegalArgumentException("Invalid quarter: " + quarter);
         };
 
-    return activityDAO.findActivitiesByDateRangeAndDirection(
-        quarterStartDate, quarterEndDate, directionId);
+    return repository.findByDirectionAndDate(quarterStartDate,quarterEndDate);
   }
 }
