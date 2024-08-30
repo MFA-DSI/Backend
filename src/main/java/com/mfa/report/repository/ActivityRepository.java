@@ -21,6 +21,6 @@ public interface ActivityRepository extends JpaRepository<Activity, String> {
   Activity findByIdWithActivityDetails(String id);
 
   @Query(
-      "SELECT m FROM Mission m JOIN Activity a ON m.id = a.mission.id AND m.direction.id = :directionId AND a.creationDatetime  BETWEEN :startDate AND :endDate")
-  List<Object> findByDirectionAndDate(String directionId, LocalDate startDate, LocalDate endDate);
+      "SELECT a FROM Mission m JOIN Activity a ON m.id = a.mission.id  where m.direction.id = :directionId AND a.creationDatetime  BETWEEN :startDate AND :endDate")
+  List<Activity> findByDirectionAndDate(String directionId, LocalDate startDate, LocalDate endDate);
 }

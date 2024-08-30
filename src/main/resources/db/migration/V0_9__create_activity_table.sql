@@ -11,3 +11,4 @@ CREATE TABLE IF NOT EXISTS "activity"(
 );
 
 create index if not exists activity_id_index on "activity" (id);
+create index if not exists creation_datetime_id_index on "activity" (creation_datetime);
