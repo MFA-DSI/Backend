@@ -28,7 +28,7 @@ public class ActivityController {
   }
 
   @GetMapping("/activities/month")
-  @Cacheable(value = "activity", key = "#directionId+ ':' + #month")
+  @Cacheable(value = "activity", key = "#directionId+ ':' + #month + ':' + #year")
   public List<ActivityDTO> getActivitiesForMonth(
       @RequestParam int year, @RequestParam int month, @RequestParam String directionId) {
     return activityService.getActivitiesForMonth(year, month, directionId).stream()
@@ -37,7 +37,7 @@ public class ActivityController {
   }
 
   @GetMapping("/activities/quarter")
-  @Cacheable(value = "activity", key = "#directionId+ ':' + #quarter")
+  @Cacheable(value = "activity", key = "#directionId + ':' + #quarter + ':' + #year")
   public List<ActivityDTO> getActivitiesForQuarter(
       @RequestParam int year, @RequestParam int quarter, @RequestParam String directionId) {
     return activityService.getActivitiesForQuarter(year, quarter, directionId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
