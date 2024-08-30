@@ -2,15 +2,13 @@ package com.mfa.report.endpoint.rest.controller;
 
 import com.mfa.report.endpoint.rest.mapper.ActivityMapper;
 import com.mfa.report.endpoint.rest.model.DTO.ActivityDTO;
-import com.mfa.report.model.Activity;
 import com.mfa.report.service.ActivityService;
-import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/direction/")
 @CrossOrigin(origins = "*")
@@ -24,7 +22,9 @@ public class ActivityController {
   @Cacheable(value = "activity", key = "#directionId+ ':' + #weekStartDate")
   public List<ActivityDTO> getActivitiesForWeek(
       @RequestParam LocalDate weekStartDate, @RequestParam String directionId) {
-    return activityService.getActivitiesForWeek(weekStartDate, directionId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
+    return activityService.getActivitiesForWeek(weekStartDate, directionId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toUnmodifiableList());
   }
 
   @GetMapping("/activities/month")
@@ -40,7 +40,9 @@ public class ActivityController {
   @Cacheable(value = "activity", key = "#directionId + ':' + #quarter + ':' + #year")
   public List<ActivityDTO> getActivitiesForQuarter(
       @RequestParam int year, @RequestParam int quarter, @RequestParam String directionId) {
-    return activityService.getActivitiesForQuarter(year, quarter, directionId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
+    return activityService.getActivitiesForQuarter(year, quarter, directionId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toUnmodifiableList());
   }
 
   @GetMapping("/activities/all")

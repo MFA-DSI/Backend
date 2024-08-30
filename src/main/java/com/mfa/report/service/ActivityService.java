@@ -20,9 +20,8 @@ public class ActivityService {
   private final ActivityRepository repository;
   private final ActivityDAO activityDAO;
 
-
   public String toString(Object object) {
-    return "YourClass [attribute1=" + object ;
+    return "YourClass [attribute1=" + object;
   }
 
   public Activity getActivitiesByMissionId(String id) {
@@ -35,7 +34,7 @@ public class ActivityService {
         .orElseThrow(() -> new NotFoundException("activity with id." + id + " not found "));
   }
 
-  public List<Activity> getActivities(){
+  public List<Activity> getActivities() {
     return repository.findAll();
   }
 
@@ -60,16 +59,17 @@ public class ActivityService {
     return repository.save(activity);
   }
 
-
   public List<Activity> getActivitiesForWeek(LocalDate weekStartDate, String directionId) {
     LocalDate weekEndDate = weekStartDate.plusDays(6);
- return activityDAO.findActivitiesByDateRangeAndDirection(directionId,weekStartDate,weekEndDate);
+    return activityDAO.findActivitiesByDateRangeAndDirection(
+        directionId, weekStartDate, weekEndDate);
   }
 
   public List<Activity> getActivitiesForMonth(int year, int month, String directionId) {
     LocalDate monthStartDate = LocalDate.of(year, month, 1);
     LocalDate monthEndDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth());
-    return activityDAO.findActivitiesByDateRangeAndDirection(directionId,monthStartDate,monthEndDate);
+    return activityDAO.findActivitiesByDateRangeAndDirection(
+        directionId, monthStartDate, monthEndDate);
   }
 
   public List<Activity> getActivitiesForQuarter(int year, int quarter, String directionId) {
@@ -95,6 +95,7 @@ public class ActivityService {
           default -> throw new IllegalArgumentException("Invalid quarter: " + quarter);
         };
 
-    return activityDAO.findActivitiesByDateRangeAndDirection(directionId,quarterStartDate,quarterEndDate);
+    return activityDAO.findActivitiesByDateRangeAndDirection(
+        directionId, quarterStartDate, quarterEndDate);
   }
 }
