@@ -19,11 +19,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String mail) throws UsernameNotFoundException {
-        User user = userService.getUserByUserMail(mail);
+    public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
+        User user = userService.getUserById(id);
         if (Objects.isNull(user)) {
-            throw new UsernameNotFoundException("User of name: " + mail + " not found");
+            throw new UsernameNotFoundException("User of id: " + id + " not found");
         }
         return Principal.builder().user(user).build();
     }
+
     }

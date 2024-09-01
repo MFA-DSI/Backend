@@ -1,5 +1,6 @@
-package com.mfa.report.endpoint.rest.model;
+package com.mfa.report.endpoint.rest;
 
+import com.mfa.report.endpoint.rest.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class Auth {
+public class Credentials {
   private String email;
   private String password;
-
+  private Role authority;
 }

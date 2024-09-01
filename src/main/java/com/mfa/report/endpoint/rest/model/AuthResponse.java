@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class AuthResponse {
-  private String token;
+  private Token token;
   private String userId;
   private String directionId;
 }

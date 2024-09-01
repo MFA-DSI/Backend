@@ -6,6 +6,7 @@ import com.mfa.report.endpoint.rest.model.Principal;
 import com.mfa.report.endpoint.rest.model.Role;
 import com.mfa.report.endpoint.rest.model.SignUp;
 import com.mfa.report.model.User;
+import com.mfa.report.service.Auth.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
   private final UserService userService;
   private final UserDetailsServiceImpl userDetailsServiceImpl;
-  private final JWTService jwtService;
+  private final TokenService jwtService;
   private final PasswordEncoder passwordEncoder;
   private final String AUTHORIZATION_HEADER = "Authorization";
   private final int BEARER_PREFIX_COUNT = 7;
@@ -29,14 +30,10 @@ public class AuthService {
 
   public AuthResponse signIn(Auth toAuth) {
     String email = toAuth.getEmail();
-    UserDetails principal = userDetailsServiceImpl.loadUserByUsername(email);
     User user = userService.getUserByUserMail(email);
-    if (!passwordEncoder.matches(toAuth.getPassword(), principal.getPassword())) {
-      throw new UsernameNotFoundException("Wrong Password!");
-    }
 
     return AuthResponse.builder()
-        .token(jwtService.generateToken(principal, user.getId()))
+        .token(jwtService.generateToken(user.getRole(),user.getId()))
         .userId(user.getId())
         .directionId(user.getDirection().getId())
         .build();
@@ -65,19 +62,11 @@ public class AuthService {
                         .build()))
             .get(0);
     directionService.saveNewUserToResponsible(toSignUp.getDirectionId(), createdUser);
-    Principal principal = Principal.builder().user(createdUser).build();
-
     return AuthResponse.builder()
-        .token(jwtService.generateToken(principal, principal.getUser().getId()))
+        .token(jwtService.generateToken(createdUser.getRole(),createdUser.getId()))
         .userId(createdUser.getId())
         .directionId(toSignUp.getDirectionId())
         .build();
   }
 
-  public User whoami(HttpServletRequest request) {
-    String authHeader = request.getHeader(AUTHORIZATION_HEADER);
-    String token = authHeader.substring(BEARER_PREFIX_COUNT);
-    String email = jwtService.extractEmail(token);
-    return userService.getUserByUserMail(email);
-  }
 }
