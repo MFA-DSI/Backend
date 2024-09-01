@@ -6,8 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-
 @Repository
-public interface NotificationRepository extends JpaRepository<Notification,String> {
-    Optional<Notification> findByUserId(String Id);
+public interface NotificationRepository extends JpaRepository<Notification, String> {
+  Optional<Notification> findByUserId(String id);
 }

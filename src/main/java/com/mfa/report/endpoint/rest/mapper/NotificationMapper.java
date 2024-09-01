@@ -10,25 +10,25 @@ import org.springframework.stereotype.Component;
 @Component
 @AllArgsConstructor
 public class NotificationMapper {
-    private final UserService userService;
-    private final ActivityService activityService;
+  private final UserService userService;
+  private final ActivityService activityService;
 
-    public NotificationDTO toDomain (Notification notification){
-        return NotificationDTO.builder()
-                .id(notification.getId())
-                .viewStatus(notification.isViewStatus())
-                .description(notification.getDescription())
-                .activityId(notification.getActivity().getId())
-                .build();
-    }
+  public NotificationDTO toDomain(Notification notification) {
+    return NotificationDTO.builder()
+        .id(notification.getId())
+        .viewStatus(notification.isViewStatus())
+        .description(notification.getDescription())
+        .activityId(notification.getActivity().getId())
+        .build();
+  }
 
-    public Notification toRest(NotificationDTO notificationDTO){
-        return Notification.builder()
-                .id(notificationDTO.getId())
-                .description(notificationDTO.getDescription())
-                .viewStatus(notificationDTO.isViewStatus())
-                .user(userService.getUserById(notificationDTO.getUserId()))
-                .activity(activityService.getActivityById(notificationDTO.getActivityId()))
-                .build();
-    }
+  public Notification toRest(NotificationDTO notificationDTO) {
+    return Notification.builder()
+        .id(notificationDTO.getId())
+        .description(notificationDTO.getDescription())
+        .viewStatus(notificationDTO.isViewStatus())
+        .user(userService.getUserById(notificationDTO.getUserId()))
+        .activity(activityService.getActivityById(notificationDTO.getActivityId()))
+        .build();
+  }
 }

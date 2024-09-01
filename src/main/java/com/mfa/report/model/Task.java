@@ -1,11 +1,22 @@
 package com.mfa.report.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
-
 import java.time.LocalDate;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "\"task\"")
@@ -16,18 +27,18 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Task {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private String id;
 
-    private LocalDate dueDatetime ;
+  private LocalDate dueDatetime;
 
-    @NotBlank(message = "task description is mandatory")
-    private String description;
+  @NotBlank(message = "task description is mandatory")
+  private String description;
 
-    @ManyToOne
-    @NotBlank(message = "task activity is mandatory")
-    @JoinColumn(name = "activity_id", referencedColumnName = "id")
-    @JsonIgnore
-    private Activity activity;
+  @ManyToOne
+  @NotBlank(message = "task activity is mandatory")
+  @JoinColumn(name = "activity_id", referencedColumnName = "id")
+  @JsonIgnore
+  private Activity activity;
 }

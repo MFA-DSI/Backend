@@ -8,15 +8,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.util.List;
-
 
 @Entity
 @Table(name = "\"direction\"")
@@ -28,17 +26,14 @@ import java.util.List;
 @NoArgsConstructor
 public class Direction {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private String id;
 
-    @NotBlank(message = "direction name is mandatory")
-    private String name;
+  @NotBlank(message = "direction name is mandatory")
+  private String name;
 
-    @OneToMany
-    private List<User> responsible;
+  @OneToMany private List<User> responsible;
 
-    @OneToMany
-    @JsonIgnore
-    private List<Mission> mission;
+  @OneToMany(mappedBy = "direction") @JsonIgnore private List<Mission> mission;
 }

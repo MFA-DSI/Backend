@@ -1,14 +1,13 @@
 package com.mfa.report.endpoint.rest.model;
 
 import com.mfa.report.model.User;
+import java.util.Collection;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.Collection;
-import java.util.List;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Builder
 @AllArgsConstructor

@@ -1,5 +1,6 @@
 package com.mfa.report.model;
 
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,8 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.util.List;
 
 @Entity
 @Table(name = "\"mission\"")
@@ -21,14 +20,17 @@ import java.util.List;
 @NoArgsConstructor
 public class Mission {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
-    private String description;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private String id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    private Direction direction;
+  private String description;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Activity> activity;
+  @ManyToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "direction_id")
+  private Direction direction;
+
+  @OneToMany(mappedBy = "mission",fetch = FetchType.LAZY)
+
+  private List<Activity> activity;
 }

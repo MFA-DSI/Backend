@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @EnableJpaRepositories
-public interface RecommendationRepository extends JpaRepository<Recommendation,String> {
-    Recommendation findByActivityId(String activityId);
+public interface RecommendationRepository extends JpaRepository<Recommendation, String> {
+  Recommendation findByActivityId(String activityId);
 }

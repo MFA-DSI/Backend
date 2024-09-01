@@ -10,8 +10,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableCaching
 public class ReportApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ReportApplication.class, args);
-	}
-
+  public static void main(String[] args) {
+    SpringApplication.run(ReportApplication.class, args);
+  }
 }
