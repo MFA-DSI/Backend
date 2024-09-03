@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class RecommendationMapper {
   private final ActivityService activityService;
+
   private final UserService userService;
 
   public RecommendationDTO toDomain(Recommendation recommendation) {
@@ -44,6 +45,7 @@ public class RecommendationMapper {
         .approved(recommendationDTO.isValidate_status())
         .creationDatetime(LocalDate.now())
         .responsible(userService.getUserById(recommendationDTO.getCommitterId()))
+        .creationDatetime(recommendationDTO.getCommitDatetime())
         .activity(activity)
         .build();
   }

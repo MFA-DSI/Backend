@@ -30,6 +30,17 @@ public class NotificationMapper {
         .viewStatus(notificationDTO.isViewStatus())
         .user(userService.getUserById(notificationDTO.getUserId()))
         .recommendation(recommendation)
+        .activityId(notification.getActivity().getId())
+        .build();
+  }
+
+  public Notification toRest(NotificationDTO notificationDTO) {
+    return Notification.builder()
+        .id(notificationDTO.getId())
+        .description(notificationDTO.getDescription())
+        .viewStatus(notificationDTO.isViewStatus())
+        .user(userService.getUserById(notificationDTO.getUserId()))
+        .activity(activityService.getActivityById(notificationDTO.getActivityId()))
         .build();
   }
 }
