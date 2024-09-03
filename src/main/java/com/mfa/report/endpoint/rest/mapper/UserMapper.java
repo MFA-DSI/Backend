@@ -2,6 +2,7 @@ package com.mfa.report.endpoint.rest.mapper;
 
 import com.mfa.report.endpoint.rest.model.DTO.SignInUserDTO;
 import com.mfa.report.endpoint.rest.model.DTO.UserDTO;
+import com.mfa.report.endpoint.rest.model.UserToUpdate;
 import com.mfa.report.model.User;
 import com.mfa.report.service.DirectionService;
 import lombok.AllArgsConstructor;

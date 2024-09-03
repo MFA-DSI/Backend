@@ -41,6 +41,16 @@ public class Recommendation {
   @Column(name = "is_approved")
   private boolean approved;
 
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User responsible;
+
+
+  private LocalDate creationDatetime;
+
+  @Column(name = "is_approved")
+  private boolean approved;
+
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "activity_id")
   @JsonIgnore
