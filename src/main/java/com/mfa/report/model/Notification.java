@@ -40,8 +40,8 @@ public class Notification {
   private User user;
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  @JoinColumn(name = "activity_id")
-  private Activity activity;
+  @JoinColumn(name = "recommendation_id")
+  private Recommendation recommendation;
 
   private boolean viewStatus;
 }

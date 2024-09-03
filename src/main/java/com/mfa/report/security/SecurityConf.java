@@ -22,7 +22,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConf {
   private final JWTFilter jwtFilter;
 
-
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
     return httpSecurity
@@ -37,6 +36,8 @@ public class SecurityConf {
                   .permitAll()
                   .requestMatchers("/ping")
                   .permitAll()
+                  .requestMatchers(GET, "/direction/all")
+                  .permitAll()
                   .anyRequest()
                   .authenticated();
             })
@@ -45,8 +46,8 @@ public class SecurityConf {
         .build();
   }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 }

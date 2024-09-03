@@ -1,5 +1,7 @@
 package com.mfa.report.service;
 
+import com.mfa.report.endpoint.rest.model.Role;
+import com.mfa.report.endpoint.rest.model.UserToUpdate;
 import com.mfa.report.model.User;
 import com.mfa.report.repository.UserRepository;
 import com.mfa.report.repository.exception.NotFoundException;
@@ -30,6 +32,20 @@ public class UserService {
     return userRepository
         .findById(id)
         .orElseThrow(() -> new NotFoundException("User with id." + id + " not found "));
+  }
+
+  public User ModifyUserRole(String id, String role) {
+    User user = getUserById(id);
+    user.setRole(Role.valueOf(role));
+    return userRepository.save(user);
+  }
+
+  public User modifyUserInformation(UserToUpdate user) {
+    User user1 = userRepository.getById(user.getId());
+    user1.setFirstname(user.getFirstname());
+    user1.setLastname(user.getLastname());
+    user1.setEmail(user.getMail());
+    return userRepository.save(user1);
   }
 
   public User findByUsername(String userName) {

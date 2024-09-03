@@ -2,6 +2,7 @@ package com.mfa.report.endpoint.rest.mapper;
 
 import com.mfa.report.endpoint.rest.model.DTO.NotificationDTO;
 import com.mfa.report.model.Notification;
+import com.mfa.report.model.Recommendation;
 import com.mfa.report.service.ActivityService;
 import com.mfa.report.service.UserService;
 import lombok.AllArgsConstructor;
@@ -18,17 +19,17 @@ public class NotificationMapper {
         .id(notification.getId())
         .viewStatus(notification.isViewStatus())
         .description(notification.getDescription())
-        .activityId(notification.getActivity().getId())
+        .userId(notification.getUser().getId())
+        .activityId(notification.getRecommendation().getActivity().getId())
         .build();
   }
 
-  public Notification toRest(NotificationDTO notificationDTO) {
+  public Notification toRest(NotificationDTO notificationDTO, Recommendation recommendation) {
     return Notification.builder()
-        .id(notificationDTO.getId())
         .description(notificationDTO.getDescription())
         .viewStatus(notificationDTO.isViewStatus())
         .user(userService.getUserById(notificationDTO.getUserId()))
-        .activity(activityService.getActivityById(notificationDTO.getActivityId()))
+        .recommendation(recommendation)
         .build();
   }
 }
