@@ -68,6 +68,7 @@ public class MissionController {
       @RequestParam(defaultValue = "1", name = "page") Integer page,
       @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
 
+    directionValidator.accept(directionId);
     return service.getMissionByDirectionId(directionId, page, pageSize).stream()
         .map(mapper::toDomain)
         .toList();
@@ -89,6 +90,7 @@ public class MissionController {
       @RequestParam(name = "directionId") String directionId,
       @RequestParam(name = "userId") String userId,
       @RequestBody MissionDTO missionDTO) {
+    directionValidator.accept(directionId);
     Direction direction = directionService.getDirectionById(directionId);
     directionValidator.acceptUser(direction, userId);
     Mission mission = mapper.toRest(missionDTO, direction);
@@ -102,7 +104,6 @@ public class MissionController {
                       activity,
                       activityDTO.getTask(),
                       activityDTO.getNextTask(),
-                      activityDTO.getRecommendation(),
                       activityDTO.getPerfRealizationDTO());
                 })
             .peek(activityService::crUpdateActivity)

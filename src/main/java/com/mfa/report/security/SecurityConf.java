@@ -41,7 +41,6 @@ public class SecurityConf {
                   .anyRequest()
                   .authenticated();
             })
-        .exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/error"))
         .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }

@@ -6,8 +6,7 @@ CREATE TABLE IF NOT EXISTS "activity"(
     description VARCHAR,
     creation_datetime timestamp with time zone,
     observation VARCHAR,
-    mission_id VARCHAR,
-    performance_realization_id VARCHAR
+    mission_id VARCHAR
 );
 
 create index if not exists activity_id_index on "activity" (id);

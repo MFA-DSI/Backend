@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+
+import com.mfa.report.repository.exception.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,11 @@ public class DirectionValidator implements Consumer<Direction> {
     Set<String> violationsMessage = new HashSet<>();
   }
 
+  public void accept(String id){
+    if(!repository.findById(id).isPresent()){
+      throw new NotFoundException("direction with id "+id+" not found");
+    }
+  }
   public void acceptUser(Direction direction, String userId) {
     boolean isResponsible =
         direction.getResponsible().stream().anyMatch(user -> user.getId().equals(userId));
@@ -31,5 +38,6 @@ public class DirectionValidator implements Consumer<Direction> {
       throw new ForbiddenException(
           "The responsible of one direction cannot post mission to other direction");
     }
+
   }
 }

@@ -23,12 +23,12 @@ public class ActivityDAO {
 
     Root<Activity> activity = query.from(Activity.class);
 
-    Join<Activity, Mission> mission = activity.join("mission");
-    Join<Activity, Task> task = activity.join("taskList");
-    Join<Activity, NextTask> nextTask = activity.join("nexTaskList");
-    Join<Activity, Recommendation> recommendation = activity.join("recommendations");
+    Join<Activity, Mission> mission = activity.join("mission", JoinType.LEFT);
+    Join<Activity, Task> task = activity.join("taskList", JoinType.LEFT);
+    Join<Activity, NextTask> nextTask = activity.join("nexTaskList", JoinType.LEFT);
+    Join<Activity, Recommendation> recommendation = activity.join("recommendations", JoinType.LEFT);
     Join<Activity, PerformanceRealization> performanceRealization =
-        activity.join("performanceRealization");
+        activity.join("performanceRealization", JoinType.LEFT);
 
     // Set the conditions
     Predicate directionPredicate = cb.equal(mission.get("direction").get("id"), directionId);

@@ -3,10 +3,9 @@ package com.mfa.report.endpoint.rest.mapper;
 import com.mfa.report.endpoint.rest.model.DTO.ActivityDTO;
 import com.mfa.report.model.Activity;
 import com.mfa.report.service.MissionService;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
@@ -25,16 +24,29 @@ public class ActivityMapper {
         .observation(activity.getObservation())
         .prediction(activity.getPrediction())
         .task(
-            activity.getTaskList().stream().map(taskMapper::toDomain).collect(Collectors.toList()))
+            activity.getTaskList() != null
+                ? activity.getTaskList().stream()
+                    .map(taskMapper::toDomain)
+                    .collect(Collectors.toList())
+                : null)
         .nextTask(
-            activity.getNexTaskList().stream()
-                .map(nextTaskMapper::toDomain)
-                .collect(Collectors.toList()))
-        .perfRealizationDTO(perfRealizationMapper.toDomain(activity.getPerformanceRealization()))
+            activity.getNexTaskList() != null
+                ? activity.getNexTaskList().stream()
+                    .map(nextTaskMapper::toDomain)
+                    .collect(Collectors.toList())
+                : null)
+        .perfRealizationDTO(
+            activity.getPerformanceRealization() != null
+                ? activity.getPerformanceRealization().stream()
+                    .map(perfRealizationMapper::toDomain)
+                    .collect(Collectors.toUnmodifiableList())
+                : null)
         .recommendation(
-            activity.getRecommendations().stream()
-                .map(recommendationMapper::toDomain)
-                .collect(Collectors.toList()))
+            activity.getRecommendations() == null
+                ? null
+                : activity.getRecommendations().stream()
+                    .map(recommendationMapper::toDomain)
+                    .collect(Collectors.toList()))
         .build();
   }
 

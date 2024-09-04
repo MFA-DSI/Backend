@@ -37,9 +37,8 @@ public class Activity {
   @JoinColumn(name = "mission_id")
   private Mission mission;
 
-  @OneToOne
-  @JoinColumn(name = "performance_realization_id")
-  private PerformanceRealization performanceRealization;
+  @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<PerformanceRealization> performanceRealization;
 
   @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Task> taskList;

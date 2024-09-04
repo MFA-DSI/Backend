@@ -20,6 +20,6 @@ public class ActivityDTO {
   private List<TaskDTO> task;
   private List<NextTaskDTO> nextTask;
   private List<RecommendationDTO> recommendation;
-  private PerfRealizationDTO perfRealizationDTO;
+  private List<PerfRealizationDTO> perfRealizationDTO;
   private String missionId;
 }

@@ -6,14 +6,13 @@ import com.mfa.report.endpoint.rest.model.Principal;
 import com.mfa.report.endpoint.rest.model.Role;
 import com.mfa.report.endpoint.rest.model.SignUp;
 import com.mfa.report.model.User;
+import com.mfa.report.model.validator.UserValidator;
+import com.mfa.report.repository.exception.BadRequestException;
 import com.mfa.report.service.Auth.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,11 +26,17 @@ public class AuthService {
   private final String AUTHORIZATION_HEADER = "Authorization";
   private final int BEARER_PREFIX_COUNT = 7;
   private final DirectionService directionService;
+  private final UserValidator userValidator;
 
   public AuthResponse signIn(Auth toAuth) {
     String email = toAuth.getEmail();
+    String password = toAuth.getPassword();
+
     User user = userService.getUserByUserMail(email);
 
+    if(!matchPassword(user,password)){
+      throw new BadRequestException("Incorrect password");
+    }
     return AuthResponse.builder()
         .token(jwtService.generateToken(user.getRole(),user.getId()))
         .userId(user.getId())
@@ -43,7 +48,7 @@ public class AuthService {
     String email = toSignUp.getEmail();
     User existingUser = userService.getUserByUserMail(email);
     if (Objects.nonNull(existingUser)) {
-      throw new DuplicateKeyException("User with the email address: " + email + " already exists.");
+      throw new BadRequestException("User with the email address: " + email + " already exists.");
     }
 
     String hashedPassword = passwordEncoder.encode(toSignUp.getPassword());
@@ -67,6 +72,10 @@ public class AuthService {
         .userId(createdUser.getId())
         .directionId(toSignUp.getDirectionId())
         .build();
+  }
+
+  public boolean matchPassword(User user,String password){
+    return passwordEncoder.matches(password,user.getPassword());
   }
 
 }
