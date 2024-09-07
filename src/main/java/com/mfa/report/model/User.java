@@ -54,6 +54,8 @@ public class User implements Serializable {
   @NotBlank(message = "password is mandatory")
   private String password;
 
+  private boolean passwordChangeRequired;
+
   @Enumerated(EnumType.STRING)
   private Role role;
 

@@ -40,6 +40,7 @@ public class UserService {
     return userRepository.save(user);
   }
 
+
   public User modifyUserInformation(UserToUpdate user) {
     User user1 = userRepository.getById(user.getId());
     user1.setFirstname(user.getFirstname());
@@ -48,7 +49,7 @@ public class UserService {
     return userRepository.save(user1);
   }
 
-  public User findByUsername(String userName) {
-    return userRepository.findByUsername(userName);
-  }
+
+
+
 }

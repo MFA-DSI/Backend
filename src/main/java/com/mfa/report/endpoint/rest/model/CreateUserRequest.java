@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class SignUp {
-    private String username;
-    private String mail;
-    private String password;
-    private String newPassword;
-    private String confirmPassword;
+public class CreateUserRequest {
+  private String email;
+  private String username;
+  private String tempPassword;
+  private String directionId;
 }

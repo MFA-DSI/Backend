@@ -2,17 +2,13 @@ package com.mfa.report.endpoint.rest.controller.auth;
 
 import com.mfa.report.endpoint.rest.model.Auth;
 import com.mfa.report.endpoint.rest.model.AuthResponse;
-import com.mfa.report.endpoint.rest.model.SignUp;
+import com.mfa.report.endpoint.rest.model.CreateUserRequest;
 import com.mfa.report.service.AuthService;
 import com.mfa.report.service.DirectionService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
@@ -29,10 +25,14 @@ public class AuthController {
     return ResponseEntity.status(200).body(response);
   }
 
-  @PostMapping("/signup")
-  public ResponseEntity<AuthResponse> signUp(@RequestBody SignUp sign) {
-    directionService.getDirectionById(sign.getDirectionId());
-    AuthResponse response = authService.signUp(sign);
-    return ResponseEntity.status(201).body(response);
+  @PostMapping("/postAdmin")
+  public ResponseEntity<AuthResponse> createAdmin(@RequestAttribute("role") String role,@RequestParam String directionId, @RequestParam String userId, @RequestBody  CreateUserRequest createUserRequest){
+    return ResponseEntity.status(201).body( authService.createResponsible(directionId,userId,createUserRequest,role));
   }
+
+  @PostMapping("/postResponsible")
+  public ResponseEntity<AuthResponse> createResponsible(@RequestAttribute("role") String role,String directionId,String userId,@RequestBody  CreateUserRequest createUserRequest){
+    return ResponseEntity.status(201).body( authService.createResponsible(directionId,userId,createUserRequest,role));
+  }
+
 }

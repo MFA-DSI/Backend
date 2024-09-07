@@ -1,15 +1,11 @@
 package com.mfa.report.service;
 
-import com.mfa.report.endpoint.rest.model.Auth;
-import com.mfa.report.endpoint.rest.model.AuthResponse;
-import com.mfa.report.endpoint.rest.model.Principal;
-import com.mfa.report.endpoint.rest.model.Role;
-import com.mfa.report.endpoint.rest.model.SignUp;
+import com.mfa.report.endpoint.rest.model.*;
 import com.mfa.report.model.User;
 import com.mfa.report.model.validator.UserValidator;
 import com.mfa.report.repository.exception.BadRequestException;
+import com.mfa.report.repository.exception.ForbiddenException;
 import com.mfa.report.service.Auth.TokenService;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
@@ -34,48 +30,123 @@ public class AuthService {
 
     User user = userService.getUserByUserMail(email);
 
-    if(!matchPassword(user,password)){
+    if (!matchPassword(user, password)) {
       throw new BadRequestException("Incorrect password");
     }
+    if (user.isPasswordChangeRequired()) {
+      throw new BadRequestException("Password change required. Please update your password.");
+    }
     return AuthResponse.builder()
-        .token(jwtService.generateToken(user.getRole(),user.getId()))
+        .token(jwtService.generateToken(user.getRole(), user.getId()))
         .userId(user.getId())
         .directionId(user.getDirection().getId())
         .build();
   }
 
-  public AuthResponse signUp(SignUp toSignUp) {
-    String email = toSignUp.getEmail();
+  public AuthResponse SignUpUser(SignUp signUp){
+    User existingUser = userService.getUserByUserMail(signUp.getMail());
+    if (existingUser == null) {
+      throw new BadRequestException("User not found.");
+    }
+
+    if (existingUser.isPasswordChangeRequired()) {
+      if (!passwordEncoder.matches(signUp.getPassword(), existingUser.getPassword())) {
+        throw new BadRequestException("Temporary password is incorrect.");
+      }
+
+
+      String newPassword = passwordEncoder.encode(signUp.getNewPassword());
+      existingUser.setPassword(newPassword);
+      existingUser.setPasswordChangeRequired(false);
+
+      User user = userService.crupdateUser(List.of(existingUser)).get(0);
+
+      return AuthResponse.builder()
+              .token(jwtService.generateToken(user.getRole(), user.getId()))
+              .userId(user.getId())
+              .directionId(user.getDirection().getId())
+              .build();
+    } else {
+      throw new BadRequestException("Password change is not required.");
+    }
+  }
+
+  private AuthResponse createUserWithRole(CreateUserRequest request, Role role) {
+    String email = request.getEmail();
     User existingUser = userService.getUserByUserMail(email);
     if (Objects.nonNull(existingUser)) {
       throw new BadRequestException("User with the email address: " + email + " already exists.");
     }
 
-    String hashedPassword = passwordEncoder.encode(toSignUp.getPassword());
+    String tempPassword = request.getTempPassword();
+    String hashedPassword = passwordEncoder.encode(tempPassword);
+
     User createdUser =
         userService
             .crupdateUser(
                 List.of(
                     User.builder()
-                        .username(toSignUp.getUsername())
-                        .email(toSignUp.getEmail())
-                        .firstname(toSignUp.getFirstname())
-                        .lastname(toSignUp.getLastname())
-                        .direction(directionService.getDirectionById(toSignUp.getDirectionId()))
-                        .role(Role.user)
+                        .username(request.getUsername())
+                        .email(email)
+                        .direction(directionService.getDirectionById(request.getDirectionId()))
+                        .role(role)
                         .password(hashedPassword)
+                        .passwordChangeRequired(true)
                         .build()))
             .get(0);
-    directionService.saveNewUserToResponsible(toSignUp.getDirectionId(), createdUser);
+
     return AuthResponse.builder()
-        .token(jwtService.generateToken(createdUser.getRole(),createdUser.getId()))
+        .token(jwtService.generateToken(createdUser.getRole(), createdUser.getId()))
         .userId(createdUser.getId())
-        .directionId(toSignUp.getDirectionId())
+        .directionId(request.getDirectionId())
         .build();
   }
 
-  public boolean matchPassword(User user,String password){
-    return passwordEncoder.matches(password,user.getPassword());
+  public AuthResponse createResponsible(
+      String directionId, String userId, CreateUserRequest userRequest,String role) {
+    User currentUser = getCurrentAuthenticatedUser(userId);
+    if (!currentUser.getRole().equals(Role.ADMIN)
+        || !currentUser.getRole().equals(Role.SUPER_ADMIN)) {
+      throw new ForbiddenException("User cannot create responsible");
+    }
+    if(!Objects.equals(currentUser.getRole().toString(), role)){
+      throw new BadRequestException("User role is not equal as registered");
+    }
+
+    if (!isAdminInSameDirection(currentUser, directionId)) {
+      throw new ForbiddenException(
+          "You do not have permission to create a Responsible in this direction.");
+    }
+
+    return createUserWithRole(userRequest, Role.user);
   }
 
+  public AuthResponse createAdmin(
+      String directionId, String userId, CreateUserRequest userRequest,String role) {
+
+    User currentUser = getCurrentAuthenticatedUser(userId);
+
+    if (!currentUser.getRole().equals(Role.SUPER_ADMIN)) {
+      throw new ForbiddenException("Responsible cannot create user");
+    }
+    if(!currentUser.getRole().toString().equals(role)){
+      throw new BadRequestException("User role is not equal as registered");
+    }
+
+    return createUserWithRole(userRequest, Role.ADMIN);
+  }
+
+  private User getCurrentAuthenticatedUser(String id) {
+    return userService.getUserById(id);
+  }
+
+  private boolean isAdminInSameDirection(User currentUser, String directionId) {
+    return currentUser != null
+        && Role.ADMIN.equals(currentUser.getRole())
+        && currentUser.getDirection().getId().equals(directionId);
+  }
+
+  public boolean matchPassword(User user, String password) {
+    return passwordEncoder.matches(password, user.getPassword());
+  }
 }

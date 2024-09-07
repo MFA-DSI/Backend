@@ -2,7 +2,7 @@ package com.mfa.report.utils;
 
 import com.mfa.report.endpoint.rest.model.Auth;
 import com.mfa.report.endpoint.rest.model.Role;
-import com.mfa.report.endpoint.rest.model.SignUp;
+import com.mfa.report.endpoint.rest.model.CreateUserRequest;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.User;
 
@@ -50,8 +50,8 @@ public class UserUtils {
     return Direction.builder().id(DIRECTION1_ID).name(DIRECTION1_NAME).build();
   }
 
-  public static SignUp signUp4() {
-    return SignUp.builder()
+  public static CreateUserRequest signUp4() {
+    return CreateUserRequest.builder()
         .username(USER4_USERNAME)
         .email(USER4_EMAIL)
         .password(USER4_PASSWORD)

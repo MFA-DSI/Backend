@@ -61,7 +61,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
           List<String> roles = decodedJWT.getClaim("role").asList(String.class);
           String userId = String.valueOf(decodedJWT.getClaim("userId"));
-
+          request.setAttribute("role",roles.get(0));
           List<SimpleGrantedAuthority> rolesList =
               roles.stream()
                   .map(
