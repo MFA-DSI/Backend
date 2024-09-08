@@ -1,6 +1,7 @@
 package com.mfa.report.model;
 
-import com.mfa.report.endpoint.rest.model.Role;
+import com.mfa.report.model.enumerated.Grade;
+import com.mfa.report.model.enumerated.Role;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -56,6 +57,12 @@ public class User implements Serializable {
 
   @Enumerated(EnumType.STRING)
   private Role role;
+
+  @Enumerated(EnumType.STRING)
+  private Grade grade;
+
+  @NotBlank(message = "function is mandatory")
+  private String function;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
   private List<Notification> notificationList;

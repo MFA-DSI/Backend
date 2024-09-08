@@ -25,6 +25,17 @@ public class MissionMapper {
         .build();
   }
 
+  public com.mfa.report.endpoint.rest.model.RestEntity.Mission toDomainList(Mission mission) {
+    return com.mfa.report.endpoint.rest.model.RestEntity.Mission.builder()
+        .id(mission.getId())
+        .description(mission.getDescription())
+        .activityList(
+            mission.getActivity().stream()
+                .map(activityMapper::toDomainList)
+                .collect(Collectors.toUnmodifiableList()))
+        .build();
+  }
+
   public Mission toRest(MissionDTO mission, Direction direction) {
     return Mission.builder().description(mission.getName()).direction(direction).build();
   }

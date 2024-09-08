@@ -17,6 +17,14 @@ public class PerfRealizationMapper {
         .build();
   }
 
+  public com.mfa.report.endpoint.rest.model.RestEntity.PerformanceRealization toDomainList(PerformanceRealization performanceRealization) {
+    return com.mfa.report.endpoint.rest.model.RestEntity.PerformanceRealization.builder()
+            .id(performanceRealization.getId())
+            .realization(performanceRealization.getRealization())
+            .indicators(performanceRealization.getKPI())
+            .build();
+  }
+
   public PerformanceRealization toRest(PerfRealizationDTO perfRealizationDTO) {
     return PerformanceRealization.builder()
         .realization(perfRealizationDTO.getRealization())

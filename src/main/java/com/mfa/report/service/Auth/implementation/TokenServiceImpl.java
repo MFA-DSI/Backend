@@ -2,7 +2,7 @@ package com.mfa.report.service.Auth.implementation;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.mfa.report.endpoint.rest.model.Role;
+import com.mfa.report.model.enumerated.Role;
 import com.mfa.report.endpoint.rest.model.Token;
 import com.mfa.report.service.Auth.TokenService;
 import lombok.RequiredArgsConstructor;

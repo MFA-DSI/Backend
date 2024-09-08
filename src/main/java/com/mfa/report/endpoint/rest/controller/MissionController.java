@@ -63,13 +63,13 @@ public class MissionController {
 
   @GetMapping("/mission/all")
   @Cacheable(value = "mission", key = "#directionId")
-  public List<MissionDTO> getAllMission(
+  public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getAllMission(
       @RequestParam(name = "directionId") String directionId,
       @RequestParam(defaultValue = "1", name = "page") Integer page,
       @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
 
     return service.getMissionByDirectionId(directionId, page, pageSize).stream()
-        .map(mapper::toDomain)
+        .map(mapper::toDomainList)
         .toList();
   }
 

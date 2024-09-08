@@ -2,8 +2,8 @@ package com.mfa.report.endpoint.rest.mapper;
 
 import com.mfa.report.endpoint.rest.model.DTO.SignInUserDTO;
 import com.mfa.report.endpoint.rest.model.DTO.UserDTO;
-import com.mfa.report.endpoint.rest.model.UserToUpdate;
 import com.mfa.report.model.User;
+import com.mfa.report.model.enumerated.Grade;
 import com.mfa.report.service.DirectionService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,8 @@ public class UserMapper {
         .id(user.getId())
         .firstname(user.getId())
         .lastname(user.getLastname())
-        .username(user.getUsername())
+        .grade(user.getGrade().name())
+        .function(user.getFunction())
         .mail(user.getEmail())
         .directionId(user.getDirection().getId())
         .build();
@@ -28,7 +29,6 @@ public class UserMapper {
     return User.builder()
         .id(userDTO.getId())
         .email(userDTO.getMail())
-        .username(userDTO.getUsername())
         .firstname(userDTO.getFirstname())
         .lastname(userDTO.getLastname())
         .password(userDTO.getPassword())
@@ -40,9 +40,10 @@ public class UserMapper {
     return User.builder()
         .id(userDTO.getId())
         .email(userDTO.getMail())
-        .username(userDTO.getUsername())
         .firstname(userDTO.getFirstname())
         .lastname(userDTO.getLastname())
+        .grade(Grade.valueOf(userDTO.getGrade()))
+        .function(userDTO.getFunction())
         .direction(directionService.getDirectionById(userDTO.getDirectionId()))
         .build();
   }

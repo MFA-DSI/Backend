@@ -1,7 +1,7 @@
 package com.mfa.report.utils;
 
 import com.mfa.report.endpoint.rest.model.Auth;
-import com.mfa.report.endpoint.rest.model.Role;
+import com.mfa.report.model.enumerated.Role;
 import com.mfa.report.endpoint.rest.model.SignUp;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.User;

@@ -1,5 +1,6 @@
 package com.mfa.report.endpoint.rest.model;
 
+import com.mfa.report.model.enumerated.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

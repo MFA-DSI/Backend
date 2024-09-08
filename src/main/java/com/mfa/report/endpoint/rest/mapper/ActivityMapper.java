@@ -30,12 +30,20 @@ public class ActivityMapper {
             activity.getNexTaskList().stream()
                 .map(nextTaskMapper::toDomain)
                 .collect(Collectors.toList()))
-        .perfRealizationDTO(perfRealizationMapper.toDomain(activity.getPerformanceRealization()))
+        .perfRealizationDTO(activity.getPerformanceRealization().stream().map(perfRealizationMapper::toDomain).collect(Collectors.toUnmodifiableList()))
         .recommendation(
             activity.getRecommendations().stream()
                 .map(recommendationMapper::toDomain)
                 .collect(Collectors.toList()))
         .build();
+  }
+
+  public com.mfa.report.endpoint.rest.model.RestEntity.Activity toDomainList(Activity activity) {
+    return com.mfa.report.endpoint.rest.model.RestEntity.Activity.builder()
+            .id(activity.getId())
+            .description(activity.getDescription())
+            .performanceRealization(activity.getPerformanceRealization().stream().map(perfRealizationMapper::toDomainList).collect(Collectors.toUnmodifiableList()))
+            .build();
   }
 
   public Activity toRest(ActivityDTO activityDTO) {

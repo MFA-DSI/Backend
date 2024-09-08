@@ -2,18 +2,15 @@ package com.mfa.report.service;
 
 import com.mfa.report.endpoint.rest.model.Auth;
 import com.mfa.report.endpoint.rest.model.AuthResponse;
-import com.mfa.report.endpoint.rest.model.Principal;
-import com.mfa.report.endpoint.rest.model.Role;
+import com.mfa.report.model.enumerated.Role;
 import com.mfa.report.endpoint.rest.model.SignUp;
 import com.mfa.report.model.User;
 import com.mfa.report.service.Auth.TokenService;
-import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

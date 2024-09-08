@@ -1,6 +1,6 @@
 package com.mfa.report.service;
 
-import com.mfa.report.endpoint.rest.model.Role;
+import com.mfa.report.model.enumerated.Role;
 import com.mfa.report.endpoint.rest.model.UserToUpdate;
 import com.mfa.report.model.User;
 import com.mfa.report.repository.UserRepository;
