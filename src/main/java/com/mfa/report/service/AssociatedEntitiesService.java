@@ -68,7 +68,7 @@ public class AssociatedEntitiesService {
       List<TaskDTO> taskList,
       List<NextTaskDTO> nextTaskList,
       List<RecommendationDTO> recommendations,
-      PerfRealizationDTO perfRealizationDTO) {
+      List<PerfRealizationDTO> perfRealizationDTO) {
 
     taskList.forEach(
         task -> {
