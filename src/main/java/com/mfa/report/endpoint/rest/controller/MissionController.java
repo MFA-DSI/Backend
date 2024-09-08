@@ -102,7 +102,6 @@ public class MissionController {
                       activity,
                       activityDTO.getTask(),
                       activityDTO.getNextTask(),
-                      activityDTO.getRecommendation(),
                       activityDTO.getPerfRealizationDTO());
                 })
             .peek(activityService::crUpdateActivity)

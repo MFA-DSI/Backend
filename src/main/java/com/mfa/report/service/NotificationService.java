@@ -34,7 +34,9 @@ public class NotificationService {
     for (User responsible : responsibles) {
       Notification notification = new Notification();
       notification.setUser(responsible);
-      notification.setDescription(responsible.getUsername()+" a soumis une récommendation sur "+recommandation.getActivity().getDescription());
+
+      //TODO: correct this
+      notification.setDescription(responsible.getGrade()+" a soumis une récommendation sur "+recommandation.getActivity().getDescription());
       notification.setRecommendation(recommandation);
       repository.save(notification);
     }

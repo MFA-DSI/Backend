@@ -16,10 +16,6 @@ import org.springframework.stereotype.Service;
 public class UserService {
   private final UserRepository userRepository;
 
-  public User getUserByUsername(String username) {
-    return userRepository.findByUsername(username);
-  }
-
   public List<User> crupdateUser(List<User> toCrupdate) {
     return userRepository.saveAll(toCrupdate);
   }
@@ -48,7 +44,4 @@ public class UserService {
     return userRepository.save(user1);
   }
 
-  public User findByUsername(String userName) {
-    return userRepository.findByUsername(userName);
-  }
 }

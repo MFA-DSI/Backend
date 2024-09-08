@@ -13,6 +13,8 @@ public class SignUp {
   private String firstname;
   private String lastname;
   private String email;
+  private String function;
+  private String grade;
   private String password;
   private String directionId;
 }

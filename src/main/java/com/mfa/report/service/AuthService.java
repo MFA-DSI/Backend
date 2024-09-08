@@ -2,11 +2,11 @@ package com.mfa.report.service;
 
 import com.mfa.report.endpoint.rest.model.Auth;
 import com.mfa.report.endpoint.rest.model.AuthResponse;
-import com.mfa.report.model.enumerated.Role;
 import com.mfa.report.endpoint.rest.model.SignUp;
 import com.mfa.report.model.User;
+import com.mfa.report.model.enumerated.Grade;
+import com.mfa.report.model.enumerated.Role;
 import com.mfa.report.service.Auth.TokenService;
-
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
@@ -30,7 +30,7 @@ public class AuthService {
     User user = userService.getUserByUserMail(email);
 
     return AuthResponse.builder()
-        .token(jwtService.generateToken(user.getRole(),user.getId()))
+        .token(jwtService.generateToken(user.getRole(), user.getId()))
         .userId(user.getId())
         .directionId(user.getDirection().getId())
         .build();
@@ -49,21 +49,21 @@ public class AuthService {
             .crupdateUser(
                 List.of(
                     User.builder()
-                        .username(toSignUp.getUsername())
                         .email(toSignUp.getEmail())
                         .firstname(toSignUp.getFirstname())
                         .lastname(toSignUp.getLastname())
                         .direction(directionService.getDirectionById(toSignUp.getDirectionId()))
                         .role(Role.user)
+                        .grade(Grade.valueOf(toSignUp.getGrade()))
+                        .function(toSignUp.getFunction())
                         .password(hashedPassword)
                         .build()))
             .get(0);
     directionService.saveNewUserToResponsible(toSignUp.getDirectionId(), createdUser);
     return AuthResponse.builder()
-        .token(jwtService.generateToken(createdUser.getRole(),createdUser.getId()))
+        .token(jwtService.generateToken(createdUser.getRole(), createdUser.getId()))
         .userId(createdUser.getId())
         .directionId(toSignUp.getDirectionId())
         .build();
   }
-
 }

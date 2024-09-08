@@ -37,9 +37,6 @@ public class User implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private String id;
 
-  @NotBlank(message = "username is mandatory")
-  private String username;
-
   @Column(name = "first_name")
   @NotBlank(message = "firstname is mandatory")
   private String firstname;

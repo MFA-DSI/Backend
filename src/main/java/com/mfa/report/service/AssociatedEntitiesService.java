@@ -6,16 +6,18 @@ import com.mfa.report.endpoint.rest.mapper.RecommendationMapper;
 import com.mfa.report.endpoint.rest.mapper.TaskMapper;
 import com.mfa.report.endpoint.rest.model.DTO.NextTaskDTO;
 import com.mfa.report.endpoint.rest.model.DTO.PerfRealizationDTO;
-import com.mfa.report.endpoint.rest.model.DTO.RecommendationDTO;
 import com.mfa.report.endpoint.rest.model.DTO.TaskDTO;
-import com.mfa.report.model.*;
+import com.mfa.report.model.Activity;
+import com.mfa.report.model.Mission;
+import com.mfa.report.model.NextTask;
+import com.mfa.report.model.PerformanceRealization;
+import com.mfa.report.model.Task;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -42,12 +44,6 @@ public class AssociatedEntitiesService {
   }
 
   @Async
-  public CompletableFuture<Void> saveRecommendationAsync(Recommendation recommendation) {
-    recommendationService.crUpdateRecommendation(recommendation);
-    return CompletableFuture.completedFuture(null);
-  }
-
-  @Async
   public CompletableFuture<Void> saveNextTaskAsync(NextTask nextTask) {
     try {
       nextTaskService.crUpdateNextTask(nextTask);
@@ -59,52 +55,53 @@ public class AssociatedEntitiesService {
 
   @Async
   public PerformanceRealization savePerformanceRealizationAsync(
-      PerformanceRealization performanceRealization) {
+          PerformanceRealization performanceRealization) {
     return performanceRealizationService.crUpdatePerformance(performanceRealization);
   }
 
   public Activity AttachEntitiesToActivity(
-      Activity activity,
-      List<TaskDTO> taskList,
-      List<NextTaskDTO> nextTaskList,
-      List<RecommendationDTO> recommendations,
-      List<PerfRealizationDTO> perfRealizationDTO) {
+          Activity activity,
+          List<TaskDTO> taskList,
+          List<NextTaskDTO> nextTaskList,
+          List<PerfRealizationDTO> perfRealizationDTO) {
 
-    taskList.forEach(
-        task -> {
-          task.setActivityId(activity.getId());
-          saveTaskAsync(taskMapper.ToRestSave(task, activity));
-        });
-    activity.setTaskList(taskList.stream().map(taskMapper::toRest).toList());
+    if(taskList != null && !taskList.isEmpty()){
+      taskList.forEach(
+              task -> {
+                task.setActivityId(activity.getId());
+                saveTaskAsync(taskMapper.ToRestSave(task, activity));
+              });
+      activity.setTaskList(taskList.stream().map(taskMapper::toRest).toList());
+    }
 
-    nextTaskList.forEach(
-        nextTaskDTO -> {
-          nextTaskDTO.setActivityId(activity.getId());
-          saveNextTaskAsync(nextTaskMapper.toRestSave(nextTaskDTO, activity));
-        });
 
-    activity.setNexTaskList(nextTaskList.stream().map(nextTaskMapper::toRest).toList());
+    if(nextTaskList != null && !nextTaskList.isEmpty()){
+      nextTaskList.forEach(
+              nextTaskDTO -> {
+                nextTaskDTO.setActivityId(activity.getId());
+                saveNextTaskAsync(nextTaskMapper.toRestSave(nextTaskDTO, activity));
+              });
 
-    recommendations.forEach(
-        recommendationDTO -> {
-          recommendationDTO.setActivityId(activity.getId());
-          saveRecommendationAsync(recommendationMapper.toRestSave(recommendationDTO, activity));
-        });
-    activity.setRecommendations(
-        recommendations.stream().map(recommendationMapper::toRest).toList());
+      activity.setNexTaskList(nextTaskList.stream().map(nextTaskMapper::toRest).toList());
 
-    perfRealizationDTO.setActivityId(activity.getId());
-    PerformanceRealization performanceRealization =
-        savePerformanceRealizationAsync(perfRealizationMapper.toRest(perfRealizationDTO));
-    activity.setPerformanceRealization(performanceRealization);
+    }
+    if(perfRealizationDTO != null && ! perfRealizationDTO.isEmpty()){
+      perfRealizationDTO.forEach(
+              (perfRealizationDTO1 -> {
+                perfRealizationDTO1.setActivityId(activity.getId());
+                savePerformanceRealizationAsync(perfRealizationMapper.toRest(perfRealizationDTO1));
+              }));
+      activity.setPerformanceRealization(
+              perfRealizationDTO.stream().map(perfRealizationMapper::toRest).toList());
+
+    }
+
 
     return activity;
   }
 
   @Async
-  public void attachActivitiesToMission(List<Activity> activity, Mission mission){
-      activity.forEach(activity1 ->
-              activity1.setMission(mission)
-              );
+  public void attachActivitiesToMission(List<Activity> activity, Mission mission) {
+    activity.forEach(activity1 -> activity1.setMission(mission));
   }
 }

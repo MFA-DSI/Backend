@@ -32,7 +32,7 @@ public class Principal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return null;
     }
 
     @Override
