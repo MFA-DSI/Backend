@@ -29,14 +29,14 @@ public class TokenServiceImpl implements TokenService {
 
     String jwtToken =
         JWT.create()
-            .withJWTId(UUID.randomUUID().toString())
-            .withSubject("report-app-token")
-            .withIssuer(issuer)
-            .withAudience("direction-audience")
-            .withClaim("role", List.of(role.toString()))
-            .withClaim("userId", userId)
-            .withExpiresAt(new Date().toInstant().plusMillis(expiryOffset))
-            .sign(algorithm);
+                .withJWTId(UUID.randomUUID().toString())
+                .withSubject("report-app-token")
+                .withIssuer(issuer)
+                .withAudience("direction-audience")
+                .withClaim("role", List.of(role.toString()))
+                .withClaim("userId", userId)
+                .withExpiresAt(new Date().toInstant().plusMillis(expiryOffset))
+                .sign(algorithm);
 
     return Token.builder().accessToken(jwtToken).build();
   }

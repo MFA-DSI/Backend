@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/direction/")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*",originPatterns = "*")
 @Slf4j
 public class MissionController {
 
@@ -67,7 +67,7 @@ public class MissionController {
       @RequestParam(name = "directionId") String directionId,
       @RequestParam(defaultValue = "1", name = "page") Integer page,
       @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
-
+  log.info("it was a get");
     return service.getMissionByDirectionId(directionId, page, pageSize).stream()
         .map(mapper::toDomainList)
         .toList();

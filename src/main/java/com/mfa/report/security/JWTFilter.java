@@ -35,7 +35,6 @@ public class JWTFilter extends OncePerRequestFilter {
   private final JWTVerifier jwtVerifier;
 
   @Override
-  @SuppressWarnings("null")
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
