@@ -89,7 +89,7 @@ public class AssociatedEntitiesService {
       perfRealizationDTO.forEach(
               (perfRealizationDTO1 -> {
                 perfRealizationDTO1.setActivityId(activity.getId());
-                savePerformanceRealizationAsync(perfRealizationMapper.toRest(perfRealizationDTO1));
+                savePerformanceRealizationAsync(perfRealizationMapper.toRestSave(perfRealizationDTO1,activity));
               }));
       activity.setPerformanceRealization(
               perfRealizationDTO.stream().map(perfRealizationMapper::toRest).toList());

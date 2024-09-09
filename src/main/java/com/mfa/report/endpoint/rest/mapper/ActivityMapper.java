@@ -17,26 +17,48 @@ public class ActivityMapper {
   private final RecommendationMapper recommendationMapper;
   private final MissionService service;
 
-  public ActivityDTO toDomain(Activity activity) {
-    return ActivityDTO.builder()
-        .id(activity.getId())
-        .description(activity.getDescription())
-        .dueDatetime(activity.getCreationDatetime())
-        .observation(activity.getObservation())
-        .prediction(activity.getPrediction())
-        .task(
-            activity.getTaskList().stream().map(taskMapper::toDomain).collect(Collectors.toList()))
-        .nextTask(
-            activity.getNexTaskList().stream()
-                .map(nextTaskMapper::toDomain)
-                .collect(Collectors.toList()))
-        .perfRealizationDTO(activity.getPerformanceRealization().stream().map(perfRealizationMapper::toDomain).collect(Collectors.toUnmodifiableList()))
-        .recommendation(
-            activity.getRecommendations().stream()
-                .map(recommendationMapper::toDomain)
-                .collect(Collectors.toList()))
-        .build();
-  }
+    public ActivityDTO toDomain(Activity activity) {
+      return ActivityDTO.builder()
+              .id(activity.getId())
+              .description(activity.getDescription())
+              .dueDatetime(activity.getCreationDatetime())
+              .observation(activity.getObservation())
+              .prediction(activity.getPrediction())
+              .task(
+                      activity.getTaskList() != null
+                              ? activity.getTaskList().stream()
+                              .map(taskMapper::toDomain)
+                              .collect(Collectors.toList())
+                              : null)
+              .nextTask(
+                      activity.getNexTaskList() != null
+                              ? activity.getNexTaskList().stream()
+                              .map(nextTaskMapper::toDomain)
+                              .collect(Collectors.toList())
+                              : null)
+              .perfRealizationDTO(
+                      activity.getPerformanceRealization() != null
+                              ? activity.getPerformanceRealization().stream()
+                              .map(perfRealizationMapper::toDomain)
+                              .collect(Collectors.toUnmodifiableList())
+                              : null)
+              .recommendation(
+                      activity.getRecommendations() == null
+                              ? null
+                              : activity.getRecommendations().stream()
+                              .map(recommendationMapper::toDomain)
+                              .collect(Collectors.toList()))
+              .build();
+    }
+
+    public Activity toRest(ActivityDTO activityDTO) {
+      return Activity.builder()
+              .description(activityDTO.getDescription())
+              .prediction(activityDTO.getPrediction())
+              .observation(activityDTO.getObservation())
+              .creationDatetime(activityDTO.getDueDatetime())
+              .build();
+    }
 
   public com.mfa.report.endpoint.rest.model.RestEntity.Activity toDomainList(Activity activity) {
     return com.mfa.report.endpoint.rest.model.RestEntity.Activity.builder()
@@ -46,12 +68,4 @@ public class ActivityMapper {
             .build();
   }
 
-  public Activity toRest(ActivityDTO activityDTO) {
-    return Activity.builder()
-        .description(activityDTO.getDescription())
-        .prediction(activityDTO.getPrediction())
-        .observation(activityDTO.getObservation())
-        .creationDatetime(activityDTO.getDueDatetime())
-        .build();
-  }
 }

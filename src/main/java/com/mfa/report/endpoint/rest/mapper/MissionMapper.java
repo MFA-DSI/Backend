@@ -33,6 +33,7 @@ public class MissionMapper {
             mission.getActivity().stream()
                 .map(activityMapper::toDomainList)
                 .collect(Collectors.toUnmodifiableList()))
+
         .build();
   }
 
