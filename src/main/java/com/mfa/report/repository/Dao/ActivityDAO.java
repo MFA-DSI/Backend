@@ -3,6 +3,7 @@ package com.mfa.report.repository.Dao;
 import com.mfa.report.model.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class ActivityDAO {
   @PersistenceContext private EntityManager entityManager;
 
   public List<Activity> findActivitiesByDateRangeAndDirection(
-      String directionId, LocalDate startDate, LocalDate endDate) {
+      String directionId, LocalDate startDate, LocalDate endDate,int page,int pageSize) {
 
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<Activity> query = cb.createQuery(Activity.class);
@@ -47,8 +48,10 @@ public class ActivityDAO {
     }
 
     query.select(activity).where(cb.and(predicates.toArray(new Predicate[0])));
-
-    return entityManager.createQuery(query).getResultList();
+    TypedQuery<Activity> typedQuery = entityManager.createQuery(query);
+    typedQuery.setFirstResult((page - 1) * pageSize);
+    typedQuery.setMaxResults(pageSize);
+    return  typedQuery.getResultList();
 
   }
 }

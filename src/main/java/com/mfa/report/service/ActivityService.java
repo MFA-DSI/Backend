@@ -62,23 +62,23 @@ public class ActivityService {
     return repository.save(activity);
   }
 
-  public List<Activity> getActivitiesForWeek(LocalDate weekStartDate, String directionId) {
+  public List<Activity> getActivitiesForWeek(LocalDate weekStartDate, String directionId,int page,int pageSize) {
     LocalDate weekEndDate = weekStartDate.plusDays(6);
     return activityDAO.findActivitiesByDateRangeAndDirection(
-        directionId, weekStartDate, weekEndDate);
+        directionId, weekStartDate, weekEndDate,page,pageSize);
   }
-  public List<Activity> getActivitiesByDirectionId(String directionId){
-    return activityDAO.findActivitiesByDateRangeAndDirection(directionId,null,null);
+  public List<Activity> getActivitiesByDirectionId(String directionId,int page,int pageSize){
+    return activityDAO.findActivitiesByDateRangeAndDirection(directionId,null,null,page,pageSize);
   }
 
-  public List<Activity> getActivitiesForMonth(int year, int month, String directionId) {
+  public List<Activity> getActivitiesForMonth(int year, int month, String directionId,int page,int pageSize) {
     LocalDate monthStartDate = LocalDate.of(year, month, 1);
     LocalDate monthEndDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth());
     return activityDAO.findActivitiesByDateRangeAndDirection(
-        directionId, monthStartDate, monthEndDate);
+        directionId, monthStartDate, monthEndDate,page,pageSize);
   }
 
-  public List<Activity> getActivitiesForQuarter(int year, int quarter, String directionId) {
+  public List<Activity> getActivitiesForQuarter(int year, int quarter, String directionId,int page,int pageSize) {
     LocalDate quarterStartDate;
     LocalDate quarterEndDate =
         switch (quarter) {
@@ -102,6 +102,6 @@ public class ActivityService {
         };
 
     return activityDAO.findActivitiesByDateRangeAndDirection(
-        directionId, quarterStartDate, quarterEndDate);
+        directionId, quarterStartDate, quarterEndDate,page,pageSize);
   }
 }

@@ -61,9 +61,9 @@ public class MissionController {
     return mapper.toDomain(service.getMissionById(id));
   }
 
-  @GetMapping("/mission/all")
+  @GetMapping("/mission/direction")
   @Cacheable(value = "mission", key = "#directionId")
-  public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getAllMission(
+  public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getAllMissionByDirectionId(
       @RequestParam(name = "directionId") String directionId,
       @RequestParam(defaultValue = "1", name = "page") Integer page,
       @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
@@ -71,6 +71,15 @@ public class MissionController {
     return service.getMissionByDirectionId(directionId, page, pageSize).stream()
         .map(mapper::toDomainList)
         .toList();
+  }
+
+
+  @GetMapping("/mission/all")
+  public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getAllMission(
+          @RequestParam(defaultValue = "1", name = "page") Integer page,
+          @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize
+  ){
+    return  service.getAllMission(page,pageSize).stream().map(mapper::toDomainList).collect(Collectors.toUnmodifiableList());
   }
 
   // public List<MissionDTO> updateMission(@RequestBody MissionDTO missionDTO , @RequestParam String

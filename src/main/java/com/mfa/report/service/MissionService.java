@@ -29,6 +29,11 @@ public class MissionService {
         .orElseThrow(() -> new NotFoundException("mission with id." + id + " not found "));
   }
 
+  public List<Mission> getAllMission(int page,int pageSize){
+      Pageable pageable = PageRequest.of(page - 1, pageSize);
+      return repository.findAll(pageable).getContent();
+  }
+
   public List<Mission> getMissionByDirectionId(String directionId, Integer page, Integer pageSize) {
     Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(ASC, "description"));
     return repository.findAllByDirectionId(directionId, pageable);

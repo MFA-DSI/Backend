@@ -21,8 +21,8 @@ public class ActivityController {
   @GetMapping("/activities/week")
   @Cacheable(value = "activity", key = "#directionId+ ':' + #weekStartDate")
   public List<ActivityDTO> getActivitiesForWeek(
-      @RequestParam LocalDate weekStartDate, @RequestParam String directionId) {
-    return activityService.getActivitiesForWeek(weekStartDate, directionId).stream()
+      @RequestParam LocalDate weekStartDate, @RequestParam String directionId,@RequestParam(defaultValue ="1") int page,@RequestParam(defaultValue = "15") int pageSize) {
+    return activityService.getActivitiesForWeek(weekStartDate, directionId,page,pageSize).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
@@ -30,8 +30,8 @@ public class ActivityController {
   @GetMapping("/activities/month")
   @Cacheable(value = "activity", key = "#directionId+ ':' + #month + ':' + #year")
   public List<ActivityDTO> getActivitiesForMonth(
-      @RequestParam int year, @RequestParam int month, @RequestParam String directionId) {
-    return activityService.getActivitiesForMonth(year, month, directionId).stream()
+      @RequestParam int year, @RequestParam int month, @RequestParam String directionId,@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15") int pageSize) {
+    return activityService.getActivitiesForMonth(year, month, directionId,page,pageSize).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
@@ -39,8 +39,8 @@ public class ActivityController {
   @GetMapping("/activities/quarter")
   @Cacheable(value = "activity", key = "#directionId + ':' + #quarter + ':' + #year")
   public List<ActivityDTO> getActivitiesForQuarter(
-      @RequestParam int year, @RequestParam int quarter, @RequestParam String directionId) {
-    return activityService.getActivitiesForQuarter(year, quarter, directionId).stream()
+      @RequestParam int year, @RequestParam int quarter, @RequestParam String directionId,@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15") int pageSize) {
+    return activityService.getActivitiesForQuarter(year, quarter, directionId,page,pageSize).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
@@ -54,8 +54,8 @@ public class ActivityController {
 
 
   @GetMapping("/activity/all")
-  public List<ActivityDTO> getAllActivitiesByDirectionId(@RequestParam String directionId){
-    return activityService.getActivitiesByDirectionId(directionId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
+  public List<ActivityDTO> getAllActivitiesByDirectionId(@RequestParam String directionId,@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15") int pageSize){
+    return activityService.getActivitiesByDirectionId(directionId,page,pageSize).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
   }
 
   @GetMapping("/activity")
