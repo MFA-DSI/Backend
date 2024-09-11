@@ -77,7 +77,7 @@ public class MissionController {
   @GetMapping("/mission/all")
   public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getAllMission(
           @RequestParam(defaultValue = "1", name = "page") Integer page,
-          @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize
+          @RequestParam(defaultValue = "2", name = "page_size") Integer pageSize
   ){
     return  service.getAllMission(page,pageSize).stream().map(mapper::toDomainList).collect(Collectors.toUnmodifiableList());
   }
