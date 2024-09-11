@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -30,11 +31,20 @@ public class ActivityDAO {
     Join<Activity, PerformanceRealization> performanceRealization =
         activity.join("performanceRealization");
 
-    // Set the conditions
-    Predicate directionPredicate = cb.equal(mission.get("direction").get("id"), directionId);
-    Predicate dateRangePredicate = cb.between(activity.get("creationDatetime"), startDate, endDate);
+    List<Predicate> predicates = new ArrayList<>();
 
-    query.select(activity).where(cb.and(directionPredicate, dateRangePredicate));
+    // Add conditions based on the provided parameters
+    if (directionId != null && !directionId.isEmpty()) {
+      Predicate directionPredicate = cb.equal(mission.get("direction").get("id"), directionId);
+      predicates.add(directionPredicate);
+    }
+
+    if (startDate != null && endDate != null) {
+      Predicate dateRangePredicate = cb.between(activity.get("creationDatetime"), startDate, endDate);
+      predicates.add(dateRangePredicate);
+    }
+
+    query.select(activity).where(cb.and(predicates.toArray(new Predicate[0])));
 
     return entityManager.createQuery(query).getResultList();
   }

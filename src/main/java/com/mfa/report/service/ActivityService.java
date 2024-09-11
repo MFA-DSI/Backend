@@ -10,6 +10,9 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -33,8 +36,9 @@ public class ActivityService {
         .orElseThrow(() -> new NotFoundException("activity with id." + id + " not found "));
   }
 
-  public List<Activity> getActivities() {
-    return repository.findAll();
+  public Page<Activity> getActivities(int page, int pageSize) {
+    Pageable pageable = PageRequest.of(page - 1, pageSize);
+    return repository.findAll(pageable);
   }
 
   public Activity crUpdateActivity(Activity activity) {
@@ -62,6 +66,9 @@ public class ActivityService {
     LocalDate weekEndDate = weekStartDate.plusDays(6);
     return activityDAO.findActivitiesByDateRangeAndDirection(
         directionId, weekStartDate, weekEndDate);
+  }
+  public List<Activity> getActivitiesByDirectionId(String directionId){
+    return activityDAO.findActivitiesByDateRangeAndDirection(directionId,null,null);
   }
 
   public List<Activity> getActivitiesForMonth(int year, int month, String directionId) {

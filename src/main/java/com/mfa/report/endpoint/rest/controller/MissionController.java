@@ -56,8 +56,8 @@ public class MissionController {
   private final ActivityValidator activityValidator;
   private final DirectionValidator directionValidator;
 
-  @GetMapping("/mission/{id}")
-  public MissionDTO getMissionById(@PathVariable String id) {
+  @GetMapping("/mission")
+  public MissionDTO getMissionById(@RequestParam String id) {
     return mapper.toDomain(service.getMissionById(id));
   }
 
@@ -67,7 +67,7 @@ public class MissionController {
       @RequestParam(name = "directionId") String directionId,
       @RequestParam(defaultValue = "1", name = "page") Integer page,
       @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
-  log.info("it was a get");
+  
     return service.getMissionByDirectionId(directionId, page, pageSize).stream()
         .map(mapper::toDomainList)
         .toList();

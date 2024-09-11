@@ -46,9 +46,20 @@ public class ActivityController {
   }
 
   @GetMapping("/activities/all")
-  public List<ActivityDTO> getAllActivities() {
-    return activityService.getActivities().stream()
+  public List<ActivityDTO> getAllActivities(@RequestParam  int page, @RequestParam int pageSize) {
+    return activityService.getActivities(page,pageSize).getContent().stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
+  }
+
+
+  @GetMapping("/activity/all")
+  public List<ActivityDTO> getAllActivitiesByDirectionId(@RequestParam String directionId){
+    return activityService.getActivitiesByDirectionId(directionId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
+  }
+
+  @GetMapping("/activity")
+  public ActivityDTO getActivityById(@RequestParam String activityId){
+    return mapper.toDomain(activityService.getActivityById(activityId));
   }
 }
