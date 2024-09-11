@@ -57,7 +57,7 @@ public class ActivityService {
     Activity activity = new Activity();
     activity.setObservation(activity.getObservation());
     activity.setPrediction(activity.getPrediction());
-    activity.setCreationDatetime(activity.getCreationDatetime());
+    activity.setDueDatetime(activity.getDueDatetime());
 
     return repository.save(activity);
   }

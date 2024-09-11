@@ -29,7 +29,7 @@ public class Activity {
   private String description;
 
   private String prediction;
-  private LocalDate creationDatetime;
+  private LocalDate dueDatetime;
   private String observation;
 
   @ManyToOne(cascade = CascadeType.ALL)

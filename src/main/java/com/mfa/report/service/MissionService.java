@@ -41,19 +41,21 @@ public class MissionService {
     return mission1;
   }
 
-  public List<Mission> getActivitiesForWeek(LocalDate weekStartDate, String directionId) {
+  public List<Mission> getActivitiesForWeek(LocalDate weekStartDate, String directionId,int page,int pageSize) {
     LocalDate weekEndDate = weekStartDate.plusDays(6);
-    return repository.findByDirectionAndDate(weekStartDate, weekEndDate);
+      Pageable pageable = PageRequest.of(page - 1, pageSize);
+    return repository.findByDirectionAndDate(weekStartDate, weekEndDate,pageable).getContent();
   }
 
-  public List<Mission> getActivitiesForMonth(int year, int month, String directionId) {
+  public List<Mission> getActivitiesForMonth(int year, int month, String directionId,int page,int pageSize) {
     LocalDate monthStartDate = LocalDate.of(year, month, 1);
     LocalDate monthEndDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth());
-    log.info(String.valueOf("direction : " + directionId));
-    return repository.findByDirectionAndDate(monthStartDate, monthEndDate);
+
+    Pageable pageable = PageRequest.of(page - 1, pageSize);
+    return repository.findByDirectionAndDate(monthStartDate, monthEndDate,pageable).getContent();
   }
 
-  public List<Mission> getActivitiesForQuarter(int year, int quarter, String directionId) {
+  public List<Mission> getActivitiesForQuarter(int year, int quarter, String directionId,int page,int pageSize) {
     LocalDate quarterStartDate;
     LocalDate quarterEndDate =
         switch (quarter) {
@@ -75,7 +77,7 @@ public class MissionService {
           }
           default -> throw new IllegalArgumentException("Invalid quarter: " + quarter);
         };
-
-    return repository.findByDirectionAndDate(quarterStartDate, quarterEndDate);
+      Pageable pageable = PageRequest.of(page - 1, pageSize);
+    return repository.findByDirectionAndDate(quarterStartDate, quarterEndDate,pageable).getContent();
   }
 }

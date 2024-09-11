@@ -21,7 +21,7 @@ public class ActivityMapper {
       return ActivityDTO.builder()
               .id(activity.getId())
               .description(activity.getDescription())
-              .dueDatetime(activity.getCreationDatetime())
+              .dueDatetime(activity.getDueDatetime())
               .observation(activity.getObservation())
               .prediction(activity.getPrediction())
               .task(
@@ -56,7 +56,7 @@ public class ActivityMapper {
               .description(activityDTO.getDescription())
               .prediction(activityDTO.getPrediction())
               .observation(activityDTO.getObservation())
-              .creationDatetime(activityDTO.getDueDatetime())
+              .dueDatetime(activityDTO.getDueDatetime())
               .build();
     }
 
