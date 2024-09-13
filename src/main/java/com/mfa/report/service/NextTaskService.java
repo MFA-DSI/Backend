@@ -3,6 +3,8 @@ package com.mfa.report.service;
 import com.mfa.report.model.NextTask;
 import com.mfa.report.repository.NextTaskRepository;
 import com.mfa.report.repository.exception.NotFoundException;
+
+import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,5 +30,9 @@ public class NextTaskService {
 
   public List<NextTask> addNextTaskList(List<NextTask> nextTaskList) {
     return nextTaskRepository.saveAll(nextTaskList);
+  }
+
+  public List<NextTask> getNextTaskPastDate(){
+    return nextTaskRepository.findByDueDatetimeBefore(LocalDate.now());
   }
 }

@@ -1,8 +1,7 @@
 package com.mfa.report.model;
 
-import java.util.List;
-
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,11 +25,14 @@ public class Mission {
 
   private String description;
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   @JoinColumn(name = "direction_id")
   private Direction direction;
 
-  @OneToMany(mappedBy = "mission",fetch = FetchType.LAZY)
-
+  @OneToMany(
+      mappedBy = "mission",
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
   private List<Activity> activity;
 }

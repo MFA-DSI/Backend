@@ -1,6 +1,8 @@
 package com.mfa.report.endpoint.rest.mapper;
 
 import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
+import com.mfa.report.endpoint.rest.model.DTO.MissionNameDTO;
+import com.mfa.report.endpoint.rest.model.RestEntity.MissionWithDirectionName;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
 import java.util.stream.Collectors;
@@ -33,8 +35,23 @@ public class MissionMapper {
             mission.getActivity().stream()
                 .map(activityMapper::toDomainList)
                 .collect(Collectors.toUnmodifiableList()))
-
         .build();
+  }
+
+  public MissionWithDirectionName toDomainDirection(Mission mission) {
+    return MissionWithDirectionName.builder()
+        .id(mission.getId())
+        .description(mission.getDescription())
+        .direction(directionMapper.toSignDomain(mission.getDirection()))
+        .activityList(
+            mission.getActivity().stream()
+                .map(activityMapper::toDomain)
+                .collect(Collectors.toList()))
+        .build();
+  }
+
+  public MissionNameDTO toDomainName(Mission mission) {
+    return MissionNameDTO.builder().description(mission.getDescription()).build();
   }
 
   public Mission toRest(MissionDTO mission, Direction direction) {

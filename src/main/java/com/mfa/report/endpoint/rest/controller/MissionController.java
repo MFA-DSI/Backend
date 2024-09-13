@@ -3,6 +3,7 @@ package com.mfa.report.endpoint.rest.controller;
 import com.mfa.report.endpoint.rest.mapper.ActivityMapper;
 import com.mfa.report.endpoint.rest.mapper.MissionMapper;
 import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
+import com.mfa.report.endpoint.rest.model.RestEntity.MissionWithDirectionName;
 import com.mfa.report.model.Activity;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
@@ -24,14 +25,8 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
@@ -57,8 +52,8 @@ public class MissionController {
   private final DirectionValidator directionValidator;
 
   @GetMapping("/mission")
-  public MissionDTO getMissionById(@RequestParam String id) {
-    return mapper.toDomain(service.getMissionById(id));
+  public MissionWithDirectionName getMissionById(@RequestParam String id) {
+    return mapper.toDomainDirection(service.getMissionById(id));
   }
 
   @GetMapping("/mission/direction")
@@ -72,7 +67,7 @@ public class MissionController {
         .map(mapper::toDomainList)
         .toList();
   }
-
+  
 
   @GetMapping("/mission/all")
   public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getAllMission(
@@ -81,16 +76,6 @@ public class MissionController {
   ){
     return  service.getAllMission(page,pageSize).stream().map(mapper::toDomainList).collect(Collectors.toUnmodifiableList());
   }
-
-  // public List<MissionDTO> updateMission(@RequestBody MissionDTO missionDTO , @RequestParam String
-  // directionId){
-  //     List<Activity> activity =
-  // missionDTO.getActivityDTOList().stream().map(activityMapper::toRest).toList();
-  //     activityValidator.accept(activity);
-  //    activityService.UpdateActivities(activity);
-  //      return new List<MissionDTO>() {
-  //    }
-  // }
 
   @PostMapping("/mission/create")
   @Transactional
@@ -120,6 +105,74 @@ public class MissionController {
     service.crUpdateMission(mission);
 
     return mapper.toDomain(mission);
+  }
+
+  @PutMapping("/mission/update")
+  @Transactional
+  public ResponseEntity<MissionDTO> updateMission(
+          @RequestParam(name = "missionId") String missionId,
+          @RequestParam(name = "userId") String userId,
+          @RequestBody MissionDTO missionDTO) {
+
+    // Fetch existing mission
+    Mission existingMission = service.getMissionById(missionId);
+    if (existingMission == null) {
+      return ResponseEntity.notFound().build();
+    }
+
+    // Fetch direction and validate user
+    Direction direction = directionService.getDirectionById(missionDTO.getDirection().getId());
+    directionValidator.acceptUser(direction, userId);
+
+    // Update the existing mission fields
+    existingMission.setDescription(missionDTO.getName());
+
+    // Update activities
+    List<Activity> updatedActivityList = missionDTO.getActivityList().stream()
+            .map(activityDTO -> {
+              Activity activity = activityMapper.toRest(activityDTO);
+              // Assuming AttachEntitiesToActivity method handles the association and persistence of tasks, nextTasks, etc.
+              return associatedEntitiesService.AttachEntitiesToActivity(
+                      activity,
+                      activityDTO.getTask(),
+                      activityDTO.getNextTask(),
+                      activityDTO.getPerfRealizationDTO());
+            })
+            .peek(activityService::crUpdateActivity)
+            .collect(Collectors.toList());
+
+
+    existingMission.setActivity(updatedActivityList);
+    
+    service.crUpdateMission(existingMission);
+
+    return ResponseEntity.ok(mapper.toDomain(existingMission));
+  }
+
+
+
+  @DeleteMapping("/mission/delete")
+  public ResponseEntity<String> deleteMission(
+          @RequestParam(name = "missionId") String missionId,
+          @RequestParam(name="userId") String userId
+  ) {
+
+
+    Mission existingMission = service.getMissionById(missionId);
+    if (existingMission == null) {
+      return ResponseEntity.notFound().build();
+    }
+
+    Direction associatedDirection = existingMission.getDirection();
+    if (associatedDirection == null) {
+      return ResponseEntity.badRequest().body(null);
+    }
+    directionValidator.acceptUser(associatedDirection, userId);
+
+
+    service.deleteMission(existingMission);
+
+    return ResponseEntity.ok("Mission deleted successfully");
   }
 
   @GetMapping("/mission/week")

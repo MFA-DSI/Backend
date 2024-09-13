@@ -45,6 +45,9 @@ public class MissionService {
 
     return mission1;
   }
+  public void deleteMission(Mission mission){
+      repository.delete(mission);
+  }
 
   public List<Mission> getActivitiesForWeek(LocalDate weekStartDate, String directionId,int page,int pageSize) {
     LocalDate weekEndDate = weekStartDate.plusDays(6);

@@ -32,7 +32,7 @@ public class Activity {
   private LocalDate dueDatetime;
   private String observation;
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   @NotBlank(message = "Activity mission is mandatory")
   @JoinColumn(name = "mission_id")
   private Mission mission;

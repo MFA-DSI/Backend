@@ -100,6 +100,8 @@ public class AssociatedEntitiesService {
     return activity;
   }
 
+
+
   @Async
   public void attachActivitiesToMission(List<Activity> activity, Mission mission) {
     activity.forEach(activity1 -> activity1.setMission(mission));

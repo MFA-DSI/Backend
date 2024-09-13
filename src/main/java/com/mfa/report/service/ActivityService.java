@@ -49,7 +49,7 @@ public class ActivityService {
     repository.saveAll(activityList);
   }
 
-  public void deleteActivities(Activity activity) {
+  public void deleteActivity(Activity activity) {
     repository.delete(activity);
   }
 
@@ -103,5 +103,9 @@ public class ActivityService {
 
     return activityDAO.findActivitiesByDateRangeAndDirection(
         directionId, quarterStartDate, quarterEndDate,page,pageSize);
+  }
+
+  public void DeleteActivities(Activity activity){
+    repository.delete(activity);
   }
 }
