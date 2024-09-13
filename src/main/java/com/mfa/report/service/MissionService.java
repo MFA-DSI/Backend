@@ -2,11 +2,9 @@ package com.mfa.report.service;
 
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
-import com.mfa.report.model.Activity;
 import com.mfa.report.model.Mission;
 import com.mfa.report.repository.MissionRepository;
 import com.mfa.report.repository.exception.NotFoundException;
-
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
@@ -29,9 +27,9 @@ public class MissionService {
         .orElseThrow(() -> new NotFoundException("mission with id." + id + " not found "));
   }
 
-  public List<Mission> getAllMission(int page,int pageSize){
-      Pageable pageable = PageRequest.of(page - 1, pageSize);
-      return repository.findAll(pageable).getContent();
+  public List<Mission> getAllMission(int page, int pageSize) {
+    Pageable pageable = PageRequest.of(page - 1, pageSize);
+    return repository.findAll(pageable).getContent();
   }
 
   public List<Mission> getMissionByDirectionId(String directionId, Integer page, Integer pageSize) {
@@ -45,25 +43,29 @@ public class MissionService {
 
     return mission1;
   }
-  public void deleteMission(Mission mission){
-      repository.delete(mission);
+
+  public void deleteMission(Mission mission) {
+    repository.delete(mission);
   }
 
-  public List<Mission> getActivitiesForWeek(LocalDate weekStartDate, String directionId,int page,int pageSize) {
+  public List<Mission> getActivitiesForWeek(
+      LocalDate weekStartDate, String directionId, int page, int pageSize) {
     LocalDate weekEndDate = weekStartDate.plusDays(6);
-      Pageable pageable = PageRequest.of(page - 1, pageSize);
-    return repository.findByDirectionAndDate(weekStartDate, weekEndDate,pageable).getContent();
+    Pageable pageable = PageRequest.of(page - 1, pageSize);
+    return repository.findByDirectionAndDate(weekStartDate, weekEndDate, pageable).getContent();
   }
 
-  public List<Mission> getActivitiesForMonth(int year, int month, String directionId,int page,int pageSize) {
+  public List<Mission> getActivitiesForMonth(
+      int year, int month, String directionId, int page, int pageSize) {
     LocalDate monthStartDate = LocalDate.of(year, month, 1);
     LocalDate monthEndDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth());
 
     Pageable pageable = PageRequest.of(page - 1, pageSize);
-    return repository.findByDirectionAndDate(monthStartDate, monthEndDate,pageable).getContent();
+    return repository.findByDirectionAndDate(monthStartDate, monthEndDate, pageable).getContent();
   }
 
-  public List<Mission> getActivitiesForQuarter(int year, int quarter, String directionId,int page,int pageSize) {
+  public List<Mission> getActivitiesForQuarter(
+      int year, int quarter, String directionId, int page, int pageSize) {
     LocalDate quarterStartDate;
     LocalDate quarterEndDate =
         switch (quarter) {
@@ -85,7 +87,9 @@ public class MissionService {
           }
           default -> throw new IllegalArgumentException("Invalid quarter: " + quarter);
         };
-      Pageable pageable = PageRequest.of(page - 1, pageSize);
-    return repository.findByDirectionAndDate(quarterStartDate, quarterEndDate,pageable).getContent();
+    Pageable pageable = PageRequest.of(page - 1, pageSize);
+    return repository
+        .findByDirectionAndDate(quarterStartDate, quarterEndDate, pageable)
+        .getContent();
   }
 }

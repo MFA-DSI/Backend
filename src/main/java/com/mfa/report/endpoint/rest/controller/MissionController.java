@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/direction/")
-@CrossOrigin(origins = "*", allowedHeaders = "*",originPatterns = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*", originPatterns = "*")
 @Slf4j
 public class MissionController {
 
@@ -62,19 +62,19 @@ public class MissionController {
       @RequestParam(name = "directionId") String directionId,
       @RequestParam(defaultValue = "1", name = "page") Integer page,
       @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
-  
+
     return service.getMissionByDirectionId(directionId, page, pageSize).stream()
         .map(mapper::toDomainList)
         .toList();
   }
-  
 
   @GetMapping("/mission/all")
   public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getAllMission(
-          @RequestParam(defaultValue = "1", name = "page") Integer page,
-          @RequestParam(defaultValue = "2", name = "page_size") Integer pageSize
-  ){
-    return  service.getAllMission(page,pageSize).stream().map(mapper::toDomainList).collect(Collectors.toUnmodifiableList());
+      @RequestParam(defaultValue = "1", name = "page") Integer page,
+      @RequestParam(defaultValue = "2", name = "page_size") Integer pageSize) {
+    return service.getAllMission(page, pageSize).stream()
+        .map(mapper::toDomainList)
+        .collect(Collectors.toUnmodifiableList());
   }
 
   @PostMapping("/mission/create")
@@ -110,9 +110,9 @@ public class MissionController {
   @PutMapping("/mission/update")
   @Transactional
   public ResponseEntity<MissionDTO> updateMission(
-          @RequestParam(name = "missionId") String missionId,
-          @RequestParam(name = "userId") String userId,
-          @RequestBody MissionDTO missionDTO) {
+      @RequestParam(name = "missionId") String missionId,
+      @RequestParam(name = "userId") String userId,
+      @RequestBody MissionDTO missionDTO) {
 
     // Fetch existing mission
     Mission existingMission = service.getMissionById(missionId);
@@ -128,35 +128,33 @@ public class MissionController {
     existingMission.setDescription(missionDTO.getName());
 
     // Update activities
-    List<Activity> updatedActivityList = missionDTO.getActivityList().stream()
-            .map(activityDTO -> {
-              Activity activity = activityMapper.toRest(activityDTO);
-              // Assuming AttachEntitiesToActivity method handles the association and persistence of tasks, nextTasks, etc.
-              return associatedEntitiesService.AttachEntitiesToActivity(
+    List<Activity> updatedActivityList =
+        missionDTO.getActivityList().stream()
+            .map(
+                activityDTO -> {
+                  Activity activity = activityMapper.toRest(activityDTO);
+                  // Assuming AttachEntitiesToActivity method handles the association and
+                  // persistence of tasks, nextTasks, etc.
+                  return associatedEntitiesService.AttachEntitiesToActivity(
                       activity,
                       activityDTO.getTask(),
                       activityDTO.getNextTask(),
                       activityDTO.getPerfRealizationDTO());
-            })
+                })
             .peek(activityService::crUpdateActivity)
             .collect(Collectors.toList());
 
-
     existingMission.setActivity(updatedActivityList);
-    
+
     service.crUpdateMission(existingMission);
 
     return ResponseEntity.ok(mapper.toDomain(existingMission));
   }
 
-
-
   @DeleteMapping("/mission/delete")
   public ResponseEntity<String> deleteMission(
-          @RequestParam(name = "missionId") String missionId,
-          @RequestParam(name="userId") String userId
-  ) {
-
+      @RequestParam(name = "missionId") String missionId,
+      @RequestParam(name = "userId") String userId) {
 
     Mission existingMission = service.getMissionById(missionId);
     if (existingMission == null) {
@@ -169,7 +167,6 @@ public class MissionController {
     }
     directionValidator.acceptUser(associatedDirection, userId);
 
-
     service.deleteMission(existingMission);
 
     return ResponseEntity.ok("Mission deleted successfully");
@@ -178,8 +175,11 @@ public class MissionController {
   @GetMapping("/mission/week")
   @Cacheable(value = "mission", key = "#directionId")
   public List<MissionDTO> getActivitiesForWeek(
-      @RequestParam LocalDate weekStartDate, @RequestParam String directionId,@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15") int pageSize) {
-    return service.getActivitiesForWeek(weekStartDate, directionId,page,pageSize).stream()
+      @RequestParam LocalDate weekStartDate,
+      @RequestParam String directionId,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "15") int pageSize) {
+    return service.getActivitiesForWeek(weekStartDate, directionId, page, pageSize).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
@@ -187,8 +187,12 @@ public class MissionController {
   @GetMapping("/mission/month")
   @Cacheable(value = "mission", key = "#directionId")
   public List<MissionDTO> getActivitiesForMonth(
-      @RequestParam int year, @RequestParam int month, @RequestParam String directionId,@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15") int pageSize) {
-    return service.getActivitiesForMonth(year, month, directionId,page,pageSize).stream()
+      @RequestParam int year,
+      @RequestParam int month,
+      @RequestParam String directionId,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "15") int pageSize) {
+    return service.getActivitiesForMonth(year, month, directionId, page, pageSize).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
@@ -196,8 +200,12 @@ public class MissionController {
   @GetMapping("/mission/quarter")
   @Cacheable(value = "mission", key = "#directionId")
   public List<MissionDTO> getActivitiesForQuarter(
-      @RequestParam int year, @RequestParam int quarter, @RequestParam String directionId,@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15") int pageSize) {
-    return service.getActivitiesForQuarter(year, quarter, directionId,page,pageSize).stream()
+      @RequestParam int year,
+      @RequestParam int quarter,
+      @RequestParam String directionId,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "15") int pageSize) {
+    return service.getActivitiesForQuarter(year, quarter, directionId, page, pageSize).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
