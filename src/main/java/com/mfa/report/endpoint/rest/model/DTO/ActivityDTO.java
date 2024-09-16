@@ -20,5 +20,5 @@ public class ActivityDTO {
   private List<TaskDTO> task;
   private List<NextTaskDTO> nextTask;
   private List<RecommendationDTO> recommendation;
-  private List<PerfRealizationDTO> perfRealizationDTO;
+  private List<PerfRealizationDTO> performanceRealization;
 }

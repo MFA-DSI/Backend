@@ -56,22 +56,34 @@ public class MissionController {
     return mapper.toDomainDirection(service.getMissionById(id));
   }
 
-  @GetMapping("/mission/direction")
+  @GetMapping("/mission/directions")
   @Cacheable(value = "mission", key = "#directionId")
   public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getAllMissionByDirectionId(
       @RequestParam(name = "directionId") String directionId,
       @RequestParam(defaultValue = "1", name = "page") Integer page,
-      @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
+      @RequestParam(defaultValue = "50", name = "page_size") Integer pageSize) {
 
     return service.getMissionByDirectionId(directionId, page, pageSize).stream()
         .map(mapper::toDomainList)
         .toList();
   }
 
+  @GetMapping("/mission/name")
+  @Cacheable(value = "mission", key = "#directionId")
+  public List<MissionWithDirectionName> getAllMissionNameByDirectionId(
+          @RequestParam(name = "directionId") String directionId,
+          @RequestParam(defaultValue = "1", name = "page") Integer page,
+          @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
+
+    return service.getMissionByDirectionId(directionId, page, pageSize).stream()
+            .map(mapper::toDomainDirection)
+            .toList();
+  }
+
   @GetMapping("/mission/all")
   public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getAllMission(
       @RequestParam(defaultValue = "1", name = "page") Integer page,
-      @RequestParam(defaultValue = "2", name = "page_size") Integer pageSize) {
+      @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
     return service.getAllMission(page, pageSize).stream()
         .map(mapper::toDomainList)
         .collect(Collectors.toUnmodifiableList());
@@ -96,7 +108,7 @@ public class MissionController {
                       activity,
                       activityDTO.getTask(),
                       activityDTO.getNextTask(),
-                      activityDTO.getPerfRealizationDTO());
+                      activityDTO.getPerformanceRealization());
                 })
             .peek(activityService::crUpdateActivity)
             .collect(Collectors.toList());
@@ -139,7 +151,7 @@ public class MissionController {
                       activity,
                       activityDTO.getTask(),
                       activityDTO.getNextTask(),
-                      activityDTO.getPerfRealizationDTO());
+                      activityDTO.getPerformanceRealization());
                 })
             .peek(activityService::crUpdateActivity)
             .collect(Collectors.toList());

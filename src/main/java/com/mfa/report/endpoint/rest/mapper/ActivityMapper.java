@@ -35,7 +35,7 @@ public class ActivityMapper {
                     .map(nextTaskMapper::toDomain)
                     .collect(Collectors.toList())
                 : null)
-        .perfRealizationDTO(
+        .performanceRealization(
             activity.getPerformanceRealization() != null
                 ? activity.getPerformanceRealization().stream()
                     .map(perfRealizationMapper::toDomain)

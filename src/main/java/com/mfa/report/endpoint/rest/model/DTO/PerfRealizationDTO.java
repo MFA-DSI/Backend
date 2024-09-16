@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class PerfRealizationDTO {
   private String id;
-  private Long performanceIndicators;
+  private Long indicators;
   private String realization;
   private String activityId;
 }

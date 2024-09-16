@@ -14,7 +14,7 @@ public class PerfRealizationMapper {
     return PerfRealizationDTO.builder()
         .id(performanceRealization.getId())
         .realization(performanceRealization.getRealization())
-        .performanceIndicators(performanceRealization.getKPI())
+        .indicators(performanceRealization.getKPI())
         .build();
   }
 
@@ -29,14 +29,14 @@ public class PerfRealizationMapper {
   public PerformanceRealization toRest(PerfRealizationDTO perfRealizationDTO) {
     return PerformanceRealization.builder()
         .realization(perfRealizationDTO.getRealization())
-        .KPI(perfRealizationDTO.getPerformanceIndicators())
+        .KPI(perfRealizationDTO.getIndicators())
         .build();
   }
 
   public PerformanceRealization toRestSave(PerfRealizationDTO performanceRealizationDTO, Activity activity){
     return PerformanceRealization.builder()
             .realization(performanceRealizationDTO.getRealization())
-            .KPI(performanceRealizationDTO.getPerformanceIndicators())
+            .KPI(performanceRealizationDTO.getIndicators())
             .activity(activity)
             .build();
   }
