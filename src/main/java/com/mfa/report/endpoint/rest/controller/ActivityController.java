@@ -1,5 +1,6 @@
 package com.mfa.report.endpoint.rest.controller;
 
+import com.itextpdf.text.DocumentException;
 import com.mfa.report.endpoint.rest.mapper.ActivityMapper;
 import com.mfa.report.endpoint.rest.model.DTO.ActivityDTO;
 import com.mfa.report.model.Activity;
@@ -9,9 +10,14 @@ import com.mfa.report.model.validator.DirectionValidator;
 import com.mfa.report.service.ActivityService;
 import com.mfa.report.service.DirectionService;
 import com.mfa.report.service.MissionService;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.mfa.report.service.PDFService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +33,7 @@ public class ActivityController {
 
   private final MissionService missionService;
   private final DirectionService directionService;
+  private final PDFService pdfService;
 
   private final DirectionValidator directionValidator;
 
@@ -100,5 +107,16 @@ public class ActivityController {
 
     activityService.deleteActivity(existingActivity);
     return ResponseEntity.ok("Activity deleted successfully"); // Return 204 No Content
+  }
+
+  @GetMapping("/activity/export/pdf")
+  public void exportPdf(@RequestParam List<String> ids, HttpServletResponse response) throws IOException, DocumentException {
+    List<Activity> activities = activityService.getActivitiesByIds(ids);
+    byte[] pdfBytes = pdfService.createActivityPdf(activities);
+
+    response.setContentType("application/pdf");
+    response.setHeader("Content-Disposition", "attachment; filename=activities.pdf");
+    response.getOutputStream().write(pdfBytes);
+    response.getOutputStream().flush();
   }
 }

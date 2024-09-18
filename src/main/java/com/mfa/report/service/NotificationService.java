@@ -49,6 +49,7 @@ public class NotificationService {
   @Scheduled(cron = "0 0 0 * * ?")
   public void sendNotificationForPastTasks() {
     List<NextTask> pastTasks = nextTaskService.getNextTaskPastDate();
+
     if (!pastTasks.isEmpty()) {
       List<User> users = userService.getAllUser();
       for (NextTask task : pastTasks) {

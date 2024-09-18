@@ -89,7 +89,7 @@ public class MissionController {
         .collect(Collectors.toUnmodifiableList());
   }
 
-  @PostMapping("/mission/create")
+  @PutMapping("/mission/create")
   @Transactional
   public MissionDTO createMission(
       @RequestParam(name = "directionId") String directionId,

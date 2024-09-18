@@ -1,10 +1,18 @@
 package com.mfa.report.service;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.mfa.report.endpoint.rest.model.DTO.ActivityDTO;
 import com.mfa.report.model.Activity;
 import com.mfa.report.repository.ActivityRepository;
 import com.mfa.report.repository.Dao.ActivityDAO;
 import com.mfa.report.repository.exception.NotFoundException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
@@ -113,4 +121,10 @@ public class ActivityService {
   public void DeleteActivities(Activity activity) {
     repository.delete(activity);
   }
+
+  public List<Activity> getActivitiesByIds(List<String>ids){
+    return repository.findAllById(ids);
+  }
+
+
 }
