@@ -7,21 +7,25 @@ import com.mfa.report.model.Activity;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
 import com.mfa.report.model.validator.DirectionValidator;
-import com.mfa.report.service.ActivityService;
-import com.mfa.report.service.DirectionService;
-import com.mfa.report.service.MissionService;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.mfa.report.service.PDFService;
+import com.mfa.report.service.*;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 @RequestMapping("/direction/")
 @CrossOrigin(origins = "*")
@@ -34,6 +38,8 @@ public class ActivityController {
   private final MissionService missionService;
   private final DirectionService directionService;
   private final PDFService pdfService;
+  private final DOCService docService;
+  private final ExcelService excelService;
 
   private final DirectionValidator directionValidator;
 
@@ -119,4 +125,31 @@ public class ActivityController {
     response.getOutputStream().write(pdfBytes);
     response.getOutputStream().flush();
   }
+
+  @GetMapping("/activity/export/doc")
+  public ResponseEntity<byte[]> exportDoc(@RequestParam List<String> ids, HttpServletResponse response) throws IOException {
+    List<Activity> activities = activityService.getActivitiesByIds(ids);
+    byte[] docBytes = docService.createActivityDoc(activities);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+    headers.setContentDispositionFormData("attachment", "document.docx");
+    headers.setContentLength(docBytes.length);
+
+    return ResponseEntity.ok()
+            .headers(headers)
+            .body(docBytes);
+}
+  @GetMapping("/activity/export/excel")
+  public void exportExcel(@RequestParam List<String> ids, HttpServletResponse response) throws IOException {
+    List<Activity> activities = activityService.getActivitiesByIds(ids);
+    byte[] excelBytes = excelService.createActivityExcel(activities);
+
+    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    response.setHeader("Content-Disposition", "attachment; filename=activities.xlsx");
+    response.setContentLength(excelBytes.length);
+    response.getOutputStream().write(excelBytes);
+    response.getOutputStream().flush();
+  }
+
 }
