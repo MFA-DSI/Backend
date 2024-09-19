@@ -10,20 +10,17 @@ import com.mfa.report.model.validator.DirectionValidator;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.mfa.report.service.*;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -40,8 +37,11 @@ public class ActivityController {
   private final PDFService pdfService;
   private final DOCService docService;
   private final ExcelService excelService;
+  private  final AssociatedEntitiesService associatedEntitiesService;
 
   private final DirectionValidator directionValidator;
+
+
 
   @GetMapping("/activities/week")
   @Cacheable(value = "activity", key = "#directionId+ ':' + #weekStartDate")
@@ -115,6 +115,31 @@ public class ActivityController {
     return ResponseEntity.ok("Activity deleted successfully"); // Return 204 No Content
   }
 
+
+  @PutMapping("/activity/update")
+  public ActivityDTO saveNewActivity(@RequestBody ActivityDTO activityDTO,@RequestParam String missionId) {
+
+    Activity newActivity = mapper.toRest(activityDTO);
+
+    Activity savedActivity = activityService.crUpdateActivity(newActivity);
+
+    Mission mission = missionService.getMissionById(missionId);
+    if (mission == null) {
+      throw new EntityNotFoundException("Mission not found with id: " + missionId);
+    }
+    List<Activity> activityList = mission.getActivity();
+    if (activityList == null) {
+      activityList = new ArrayList<>();
+    }
+    activityList.add(savedActivity);
+
+    associatedEntitiesService.AttachEntitiesToActivity(newActivity,activityDTO.getTask(),activityDTO.getNextTask(),activityDTO.getPerformanceRealization());
+
+    mission.setActivity(activityList);
+    missionService.crUpdateMission(mission);
+    return mapper.toDomain(savedActivity);
+  }
+
   @GetMapping("/activity/export/pdf")
   public void exportPdf(@RequestParam List<String> ids, HttpServletResponse response) throws IOException, DocumentException {
     List<Activity> activities = activityService.getActivitiesByIds(ids);
@@ -151,5 +176,8 @@ public class ActivityController {
     response.getOutputStream().write(excelBytes);
     response.getOutputStream().flush();
   }
+
+
+
 
 }

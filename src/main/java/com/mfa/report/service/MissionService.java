@@ -2,12 +2,17 @@ package com.mfa.report.service;
 
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
+import com.mfa.report.endpoint.rest.mapper.ActivityMapper;
+import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
+import com.mfa.report.model.Activity;
 import com.mfa.report.model.Mission;
 import com.mfa.report.repository.MissionRepository;
 import com.mfa.report.repository.exception.NotFoundException;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +25,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MissionService {
   private final MissionRepository repository;
+
+
 
   public Mission getMissionById(String id) {
     return repository
@@ -36,6 +43,8 @@ public class MissionService {
     Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(ASC, "description"));
     return repository.findAllByDirectionId(directionId, pageable);
   }
+
+
 
   public Mission crUpdateMission(Mission mission) {
     Mission mission1 = repository.save(mission);

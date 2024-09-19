@@ -124,6 +124,7 @@ public class MissionController {
   public ResponseEntity<MissionDTO> updateMission(
       @RequestParam(name = "missionId") String missionId,
       @RequestParam(name = "userId") String userId,
+      @RequestParam(name = "directionId") String directionId,
       @RequestBody MissionDTO missionDTO) {
 
     // Fetch existing mission
@@ -133,34 +134,14 @@ public class MissionController {
     }
 
     // Fetch direction and validate user
-    Direction direction = directionService.getDirectionById(missionDTO.getDirection().getId());
+    Direction direction = directionService.getDirectionById(directionId);
     directionValidator.acceptUser(direction, userId);
 
-    // Update the existing mission fields
     existingMission.setDescription(missionDTO.getName());
 
-    // Update activities
-    List<Activity> updatedActivityList =
-        missionDTO.getActivityList().stream()
-            .map(
-                activityDTO -> {
-                  Activity activity = activityMapper.toRest(activityDTO);
-                  // Assuming AttachEntitiesToActivity method handles the association and
-                  // persistence of tasks, nextTasks, etc.
-                  return associatedEntitiesService.AttachEntitiesToActivity(
-                      activity,
-                      activityDTO.getTask(),
-                      activityDTO.getNextTask(),
-                      activityDTO.getPerformanceRealization());
-                })
-            .peek(activityService::crUpdateActivity)
-            .collect(Collectors.toList());
+    Mission updatedMission = service.crUpdateMission(existingMission);
 
-    existingMission.setActivity(updatedActivityList);
-
-    service.crUpdateMission(existingMission);
-
-    return ResponseEntity.ok(mapper.toDomain(existingMission));
+    return ResponseEntity.ok(mapper.toDomain(updatedMission));
   }
 
   @DeleteMapping("/mission/delete")

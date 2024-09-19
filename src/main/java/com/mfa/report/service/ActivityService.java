@@ -5,7 +5,9 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.mfa.report.endpoint.rest.mapper.ActivityMapper;
 import com.mfa.report.endpoint.rest.model.DTO.ActivityDTO;
+import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
 import com.mfa.report.model.Activity;
 import com.mfa.report.repository.ActivityRepository;
 import com.mfa.report.repository.Dao.ActivityDAO;
@@ -16,6 +18,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,6 +33,8 @@ import org.springframework.stereotype.Service;
 public class ActivityService {
   private final ActivityRepository repository;
   private final ActivityDAO activityDAO;
+
+
 
   public String toString(Object object) {
     return "YourClass [attribute1=" + object;
