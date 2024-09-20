@@ -28,11 +28,16 @@ public class NextTaskService {
     return nextTaskRepository.save(nextTask);
   }
 
-  public List<NextTask> addNextTaskList(List<NextTask> nextTaskList) {
+  public List<NextTask> crUpdateNextTasks(List<NextTask> nextTaskList) {
     return nextTaskRepository.saveAll(nextTaskList);
   }
 
   public List<NextTask> getNextTaskPastDate(){
     return nextTaskRepository.findByDueDatetimeBefore(LocalDate.now());
+  }
+
+  public void deleteNextTask(String id){
+    NextTask nextTask = nextTaskRepository.findById(id).orElseThrow(() -> new NotFoundException("Next Task with id"+id+"not found"));
+    nextTaskRepository.delete(nextTask);
   }
 }

@@ -2,6 +2,7 @@ package com.mfa.report.service;
 
 import com.mfa.report.model.Task;
 import com.mfa.report.repository.TaskRepository;
+import com.mfa.report.repository.exception.NotFoundException;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,5 +22,13 @@ public class TaskService {
 
   public List<Task> crUpdateTasks(List<Task> taskList) {
     return taskRepository.saveAll(taskList);
+  }
+
+  public void deleteTask(String id) {
+    Task task =
+        taskRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Task with id" + id + "not found"));
+    taskRepository.delete(task);
   }
 }
