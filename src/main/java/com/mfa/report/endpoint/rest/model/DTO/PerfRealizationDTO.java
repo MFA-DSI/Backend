@@ -15,4 +15,5 @@ public class PerfRealizationDTO {
   private Long indicators;
   private String realization;
   private String activityId;
+  private String realizationType;
 }

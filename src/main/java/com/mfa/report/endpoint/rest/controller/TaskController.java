@@ -23,7 +23,7 @@ public class TaskController {
 
 
     @PutMapping("/task")
-    public List<TaskDTO> crUpdateTask(@RequestBody List<TaskDTO> taskDTO,String activityId){
+    public List<TaskDTO> crUpdateTask(@RequestBody List<TaskDTO> taskDTO,@RequestParam String activityId){
         Activity activity = activityService.getActivityById(activityId);
 
         List<Task> tasks = service.crUpdateTasks(taskDTO.stream().map(e -> mapper.ToRestSave(e, activity)).toList());

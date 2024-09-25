@@ -23,7 +23,7 @@ public class NextTaskController {
     private final NextTaskMapper mapper;
 
     @PutMapping("/nextTask")
-    public List<NextTask> crUpdate(@RequestBody List<NextTaskDTO> nextTaskDTO,String activityId){
+    public List<NextTask> crUpdate(@RequestBody List<NextTaskDTO> nextTaskDTO,@RequestParam  String activityId){
         Activity activity = activityService.getActivityById(activityId);
         return service.crUpdateNextTasks(nextTaskDTO.stream().map(e->mapper.toRestSave(e,activity)).toList());
     }

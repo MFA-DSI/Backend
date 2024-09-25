@@ -104,6 +104,7 @@ public class MissionController {
             .map(
                 activityDTO -> {
                   Activity activity = activityMapper.toRest(activityDTO);
+
                   return associatedEntitiesService.AttachEntitiesToActivity(
                       activity,
                       activityDTO.getTask(),
@@ -127,13 +128,11 @@ public class MissionController {
       @RequestParam(name = "directionId") String directionId,
       @RequestBody MissionDTO missionDTO) {
 
-    // Fetch existing mission
     Mission existingMission = service.getMissionById(missionId);
     if (existingMission == null) {
       return ResponseEntity.notFound().build();
     }
 
-    // Fetch direction and validate user
     Direction direction = directionService.getDirectionById(directionId);
     directionValidator.acceptUser(direction, userId);
 

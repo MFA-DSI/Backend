@@ -23,7 +23,7 @@ public class PerformanceRealizationController {
 
 
     @PutMapping("/performanceRealization")
-    public List<PerfRealizationDTO> crUpdatePerformanceRealization(@RequestBody List<PerfRealizationDTO> perfRealizationDTO,String activityId){
+    public List<PerfRealizationDTO> crUpdatePerformanceRealization(@RequestBody List<PerfRealizationDTO> perfRealizationDTO,@RequestParam String activityId){
         Activity activity = activityService.getActivityById(activityId);
         List<PerformanceRealization> performanceRealization = service.crUpdatePerformances(perfRealizationDTO.stream().map(e-> mapper.toRestSave(e,activity)).toList());
         return performanceRealization.stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
@@ -31,7 +31,7 @@ public class PerformanceRealizationController {
 
 
     @DeleteMapping("/performanceRealization/delete")
-    public ResponseEntity<String> deletePerformanceRealization(String id){
+    public ResponseEntity<String> deletePerformanceRealization(@RequestParam(name = "performanceRealizationId") String id){
         service.deletePerformanceRealization(id);
         return ResponseEntity.ok("Performance Realization deleted successfully");
     }

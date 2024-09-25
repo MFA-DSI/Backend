@@ -29,6 +29,7 @@ public class NextTaskMapper {
 
   public NextTask toRestSave(NextTaskDTO nextTask, Activity activity) {
     return NextTask.builder()
+        .id(nextTask.getId())
         .description(nextTask.getDescription())
         .dueDatetime(nextTask.getDueDatetime())
         .activity(activity)

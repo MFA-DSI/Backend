@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import com.mfa.report.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
@@ -71,7 +72,7 @@ public class ActivityController {
   }
 
   @GetMapping("/activities/all")
-  public List<ActivityDTO> getAllActivities(@RequestParam(defaultValue = "1")  int page, @RequestParam(defaultValue = "15") int pageSize) {
+  public List<ActivityDTO> getAllActivities(@RequestParam(defaultValue = "1")  int page, @RequestParam(defaultValue = "15",name = "page_size") int pageSize) {
     return activityService.getActivities(page,pageSize).getContent().stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
@@ -79,13 +80,13 @@ public class ActivityController {
 
 
   @GetMapping("/activity/all")
-  public List<ActivityDTO> getAllActivitiesByDirectionId(@RequestParam String directionId,@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15") int pageSize){
+  public List<ActivityDTO> getAllActivitiesByDirectionId(@RequestParam String directionId,@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15",name = "page_size") int pageSize){
     return activityService.getActivitiesByDirectionId(directionId,page,pageSize).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
   }
 
   @GetMapping("/activity")
-  public ActivityDTO getActivityById(@RequestParam String activityId){
-    return mapper.toDomain(activityService.getActivityById(activityId));
+  public ActivityDTO getActivityById(@RequestParam String id){
+    return mapper.toDomain(activityService.getActivityById(id));
   }
   @DeleteMapping("/activity/delete")
   public ResponseEntity<String> deleteActivity(
@@ -117,26 +118,16 @@ public class ActivityController {
 
 
   @PutMapping("/activity/update")
-  public ActivityDTO saveNewActivity(@RequestBody ActivityDTO activityDTO,@RequestParam String missionId) {
+  @Transactional
+  public ActivityDTO saveNewActivity(@RequestBody ActivityDTO activityDTO) {
 
-    Activity newActivity = mapper.toRest(activityDTO);
+    Activity activity = activityService.getActivityById(activityDTO.getId());
+    activity.setDueDatetime(activityDTO.getDueDatetime());
+    activity.setPrediction(activityDTO.getPrediction());
+    activity.setObservation(activityDTO.getObservation());
+    activity.setDescription(activityDTO.getDescription());
+    Activity savedActivity = activityService.crUpdateActivity(activity);
 
-    Activity savedActivity = activityService.crUpdateActivity(newActivity);
-
-    Mission mission = missionService.getMissionById(missionId);
-    if (mission == null) {
-      throw new EntityNotFoundException("Mission not found with id: " + missionId);
-    }
-    List<Activity> activityList = mission.getActivity();
-    if (activityList == null) {
-      activityList = new ArrayList<>();
-    }
-    activityList.add(savedActivity);
-
-    associatedEntitiesService.AttachEntitiesToActivity(newActivity,activityDTO.getTask(),activityDTO.getNextTask(),activityDTO.getPerformanceRealization());
-
-    mission.setActivity(activityList);
-    missionService.crUpdateMission(mission);
     return mapper.toDomain(savedActivity);
   }
 

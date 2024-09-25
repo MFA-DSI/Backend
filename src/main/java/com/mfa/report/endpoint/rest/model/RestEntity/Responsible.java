@@ -1,6 +1,5 @@
 package com.mfa.report.endpoint.rest.model.RestEntity;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class PerformanceRealization {
-    private  String id;
-    private Long indicators;
-    private String realization;
-    private String realizationType;
+public class Responsible {
+    private String id;
+    private String userName;
+    private String grade;
+    private String directionName;
+
 }

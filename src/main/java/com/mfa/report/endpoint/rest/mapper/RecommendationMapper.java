@@ -5,16 +5,16 @@ import com.mfa.report.model.Activity;
 import com.mfa.report.model.Recommendation;
 import com.mfa.report.service.ActivityService;
 import com.mfa.report.service.UserService;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
 
 @Component
 @AllArgsConstructor
 public class RecommendationMapper {
   private final ActivityService activityService;
   private final UserService userService;
+  private final UserMapper userMapper;
 
   public RecommendationDTO toDomain(Recommendation recommendation) {
     return RecommendationDTO.builder()
@@ -24,6 +24,16 @@ public class RecommendationMapper {
         .committerId(recommendation.getResponsible().getId())
         .commitDatetime(recommendation.getCreationDatetime())
         .activityId(recommendation.getActivity().getId())
+        .build();
+  }
+
+  public com.mfa.report.endpoint.rest.model.RestEntity.Recommendation toDomainResponse(
+      Recommendation recommendation) {
+    return com.mfa.report.endpoint.rest.model.RestEntity.Recommendation.builder()
+        .id(recommendation.getId())
+        .committer(userMapper.ToDomainResponsible(recommendation.getResponsible()))
+        .commitDatetime(recommendation.getCreationDatetime())
+        .description(recommendation.getDescription())
         .build();
   }
 

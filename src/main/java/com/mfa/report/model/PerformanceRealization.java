@@ -1,11 +1,7 @@
 package com.mfa.report.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import com.mfa.report.model.enumerated.RealizationType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,6 +25,9 @@ public class PerformanceRealization {
 
   private Long KPI;
   private String realization;
+
+  @Enumerated(EnumType.STRING)
+  private RealizationType realizationType;
 
   @OneToOne private Activity activity;
 }

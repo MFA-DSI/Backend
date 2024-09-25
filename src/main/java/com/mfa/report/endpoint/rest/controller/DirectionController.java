@@ -33,6 +33,12 @@ public class DirectionController {
     return mapper.toDomain(direction);
   }
 
+  @GetMapping("/name/{id}")
+  public DirectionNameDTO getDirectionNameById(@PathVariable String id) {
+    Direction direction = service.getDirectionById(id);
+    return mapper.toSignDomain(direction);
+  }
+
   @GetMapping("/all")
   public List<DirectionNameDTO> getAllDirection() {
     return service.getAllDirection().stream()

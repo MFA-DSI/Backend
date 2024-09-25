@@ -89,6 +89,7 @@ public class AssociatedEntitiesService {
       perfRealizationDTO.forEach(
               (perfRealizationDTO1 -> {
                 perfRealizationDTO1.setActivityId(activity.getId());
+                log.info(String.valueOf(perfRealizationDTO1));
                 savePerformanceRealizationAsync(perfRealizationMapper.toRestSave(perfRealizationDTO1,activity));
               }));
       activity.setPerformanceRealization(
@@ -102,8 +103,8 @@ public class AssociatedEntitiesService {
 
 
 
-  @Async
-  public void attachActivitiesToMission(List<Activity> activity, Mission mission) {
-    activity.forEach(activity1 -> activity1.setMission(mission));
-  }
+ // @Async
+ // public void attachActivitiesToMission(List<Activity> activity, Mission mission) {
+ //   activity.forEach(activity1 -> activity1.setMission(mission));
+ // }
 }

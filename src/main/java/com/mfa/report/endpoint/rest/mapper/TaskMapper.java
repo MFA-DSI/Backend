@@ -29,6 +29,7 @@ public class TaskMapper {
 
   public Task ToRestSave(TaskDTO task, Activity activity) {
     return Task.builder()
+        .id(task.getId())
         .description(task.getDescription())
         .dueDatetime(task.getDueDatetime())
         .activity(activity)
