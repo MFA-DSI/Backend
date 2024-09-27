@@ -29,10 +29,6 @@ public class ActivityDAO {
 // even if there are no matching records in the joined tables. If no match is found, the joined columns will be null.
 
     Join<Activity, Mission> mission = activity.join("mission", JoinType.LEFT);
-    Join<Activity, Task> task = activity.join("taskList", JoinType.LEFT);
-    Join<Activity, NextTask> nextTask = activity.join("nexTaskList", JoinType.LEFT);
-    Join<Activity, Recommendation> recommendation = activity.join("recommendations", JoinType.LEFT);
-    Join<Activity, PerformanceRealization> performanceRealization = activity.join("performanceRealization", JoinType.LEFT);
 
     List<Predicate> predicates = new ArrayList<>();
 
