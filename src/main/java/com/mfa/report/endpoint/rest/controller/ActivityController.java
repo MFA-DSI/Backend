@@ -79,7 +79,7 @@ public class ActivityController {
   }
 
 
-  @GetMapping("/activity/all")
+  @GetMapping("/activity/direction")
   public List<ActivityDTO> getAllActivitiesByDirectionId(@RequestParam String directionId,@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15",name = "page_size") int pageSize){
     return activityService.getActivitiesByDirectionId(directionId,page,pageSize).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
   }
