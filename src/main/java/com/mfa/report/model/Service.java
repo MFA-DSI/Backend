@@ -33,6 +33,6 @@ public class Service {
   @JoinColumn(name = "direction_id")
   private Direction direction;
 
-  @OneToMany(mappedBy = "service")
+  @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Mission> mission;
 }

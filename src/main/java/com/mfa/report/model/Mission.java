@@ -2,6 +2,8 @@ package com.mfa.report.model;
 
 import jakarta.persistence.*;
 import java.util.List;
+
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,7 +30,10 @@ public class Mission {
   @ManyToOne
   @JoinColumn(name = "direction_id")
   private Direction direction;
-
+@ManyToOne
+@NotBlank(message = "service mission is mandatory")
+@JoinColumn(name = "service_id")
+  private Service service;
   @OneToMany(
       mappedBy = "mission",
       fetch = FetchType.LAZY,
