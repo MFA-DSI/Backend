@@ -7,17 +7,11 @@ import com.mfa.report.endpoint.rest.model.RestEntity.MissionWithDirectionName;
 import com.mfa.report.model.Activity;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
+import com.mfa.report.model.Service;
 import com.mfa.report.model.validator.ActivityValidator;
 import com.mfa.report.model.validator.DirectionValidator;
 import com.mfa.report.model.validator.MissionValidator;
-import com.mfa.report.service.ActivityService;
-import com.mfa.report.service.AssociatedEntitiesService;
-import com.mfa.report.service.DirectionService;
-import com.mfa.report.service.MissionService;
-import com.mfa.report.service.NextTaskService;
-import com.mfa.report.service.PerformanceRealizationService;
-import com.mfa.report.service.RecommendationService;
-import com.mfa.report.service.TaskService;
+import com.mfa.report.service.*;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
@@ -43,6 +37,7 @@ public class MissionController {
   private final PerformanceRealizationService performanceRealization;
   private final AssociatedEntitiesService associatedEntitiesService;
   private final DirectionService directionService;
+  private  final ServiceService serviceService;
 
   private final MissionMapper mapper;
   private final ActivityMapper activityMapper;
@@ -97,7 +92,9 @@ public class MissionController {
       @RequestBody MissionDTO missionDTO) {
     Direction direction = directionService.getDirectionById(directionId);
     directionValidator.acceptUser(direction, userId);
-    Mission mission = mapper.toRest(missionDTO, direction);
+
+    Service service1 = serviceService.getServiceById(missionDTO.getServiceId());
+    Mission mission = mapper.toRest(missionDTO, direction,service1);
 
     List<Activity> activityList =
         missionDTO.getActivityList().stream()

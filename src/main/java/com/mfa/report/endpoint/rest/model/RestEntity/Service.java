@@ -1,6 +1,6 @@
-package com.mfa.report.endpoint.rest.model.DTO;
+package com.mfa.report.endpoint.rest.model.RestEntity;
 
-import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,10 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class MissionDTO {
+public class Service {
     private String id;
     private String name;
-    private DirectionDTO direction;
-    private String serviceId;
-    private List<ActivityDTO> activityList;
 }

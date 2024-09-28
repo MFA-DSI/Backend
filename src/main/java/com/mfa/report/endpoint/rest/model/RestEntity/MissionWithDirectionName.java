@@ -19,5 +19,6 @@ public class MissionWithDirectionName {
     String id;
     String description;
     DirectionNameDTO direction;
+    Service service;
     List<ActivityDTO> activityList;
 }

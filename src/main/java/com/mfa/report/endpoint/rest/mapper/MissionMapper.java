@@ -5,6 +5,7 @@ import com.mfa.report.endpoint.rest.model.DTO.MissionNameDTO;
 import com.mfa.report.endpoint.rest.model.RestEntity.MissionWithDirectionName;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
+import com.mfa.report.model.Service;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class MissionMapper {
   private final DirectionMapper directionMapper;
   private final ActivityMapper activityMapper;
+  private final ServiceMapper serviceMapper;
 
   public MissionDTO toDomain(Mission mission) {
     return MissionDTO.builder()
@@ -31,6 +33,7 @@ public class MissionMapper {
     return com.mfa.report.endpoint.rest.model.RestEntity.Mission.builder()
         .id(mission.getId())
         .description(mission.getDescription())
+        .service(serviceMapper.toRest(mission.getService()))
         .activityList(
             mission.getActivity().stream()
                 .map(activityMapper::toDomainList)
@@ -42,6 +45,7 @@ public class MissionMapper {
     return MissionWithDirectionName.builder()
         .id(mission.getId())
         .description(mission.getDescription())
+        .service(serviceMapper.toRest(mission.getService()))
         .direction(directionMapper.toSignDomain(mission.getDirection()))
         .activityList(
             mission.getActivity().stream()
@@ -54,7 +58,11 @@ public class MissionMapper {
     return MissionNameDTO.builder().description(mission.getDescription()).build();
   }
 
-  public Mission toRest(MissionDTO mission, Direction direction) {
-    return Mission.builder().description(mission.getName()).direction(direction).build();
+  public Mission toRest(MissionDTO mission, Direction direction, Service service) {
+    return Mission.builder()
+        .description(mission.getName())
+        .direction(direction)
+        .service(service)
+        .build();
   }
 }

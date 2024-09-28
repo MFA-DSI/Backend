@@ -14,18 +14,26 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class ServiceMapper {
 
-  public ServiceDTO toDomain(Service service) {
-    return ServiceDTO.builder()
+  public com.mfa.report.endpoint.rest.model.RestEntity.Service toDomain(Service service) {
+    return com.mfa.report.endpoint.rest.model.RestEntity.Service.builder()
         .id(service.getId())
         .name(service.getName())
         .build();
   }
 
 
-  public Service toRest(ServiceDTO serviceDTO){
+  public Service toRest(ServiceDTO serviceDTO,Direction direction){
     return  Service.builder()
             .id(serviceDTO.getId())
             .name(serviceDTO.getName())
+            .direction(direction)
+            .build();
+  }
+
+  public com.mfa.report.endpoint.rest.model.RestEntity.Service toRest(Service service){
+    return  com.mfa.report.endpoint.rest.model.RestEntity.Service.builder()
+            .id(service.getId())
+            .name(service.getName())
             .build();
   }
 

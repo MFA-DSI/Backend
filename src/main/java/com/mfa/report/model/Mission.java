@@ -30,10 +30,12 @@ public class Mission {
   @ManyToOne
   @JoinColumn(name = "direction_id")
   private Direction direction;
-@ManyToOne
-@NotBlank(message = "service mission is mandatory")
-@JoinColumn(name = "service_id")
+
+  @ManyToOne
+  @NotBlank(message = "service mission is mandatory")
+  @JoinColumn(name = "service_id")
   private Service service;
+
   @OneToMany(
       mappedBy = "mission",
       fetch = FetchType.LAZY,
