@@ -22,11 +22,25 @@ public class MissionMapper {
         .id(mission.getId())
         .name(mission.getDescription())
         .direction(directionMapper.toDomain(mission.getDirection()))
+        .serviceId(mission.getService().getId())
         .activityList(
             mission.getActivity().stream()
                 .map(activityMapper::toDomain)
                 .collect(Collectors.toList()))
         .build();
+  }
+
+
+  public com.mfa.report.endpoint.rest.model.RestEntity.Mission toDomainWithService(Mission mission) {
+    return com.mfa.report.endpoint.rest.model.RestEntity.Mission.builder()
+            .id(mission.getId())
+            .description(mission.getDescription())
+            .service(serviceMapper.toDomain(mission.getService()))
+            .activityList(
+                    mission.getActivity().stream()
+                            .map(activityMapper::toDomainList)
+                            .collect(Collectors.toList()))
+            .build();
   }
 
   public com.mfa.report.endpoint.rest.model.RestEntity.Mission toDomainList(Mission mission) {

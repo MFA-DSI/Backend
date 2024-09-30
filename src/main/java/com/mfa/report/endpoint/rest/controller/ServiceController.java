@@ -35,15 +35,14 @@ public class ServiceController {
 
 
     @GetMapping("/service/all")
-    public List<Service> getAllDirectionService(@RequestParam String id){
-        return service.getAllServiceByDirectionId(id).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
+    public List<Service> getAllDirectionService(@RequestParam String directionId){
+        return service.getAllServiceByDirectionId(directionId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
     }
 
     @PutMapping("/service/update")
     public Service createService(@RequestParam String directionId, @RequestParam String userId, @RequestBody ServiceDTO serviceDTO){
         Direction direction1 = directionService.getDirectionById(directionId);
         directionValidator.acceptUser(direction1,userId);
-
         Service service1;
 
         if(serviceDTO.getId()!= null){

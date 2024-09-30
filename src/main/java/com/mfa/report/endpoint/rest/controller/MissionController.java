@@ -52,7 +52,6 @@ public class MissionController {
   }
 
   @GetMapping("/mission/directions")
-  @Cacheable(value = "mission", key = "#directionId")
   public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getAllMissionByDirectionId(
       @RequestParam(name = "directionId") String directionId,
       @RequestParam(defaultValue = "1", name = "page") Integer page,
@@ -86,7 +85,7 @@ public class MissionController {
 
   @PutMapping("/mission/create")
   @Transactional
-  public MissionDTO createMission(
+  public com.mfa.report.endpoint.rest.model.RestEntity.Mission createMission(
       @RequestParam(name = "directionId") String directionId,
       @RequestParam(name = "userId") String userId,
       @RequestBody MissionDTO missionDTO) {
@@ -114,7 +113,7 @@ public class MissionController {
     mission.setActivity(activityList);
     service.crUpdateMission(mission);
 
-    return mapper.toDomain(mission);
+    return mapper.toDomainWithService(mission);
   }
 
   @PutMapping("/mission/update")
