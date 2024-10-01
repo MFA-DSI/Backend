@@ -10,12 +10,10 @@ import com.mfa.report.model.validator.DirectionValidator;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.mfa.report.service.*;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -35,7 +33,7 @@ public class ActivityController {
 
   private final MissionService missionService;
   private final DirectionService directionService;
-  private final PDFService pdfService;
+  private final FileService fileService;
   private final DOCService docService;
   private final ExcelService excelService;
   private  final AssociatedEntitiesService associatedEntitiesService;
@@ -134,7 +132,7 @@ public class ActivityController {
   @GetMapping("/activity/export/pdf")
   public void exportPdf(@RequestParam List<String> ids, HttpServletResponse response) throws IOException, DocumentException {
     List<Activity> activities = activityService.getActivitiesByIds(ids);
-    byte[] pdfBytes = pdfService.createActivityPdf(activities);
+    byte[] pdfBytes = fileService.createActivityPdf(activities);
 
     response.setContentType("application/pdf");
     response.setHeader("Content-Disposition", "attachment; filename=activities.pdf");

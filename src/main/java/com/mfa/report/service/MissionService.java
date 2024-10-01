@@ -34,6 +34,10 @@ public class MissionService {
         .orElseThrow(() -> new NotFoundException("mission with id." + id + " not found "));
   }
 
+  public List<Mission> findMissionsByIds(List<String> missionIds) {
+    return repository.findByIdIn(missionIds);
+  }
+
   public List<Mission> getAllMission(int page, int pageSize) {
     Pageable pageable = PageRequest.of(page - 1, pageSize);
     return repository.findAll(pageable).getContent();

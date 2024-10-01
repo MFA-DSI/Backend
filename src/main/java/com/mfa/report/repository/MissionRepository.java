@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @EnableJpaRepositories
 public interface MissionRepository extends JpaRepository<Mission, String> {
+  List<Mission> findByIdIn(List<String> ids);
   
   @Query("SELECT m FROM Mission m WHERE m.direction.id = :directionId")
   List<Mission> findAllByDirectionId(@Param("directionId") String directionId,Pageable pageable);
