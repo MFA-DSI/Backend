@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.mfa.report.service.utils.FontUtils;
 import lombok.AllArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class FileService {
   private final MissionService missionService;
+  private final FontUtils fontUtils;
+
   public byte[] createActivityPdf(List<Activity> activities) throws DocumentException, IOException {
     Document document = new Document();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -70,11 +73,11 @@ public class FileService {
       PdfWriter.getInstance(document, byteArrayOutputStream);
       document.open();
 
-      // Add Title
-      Paragraph title = new Paragraph(
+
+      Paragraph title =
+          new Paragraph(
               "COMPTE RENDU TRIMESTRIEL Mois de JUILLET",
-              FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16)
-      );
+              FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16));
       title.setAlignment(Element.ALIGN_CENTER);
       document.add(title);
       document.add(Chunk.NEWLINE);
@@ -85,62 +88,73 @@ public class FileService {
 
       // Add table headers
       addTableHeader(
-              table,
-              new String[]{
-                      "MISSIONS",
-                      "ACTIVITES",
-                      "PREVISIONS",
-                      "INDICATEUR DE PERFORMANCE",
-                      "REALISATION",
-                      "RECOMMENDATION",
-                      "OBSERVATION"
-              }
-      );
+          table,
+          new String[] {
+            "MISSIONS",
+            "ACTIVITES",
+            "PREVISIONS",
+            "INDICATEUR DE PERFORMANCE",
+            "REALISATION",
+            "RECOMMENDATION",
+            "OBSERVATION"
+          });
 
-      // Iterate over missions and add rows
       for (com.mfa.report.model.Mission mission : missions) {
-        // Add mission description only for the first activity of that mission
+
         String missionDescription = mission.getDescription();
         boolean isFirstActivity = true;
 
-        // Iterate over activities for the current mission
+
         for (Activity activity : mission.getActivity()) {
           // If it's the first activity, add the mission description
           if (isFirstActivity) {
-            table.addCell(missionDescription);
-            isFirstActivity = false; // Set to false after first addition
-          } else {
-            table.addCell(""); // Empty cell for alignment
+            PdfPCell missionCell =
+                new PdfPCell(new Phrase(missionDescription, fontUtils.toMissionTitle()));
+            missionCell.setRowspan(mission.getActivity().size());
+            missionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            missionCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+
+            table.addCell(missionCell);
+            isFirstActivity = false;
           }
 
           // Add activity details
           table.addCell(activity.getDescription());
           table.addCell(activity.getPrediction());
-          if (!activity.getPerformanceRealization().isEmpty()) {
-            PdfPCell performanceCell = new PdfPCell();
-            Paragraph performanceContent = new Paragraph();
-            for (PerformanceRealization realization : activity.getPerformanceRealization()) {
-              performanceContent.add(String.valueOf(realization.getKPI()));
-            }
-            performanceCell.addElement(performanceContent);
-            table.addCell(performanceCell);
-          } else {
-            table.addCell(""); // Empty cell for no realizations
-          }
+
           // Performance Indicators and Realizations
           if (!activity.getPerformanceRealization().isEmpty()) {
-            PdfPCell performanceCell = new PdfPCell();
-            Paragraph performanceContent = new Paragraph();
+            PdfPTable realizationTable = new PdfPTable(1);
+
+            realizationTable.setWidthPercentage(100);
+
             for (PerformanceRealization realization : activity.getPerformanceRealization()) {
-              performanceContent.add(realization.getRealization());
+              realizationTable.addCell(realization.getRealization());
             }
-            performanceCell.addElement(performanceContent);
-            table.addCell(performanceCell);
+            PdfPCell realizationCell = new PdfPCell();
+
+            realizationCell.addElement(realizationTable);
+            realizationCell.setColspan(1); // Spécifie la largeur de la cellule
+            table.addCell(realizationCell);
           } else {
-            table.addCell(""); // Empty cell for no realizations
+            table.addCell(""); // Empty cell for no realization
           }
 
-          // Recommendations
+          if (!activity.getPerformanceRealization().isEmpty()) {
+            PdfPTable realizationTable = new PdfPTable(1); // 1 colonne
+            realizationTable.setWidthPercentage(100);
+
+            for (PerformanceRealization realization : activity.getPerformanceRealization()) {
+              realizationTable.addCell(String.valueOf(realization.getKPI()));
+            }
+            PdfPCell realizationCell = new PdfPCell();
+            realizationCell.addElement(realizationTable);
+            realizationCell.setColspan(1); // Spécifie la largeur de la cellule
+            table.addCell(realizationCell);
+          } else {
+            table.addCell(""); // Empty cell for no realization
+          }
+
           if (!activity.getRecommendations().isEmpty()) {
             PdfPCell recommendationCell = new PdfPCell();
             Paragraph recommendationContent = new Paragraph();
@@ -150,14 +164,13 @@ public class FileService {
             recommendationCell.addElement(recommendationContent);
             table.addCell(recommendationCell);
           } else {
-            table.addCell("Aucune recommandation"); // Default message for no recommendations
+            table.addCell("Aucune recommandation");
           }
 
           // Observations
           table.addCell(activity.getObservation());
         }
 
-        // Add a new line after each mission
         table.addCell("");
         table.addCell("");
         table.addCell("");
@@ -177,10 +190,11 @@ public class FileService {
     }
     return null;
   }
+
   private void addTableHeader(PdfPTable table, String[] headers) {
     for (String header : headers) {
       PdfPCell headerCell = new PdfPCell(new Phrase(header));
-      headerCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+      headerCell.setBackgroundColor(BaseColor.GREEN.darker());
       headerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
       table.addCell(headerCell);
     }
@@ -193,7 +207,15 @@ public class FileService {
 
     // Create header row
     Row headerRow = sheet.createRow(0); // Ligne d'entête au tout début
-    String[] headers = {"MISSIONS", "ACTIVITES", "PREVISIONS", "INDICATEUR DE PERFORMANCE", "REALISATION", "RECOMMANDATION", "OBSERVATION"};
+    String[] headers = {
+      "MISSIONS",
+      "ACTIVITES",
+      "PREVISIONS",
+      "INDICATEUR DE PERFORMANCE",
+      "REALISATION",
+      "RECOMMANDATION",
+      "OBSERVATION"
+    };
 
     for (int i = 0; i < headers.length; i++) {
       Cell cell = headerRow.createCell(i);
@@ -224,38 +246,58 @@ public class FileService {
           dataRow.createCell(0).setCellValue(missionDescription);
           isFirstActivity = false;
         } else {
-          dataRow.createCell(0).setCellValue(""); // Cellule vide pour les autres lignes de la même mission
+          dataRow
+              .createCell(0)
+              .setCellValue(""); // Cellule vide pour les autres lignes de la même mission
         }
 
-        dataRow.createCell(1).setCellValue(activity.getDescription() != null ? activity.getDescription() : "");
-        dataRow.createCell(2).setCellValue(activity.getPrediction() != null ? activity.getPrediction() : "");
+        dataRow
+            .createCell(1)
+            .setCellValue(activity.getDescription() != null ? activity.getDescription() : "");
+        dataRow
+            .createCell(2)
+            .setCellValue(activity.getPrediction() != null ? activity.getPrediction() : "");
 
         // Concaténer les indicateurs de performance (KPI, réalisation, type)
-        String performanceIndicators = activity.getPerformanceRealization().stream()
-                .map(perf -> String.format("KPI: %d, Réalisation: %s, Type: %s",
-                        perf.getKPI(), perf.getRealization(), perf.getRealizationType()))
+        String performanceIndicators =
+            activity.getPerformanceRealization().stream()
+                .map(
+                    perf ->
+                        String.format(
+                            "KPI: %d, Réalisation: %s, Type: %s",
+                            perf.getKPI(), perf.getRealization(), perf.getRealizationType()))
                 .collect(Collectors.joining("; ")); // Séparé par "; " pour chaque indicateur
 
         dataRow.createCell(3).setCellValue(performanceIndicators);
 
         // Concaténer les réalisations
-        String realizations = activity.getPerformanceRealization().stream()
+        String realizations =
+            activity.getPerformanceRealization().stream()
                 .map(PerformanceRealization::getRealization)
                 .collect(Collectors.joining("; ")); // Séparer par "; " pour chaque réalisation
 
         dataRow.createCell(4).setCellValue(realizations);
 
         // Concaténer les recommandations
-        String recommendations = activity.getRecommendations().stream()
-                .map(rec -> String.format("Description: %s, Date: %s, Approuvée: %s",
-                        rec.getDescription(),
-                        rec.getCreationDatetime() != null ? rec.getCreationDatetime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) : "N/A",
-                        rec.isApproved() ? "Oui" : "Non"))
+        String recommendations =
+            activity.getRecommendations().stream()
+                .map(
+                    rec ->
+                        String.format(
+                            "Description: %s, Date: %s, Approuvée: %s",
+                            rec.getDescription(),
+                            rec.getCreationDatetime() != null
+                                ? rec.getCreationDatetime()
+                                    .format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                                : "N/A",
+                            rec.isApproved() ? "Oui" : "Non"))
                 .collect(Collectors.joining("; ")); // Séparé par "; " pour chaque recommandation
 
         dataRow.createCell(5).setCellValue(recommendations);
 
-        dataRow.createCell(6).setCellValue(activity.getObservation() != null ? activity.getObservation() : "");
+        dataRow
+            .createCell(6)
+            .setCellValue(activity.getObservation() != null ? activity.getObservation() : "");
       }
     }
 
