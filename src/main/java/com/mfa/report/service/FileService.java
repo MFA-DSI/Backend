@@ -8,20 +8,21 @@ import com.mfa.report.model.Activity;
 import com.mfa.report.model.Mission;
 import com.mfa.report.model.PerformanceRealization;
 import com.mfa.report.model.Recommendation;
+import com.mfa.report.service.utils.FontUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.mfa.report.service.utils.FontUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class FileService {
@@ -67,17 +68,12 @@ public class FileService {
   }
 
   public byte[] createMissionReport(List<Mission> missions) {
-
     try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
       Document document = new Document(PageSize.A4.rotate());
       PdfWriter.getInstance(document, byteArrayOutputStream);
       document.open();
 
-
-      Paragraph title =
-          new Paragraph(
-              "COMPTE RENDU TRIMESTRIEL Mois de JUILLET",
-              FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16));
+      Paragraph title = new Paragraph("COMPTE RENDU TRIMESTRIEL Mois de JUILLET", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16));
       title.setAlignment(Element.ALIGN_CENTER);
       document.add(title);
       document.add(Chunk.NEWLINE);
@@ -87,102 +83,103 @@ public class FileService {
       table.setWidthPercentage(100);
 
       // Add table headers
-      addTableHeader(
-          table,
-          new String[] {
-            "MISSIONS",
-            "ACTIVITES",
-            "PREVISIONS",
-            "INDICATEUR DE PERFORMANCE",
-            "REALISATION",
-            "RECOMMENDATION",
-            "OBSERVATION"
-          });
+      addTableHeader(table, new String[] {
+              "MISSIONS", "ACTIVITES", "PREVISIONS", "INDICATEUR DE PERFORMANCE",
+              "REALISATION", "RECOMMENDATION", "OBSERVATION"
+      });
 
-      for (com.mfa.report.model.Mission mission : missions) {
-
+      // Iterate through each mission
+      for (Mission mission : missions) {
         String missionDescription = mission.getDescription();
         boolean isFirstActivity = true;
+        int activityCount = mission.getActivity().size();
 
-
-        for (Activity activity : mission.getActivity()) {
-          // If it's the first activity, add the mission description
-          if (isFirstActivity) {
-            PdfPCell missionCell =
-                new PdfPCell(new Phrase(missionDescription, fontUtils.toMissionTitle()));
-            missionCell.setRowspan(mission.getActivity().size());
-            missionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            missionCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-
-            table.addCell(missionCell);
-            isFirstActivity = false;
-          }
-
-          // Add activity details
-          table.addCell(activity.getDescription());
-          table.addCell(activity.getPrediction());
-
-          // Performance Indicators and Realizations
-          if (!activity.getPerformanceRealization().isEmpty()) {
-            PdfPTable realizationTable = new PdfPTable(1);
-
-            realizationTable.setWidthPercentage(100);
-
-            for (PerformanceRealization realization : activity.getPerformanceRealization()) {
-              realizationTable.addCell(realization.getRealization());
+        // Check if the mission has activities
+        if (activityCount > 0) {
+          for (Activity activity : mission.getActivity()) {
+            // Add the mission description only once for the first activity
+            if (isFirstActivity) {
+              PdfPCell missionCell = new PdfPCell(new Phrase(missionDescription, fontUtils.toMissionTitle()));
+              missionCell.setRowspan(activityCount);
+              missionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+              missionCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+              table.addCell(missionCell);
+              isFirstActivity = false;
             }
-            PdfPCell realizationCell = new PdfPCell();
 
-            realizationCell.addElement(realizationTable);
-            realizationCell.setColspan(1); // Spécifie la largeur de la cellule
-            table.addCell(realizationCell);
-          } else {
-            table.addCell(""); // Empty cell for no realization
-          }
+            // Add activity details
+            table.addCell(activity.getDescription());
+            table.addCell(activity.getPrediction());
 
-          if (!activity.getPerformanceRealization().isEmpty()) {
-            PdfPTable realizationTable = new PdfPTable(1); // 1 colonne
-            realizationTable.setWidthPercentage(100);
+            if (!activity.getPerformanceRealization().isEmpty()) {
+              // Table for Performance Realizations
+              PdfPTable realizationTable = new PdfPTable(1);
+              realizationTable.setWidthPercentage(104); // Adjusted to match the first table
 
-            for (PerformanceRealization realization : activity.getPerformanceRealization()) {
-              realizationTable.addCell(String.valueOf(realization.getKPI()));
+              // Table for KPIs
+              PdfPTable kpiTable = new PdfPTable(1);
+              kpiTable.setWidthPercentage(104);
+              int realizationCount = activity.getPerformanceRealization().size();
+              List<PerformanceRealization> realizations = activity.getPerformanceRealization();
+
+              for (int i = 0; i < realizationCount; i++) {
+                PerformanceRealization realization = realizations.get(i);
+
+                // Create realization cell
+                PdfPCell realizationCell = new PdfPCell(new Phrase(realization.getRealization()));
+                realizationCell.setBorderWidthTop(0f);
+                // Set border bottom to 1f only for the last element
+                realizationCell.setBorderWidthBottom(i == realizationCount - 1 ? 0f : 1f);
+                realizationTable.addCell(realizationCell);
+
+                // Create KPI cell
+                PdfPCell kpiCell = new PdfPCell(new Phrase(String.valueOf(realization.getKPI())));
+                kpiCell.setBorderWidthTop(0f); // Optional: you can manage KPI cell borders similarly if needed
+                kpiCell.setBorderWidthBottom(i == realizationCount - 1 ? 0f : 1f); // Same for KPI cell
+                kpiTable.addCell(kpiCell);
+              }
+
+              // Add both tables to the main table
+              PdfPCell realizationContainer = new PdfPCell();
+              realizationContainer.addElement(realizationTable);
+              table.addCell(realizationContainer);
+
+              PdfPCell kpiContainer = new PdfPCell();
+              kpiContainer.addElement(kpiTable);
+              table.addCell(kpiContainer);
+            } else {
+              table.addCell(""); // Empty cell for no realization
+              table.addCell(""); // Empty cell for no KPI
             }
-            PdfPCell realizationCell = new PdfPCell();
-            realizationCell.addElement(realizationTable);
-            realizationCell.setColspan(1); // Spécifie la largeur de la cellule
-            table.addCell(realizationCell);
-          } else {
-            table.addCell(""); // Empty cell for no realization
-          }
 
-          if (!activity.getRecommendations().isEmpty()) {
-            PdfPCell recommendationCell = new PdfPCell();
-            Paragraph recommendationContent = new Paragraph();
-            for (Recommendation recommendation : activity.getRecommendations()) {
-              recommendationContent.add("• " + recommendation.getDescription() + "\n");
+            // Add recommendations if available
+            if (!activity.getRecommendations().isEmpty()) {
+              PdfPCell recommendationCell = new PdfPCell();
+              Paragraph recommendationContent = new Paragraph();
+              for (Recommendation recommendation : activity.getRecommendations()) {
+                recommendationContent.add("• " + recommendation.getDescription() + "\n");
+              }
+              recommendationCell.addElement(recommendationContent);
+              table.addCell(recommendationCell);
+            } else {
+              table.addCell("Aucune recommandation");
             }
-            recommendationCell.addElement(recommendationContent);
-            table.addCell(recommendationCell);
-          } else {
-            table.addCell("Aucune recommandation");
-          }
 
-          // Observations
-          table.addCell(activity.getObservation());
+            // Add observations
+            table.addCell(activity.getObservation());
+          }
+        } else {
+          // Add mission even if no activities
+          PdfPCell missionCell = new PdfPCell(new Phrase(missionDescription, fontUtils.toMissionTitle()));
+          missionCell.setColspan(7); // Span across all columns if no activities
+          missionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+          missionCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+          table.addCell(missionCell);
         }
-
-        table.addCell("");
-        table.addCell("");
-        table.addCell("");
-        table.addCell("");
-        table.addCell("");
-        table.addCell("");
-        table.addCell("");
       }
 
       // Add the table to the document
       document.add(table);
-
       document.close();
       return byteArrayOutputStream.toByteArray();
     } catch (Exception e) {
