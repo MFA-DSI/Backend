@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
@@ -69,7 +70,7 @@ public class FileService {
 
   public byte[] createMissionReport(List<Mission> missions) {
     try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-      Document document = new Document(PageSize.A4.rotate());
+      Document document = new Document(PageSize.A4.rotate(),1f, 1f, 0f, 0f);
       PdfWriter.getInstance(document, byteArrayOutputStream);
       document.open();
 
@@ -197,128 +198,95 @@ public class FileService {
     }
   }
 
-  public ByteArrayResource createExcelFile(List<String> ids) throws IOException {
-    List<Mission> missions = missionService.findMissionsByIds(ids);
-    Workbook workbook = new XSSFWorkbook();
-    Sheet sheet = workbook.createSheet("Missions");
+  public byte[] createMissionReportExcel(List<Mission> missions) {
+    try (XSSFWorkbook workbook = new XSSFWorkbook();
+         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
 
-    // Create header row
-    Row headerRow = sheet.createRow(0); // Ligne d'entête au tout début
-    String[] headers = {
-      "MISSIONS",
-      "ACTIVITES",
-      "PREVISIONS",
-      "INDICATEUR DE PERFORMANCE",
-      "REALISATION",
-      "RECOMMANDATION",
-      "OBSERVATION"
-    };
+      Sheet sheet = workbook.createSheet("Mission Report");
 
-    for (int i = 0; i < headers.length; i++) {
-      Cell cell = headerRow.createCell(i);
-      cell.setCellValue(headers[i]);
-      cell.setCellStyle(createHeaderCellStyle(workbook));
-    }
+      Font headerFont = workbook.createFont();
+      headerFont.setBold(true);
+      headerFont.setFontHeightInPoints((short) 12);
 
-    // Data rows
-    int rowIndex = 1; // Ligne de données commence après les entêtes
-    for (Mission mission : missions) {
-      String missionDescription = mission.getDescription();
-      boolean isFirstActivity = true;
+      CellStyle headerCellStyle = workbook.createCellStyle();
+      headerCellStyle.setFont(headerFont);
+      headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
+      headerCellStyle.setFillForegroundColor(IndexedColors.BRIGHT_GREEN.getIndex());
+      headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
-      // Si pas d'activités, créer une ligne vide avec juste la mission
-      if (mission.getActivity().isEmpty()) {
-        Row dataRow = sheet.createRow(rowIndex++);
-        dataRow.createCell(0).setCellValue(missionDescription);
-        for (int j = 1; j < headers.length; j++) {
-          dataRow.createCell(j).setCellValue(""); // Remplir les colonnes vides
+      Row headerRow = sheet.createRow(0);
+      String[] headers = {"MISSIONS", "ACTIVITES", "PREVISIONS", "INDICATEUR DE PERFORMANCE", "REALISATION", "RECOMMENDATION", "OBSERVATION"};
+
+      for (int i = 0; i < headers.length; i++) {
+        Cell cell = headerRow.createCell(i);
+        cell.setCellValue(headers[i]);
+        cell.setCellStyle(headerCellStyle);
+      }
+
+      int rowIdx = 1;
+
+      for (Mission mission : missions) {
+        List<Activity> activities = mission.getActivity();
+
+        int totalPerformanceIndicators = activities.stream()
+                .mapToInt(activity -> activity.getPerformanceRealization().size())
+                .sum();
+
+        for (int i = 0; i < activities.size(); i++) {
+          Activity activity = activities.get(i);
+          List<PerformanceRealization> realizations = activity.getPerformanceRealization();
+          int realizationRows = realizations.size();
+
+          for (int j = 0; j < realizationRows; j++) {
+            Row row = sheet.createRow(rowIdx);
+
+            if (rowIdx == 1 || (i == 0 && j == 0)) {
+              sheet.addMergedRegion(new CellRangeAddress(rowIdx, rowIdx + totalPerformanceIndicators - 1, 0, 0));
+              row.createCell(0).setCellValue(mission.getDescription());
+            }
+
+            if (j == 0) {
+              sheet.addMergedRegion(new CellRangeAddress(rowIdx, rowIdx + realizationRows - 1, 1, 1)); // Merge activity description
+              sheet.addMergedRegion(new CellRangeAddress(rowIdx, rowIdx + realizationRows - 1, 2, 2)); // Merge prediction
+              row.createCell(1).setCellValue(activity.getDescription());
+              row.createCell(2).setCellValue(activity.getPrediction());
+            }
+
+            PerformanceRealization realization = realizations.get(j);
+            row.createCell(3).setCellValue(realization.getKPI());
+            row.createCell(4).setCellValue(realization.getRealization());
+
+            rowIdx++;
+          }
+
+          List<Recommendation> recommendations = activity.getRecommendations();
+          if (!recommendations.isEmpty()) {
+            StringBuilder recommendationText = new StringBuilder();
+            for (Recommendation recommendation : recommendations) {
+              recommendationText.append("• ").append(recommendation.getDescription()).append("\n");
+            }
+            sheet.getRow(rowIdx - 1).createCell(5).setCellValue(recommendationText.toString());
+          } else {
+            sheet.getRow(rowIdx - 1).createCell(5).setCellValue("");
+          }
+
+          sheet.getRow(rowIdx - 1).createCell(6).setCellValue(activity.getObservation());
         }
       }
 
-      for (Activity activity : mission.getActivity()) {
-        Row dataRow = sheet.createRow(rowIndex++);
-
-        // Ajouter la description de la mission seulement pour la première activité
-        if (isFirstActivity) {
-          dataRow.createCell(0).setCellValue(missionDescription);
-          isFirstActivity = false;
-        } else {
-          dataRow
-              .createCell(0)
-              .setCellValue(""); // Cellule vide pour les autres lignes de la même mission
-        }
-
-        dataRow
-            .createCell(1)
-            .setCellValue(activity.getDescription() != null ? activity.getDescription() : "");
-        dataRow
-            .createCell(2)
-            .setCellValue(activity.getPrediction() != null ? activity.getPrediction() : "");
-
-        // Concaténer les indicateurs de performance (KPI, réalisation, type)
-        String performanceIndicators =
-            activity.getPerformanceRealization().stream()
-                .map(
-                    perf ->
-                        String.format(
-                            "KPI: %d, Réalisation: %s, Type: %s",
-                            perf.getKPI(), perf.getRealization(), perf.getRealizationType()))
-                .collect(Collectors.joining("; ")); // Séparé par "; " pour chaque indicateur
-
-        dataRow.createCell(3).setCellValue(performanceIndicators);
-
-        // Concaténer les réalisations
-        String realizations =
-            activity.getPerformanceRealization().stream()
-                .map(PerformanceRealization::getRealization)
-                .collect(Collectors.joining("; ")); // Séparer par "; " pour chaque réalisation
-
-        dataRow.createCell(4).setCellValue(realizations);
-
-        // Concaténer les recommandations
-        String recommendations =
-            activity.getRecommendations().stream()
-                .map(
-                    rec ->
-                        String.format(
-                            "Description: %s, Date: %s, Approuvée: %s",
-                            rec.getDescription(),
-                            rec.getCreationDatetime() != null
-                                ? rec.getCreationDatetime()
-                                    .format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-                                : "N/A",
-                            rec.isApproved() ? "Oui" : "Non"))
-                .collect(Collectors.joining("; ")); // Séparé par "; " pour chaque recommandation
-
-        dataRow.createCell(5).setCellValue(recommendations);
-
-        dataRow
-            .createCell(6)
-            .setCellValue(activity.getObservation() != null ? activity.getObservation() : "");
+      // Auto-size columns for better readability
+      for (int i = 0; i < headers.length; i++) {
+        sheet.autoSizeColumn(i);
       }
+
+      workbook.write(byteArrayOutputStream);
+      return byteArrayOutputStream.toByteArray();
+
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-
-    // Auto-size columns
-    for (int i = 0; i < headers.length; i++) {
-      sheet.autoSizeColumn(i);
-    }
-
-    // Write to output stream
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    workbook.write(outputStream);
-    workbook.close();
-
-    return new ByteArrayResource(outputStream.toByteArray());
+    return null;
   }
 
-  private CellStyle createHeaderCellStyle(Workbook workbook) {
-    CellStyle style = workbook.createCellStyle();
-    Font font = workbook.createFont();
-    font.setBold(true);
-    font.setFontHeightInPoints((short) 12);
-    style.setFont(font);
-    style.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
-    style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-    return style;
-  }
+
 }

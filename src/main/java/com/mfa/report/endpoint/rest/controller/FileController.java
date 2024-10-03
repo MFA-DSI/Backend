@@ -29,7 +29,6 @@ public class FileController {
 
     @PostMapping("/mission/export/pdf")
     public ResponseEntity<byte[]> generateMissionPdf( @RequestBody List<String> missionIds) {
-        log.info(missionIds.toString());
         List<Mission> missions = missionService.findMissionsByIds(missionIds);
         if (missions.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -47,11 +46,12 @@ public class FileController {
     }
 
     @GetMapping("/mission/export/excel")
-    public ResponseEntity<ByteArrayResource> generateExcel(@RequestParam List<String> id) throws IOException {
-        ByteArrayResource resource = fileService.createExcelFile(id);
+    public ResponseEntity<byte[]> generateExcel(@RequestParam List<String> missionIds) throws IOException {
+        List<Mission> missions = missionService.findMissionsByIds(missionIds);
+        byte[] resource = fileService.createMissionReportExcel(missions);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=missions.xlsx")
-                .contentLength(resource.contentLength())
+                .contentLength(resource.length)
                 .body(resource);
     }
     }
