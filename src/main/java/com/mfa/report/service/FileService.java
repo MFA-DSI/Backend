@@ -1,6 +1,14 @@
 package com.mfa.report.service;
 
-import com.itextpdf.text.*;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -11,16 +19,21 @@ import com.mfa.report.model.Recommendation;
 import com.mfa.report.service.utils.FontUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -70,11 +83,14 @@ public class FileService {
 
   public byte[] createMissionReport(List<Mission> missions) {
     try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-      Document document = new Document(PageSize.A4.rotate(),1f, 1f, 0f, 0f);
+      Document document = new Document(PageSize.A4.rotate(), 1f, 1f, 0f, 0f);
       PdfWriter.getInstance(document, byteArrayOutputStream);
       document.open();
 
-      Paragraph title = new Paragraph("COMPTE RENDU TRIMESTRIEL Mois de JUILLET", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16));
+      Paragraph title =
+          new Paragraph(
+              "COMPTE RENDU TRIMESTRIEL Mois de JUILLET",
+              FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16));
       title.setAlignment(Element.ALIGN_CENTER);
       document.add(title);
       document.add(Chunk.NEWLINE);
@@ -84,10 +100,17 @@ public class FileService {
       table.setWidthPercentage(100);
 
       // Add table headers
-      addTableHeader(table, new String[] {
-              "MISSIONS", "ACTIVITES", "PREVISIONS", "INDICATEUR DE PERFORMANCE",
-              "REALISATION", "RECOMMENDATION", "OBSERVATION"
-      });
+      addTableHeader(
+          table,
+          new String[] {
+            "MISSIONS",
+            "ACTIVITES",
+            "PREVISIONS",
+            "INDICATEUR DE PERFORMANCE",
+            "REALISATION",
+            "RECOMMENDATION",
+            "OBSERVATION"
+          });
 
       // Iterate through each mission
       for (Mission mission : missions) {
@@ -100,7 +123,8 @@ public class FileService {
           for (Activity activity : mission.getActivity()) {
             // Add the mission description only once for the first activity
             if (isFirstActivity) {
-              PdfPCell missionCell = new PdfPCell(new Phrase(missionDescription, fontUtils.toMissionTitle()));
+              PdfPCell missionCell =
+                  new PdfPCell(new Phrase(missionDescription, fontUtils.toMissionTitle()));
               missionCell.setRowspan(activityCount);
               missionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
               missionCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -135,8 +159,10 @@ public class FileService {
 
                 // Create KPI cell
                 PdfPCell kpiCell = new PdfPCell(new Phrase(String.valueOf(realization.getKPI())));
-                kpiCell.setBorderWidthTop(0f); // Optional: you can manage KPI cell borders similarly if needed
-                kpiCell.setBorderWidthBottom(i == realizationCount - 1 ? 0f : 1f); // Same for KPI cell
+                kpiCell.setBorderWidthTop(
+                    0f); // Optional: you can manage KPI cell borders similarly if needed
+                kpiCell.setBorderWidthBottom(
+                    i == realizationCount - 1 ? 0f : 1f); // Same for KPI cell
                 kpiTable.addCell(kpiCell);
               }
 
@@ -171,7 +197,8 @@ public class FileService {
           }
         } else {
           // Add mission even if no activities
-          PdfPCell missionCell = new PdfPCell(new Phrase(missionDescription, fontUtils.toMissionTitle()));
+          PdfPCell missionCell =
+              new PdfPCell(new Phrase(missionDescription, fontUtils.toMissionTitle()));
           missionCell.setColspan(7); // Span across all columns if no activities
           missionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
           missionCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -198,87 +225,35 @@ public class FileService {
     }
   }
 
-  public byte[] createMissionReportExcel(List<Mission> missions) {
+  public byte[] createMissionReportExcel(
+      List<Mission> missions, String directionName, String dates) {
     try (XSSFWorkbook workbook = new XSSFWorkbook();
-         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
 
       Sheet sheet = workbook.createSheet("Mission Report");
 
-      Font headerFont = workbook.createFont();
-      headerFont.setBold(true);
-      headerFont.setFontHeightInPoints((short) 12);
+      // Create styles for various cell types
+      CellStyle headerCellStyle = createHeaderCellStyle(workbook);
+      CellStyle titleCellStyle = createTitleCellStyle(workbook);
+      CellStyle directionCellStyle = createDirectionCellStyle(workbook);
+      CellStyle missionCellStyle = createMissionCellStyle(workbook);
+      CellStyle activityCellStyle = createActivityCellStyle(workbook);
 
-      CellStyle headerCellStyle = workbook.createCellStyle();
-      headerCellStyle.setFont(headerFont);
-      headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
-      headerCellStyle.setFillForegroundColor(IndexedColors.BRIGHT_GREEN.getIndex());
-      headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      // Create title and header sections
+      createTitleRow(sheet, titleCellStyle, dates);
+      createDirectionRow(sheet, directionCellStyle, directionName);
+      createHeaderRow(sheet, headerCellStyle);
 
-      Row headerRow = sheet.createRow(0);
-      String[] headers = {"MISSIONS", "ACTIVITES", "PREVISIONS", "INDICATEUR DE PERFORMANCE", "REALISATION", "RECOMMENDATION", "OBSERVATION"};
-
-      for (int i = 0; i < headers.length; i++) {
-        Cell cell = headerRow.createCell(i);
-        cell.setCellValue(headers[i]);
-        cell.setCellStyle(headerCellStyle);
-      }
-
-      int rowIdx = 1;
-
+      // Add mission and activity data
+      int rowIdx = 4;
       for (Mission mission : missions) {
-        List<Activity> activities = mission.getActivity();
-
-        int totalPerformanceIndicators = activities.stream()
-                .mapToInt(activity -> activity.getPerformanceRealization().size())
-                .sum();
-
-        for (int i = 0; i < activities.size(); i++) {
-          Activity activity = activities.get(i);
-          List<PerformanceRealization> realizations = activity.getPerformanceRealization();
-          int realizationRows = realizations.size();
-
-          for (int j = 0; j < realizationRows; j++) {
-            Row row = sheet.createRow(rowIdx);
-
-            if (rowIdx == 1 || (i == 0 && j == 0)) {
-              sheet.addMergedRegion(new CellRangeAddress(rowIdx, rowIdx + totalPerformanceIndicators - 1, 0, 0));
-              row.createCell(0).setCellValue(mission.getDescription());
-            }
-
-            if (j == 0) {
-              sheet.addMergedRegion(new CellRangeAddress(rowIdx, rowIdx + realizationRows - 1, 1, 1)); // Merge activity description
-              sheet.addMergedRegion(new CellRangeAddress(rowIdx, rowIdx + realizationRows - 1, 2, 2)); // Merge prediction
-              row.createCell(1).setCellValue(activity.getDescription());
-              row.createCell(2).setCellValue(activity.getPrediction());
-            }
-
-            PerformanceRealization realization = realizations.get(j);
-            row.createCell(3).setCellValue(realization.getKPI());
-            row.createCell(4).setCellValue(realization.getRealization());
-
-            rowIdx++;
-          }
-
-          List<Recommendation> recommendations = activity.getRecommendations();
-          if (!recommendations.isEmpty()) {
-            StringBuilder recommendationText = new StringBuilder();
-            for (Recommendation recommendation : recommendations) {
-              recommendationText.append("• ").append(recommendation.getDescription()).append("\n");
-            }
-            sheet.getRow(rowIdx - 1).createCell(5).setCellValue(recommendationText.toString());
-          } else {
-            sheet.getRow(rowIdx - 1).createCell(5).setCellValue("");
-          }
-
-          sheet.getRow(rowIdx - 1).createCell(6).setCellValue(activity.getObservation());
-        }
+        rowIdx = addMissionData(sheet, rowIdx, mission, missionCellStyle, activityCellStyle);
       }
 
       // Auto-size columns for better readability
-      for (int i = 0; i < headers.length; i++) {
-        sheet.autoSizeColumn(i);
-      }
+      autoSizeColumns(sheet);
 
+      // Write the workbook content to the output stream
       workbook.write(byteArrayOutputStream);
       return byteArrayOutputStream.toByteArray();
 
@@ -288,5 +263,183 @@ public class FileService {
     return null;
   }
 
+  private CellStyle createHeaderCellStyle(Workbook workbook) {
+    Font headerFont = workbook.createFont();
+    headerFont.setBold(true);
+    headerFont.setFontHeightInPoints((short) 12);
 
+    CellStyle headerCellStyle = workbook.createCellStyle();
+    headerCellStyle.setFont(headerFont);
+    headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
+    headerCellStyle.setFillForegroundColor(IndexedColors.BRIGHT_GREEN.getIndex());
+    headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+    return headerCellStyle;
+  }
+
+  private CellStyle createTitleCellStyle(Workbook workbook) {
+    Font titleFont = workbook.createFont();
+    titleFont.setBold(true);
+    titleFont.setFontHeightInPoints((short) 16);
+
+    CellStyle titleCellStyle = workbook.createCellStyle();
+    titleCellStyle.setFont(titleFont);
+    titleCellStyle.setAlignment(HorizontalAlignment.CENTER);
+
+    return titleCellStyle;
+  }
+
+  private CellStyle createDirectionCellStyle(Workbook workbook) {
+    Font titleFont = workbook.createFont();
+    titleFont.setBold(true);
+    titleFont.setFontHeightInPoints((short) 16);
+
+    CellStyle directionCellStyle = workbook.createCellStyle();
+    directionCellStyle.setFont(titleFont);
+    directionCellStyle.setAlignment(HorizontalAlignment.LEFT);
+
+    return directionCellStyle;
+  }
+
+  private CellStyle createMissionCellStyle(Workbook workbook) {
+    Font missionFont = workbook.createFont();
+    missionFont.setBold(true);
+    missionFont.setFontHeightInPoints((short) 15);
+
+    CellStyle missionCellStyle = workbook.createCellStyle();
+    missionCellStyle.setFont(missionFont);
+    missionCellStyle.setAlignment(HorizontalAlignment.CENTER);
+    missionCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+    return missionCellStyle;
+  }
+
+  private CellStyle createActivityCellStyle(Workbook workbook) {
+    Font activityFont = workbook.createFont();
+    activityFont.setFontHeightInPoints((short) 13);
+
+    CellStyle activityCellStyle = workbook.createCellStyle();
+    activityCellStyle.setFont(activityFont);
+    activityCellStyle.setAlignment(HorizontalAlignment.CENTER);
+    activityCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+    return activityCellStyle;
+  }
+
+  private void createTitleRow(Sheet sheet, CellStyle titleCellStyle, String dates) {
+    Row titleRow = sheet.createRow(0);
+    Cell titleCell = titleRow.createCell(2);
+    titleCell.setCellValue("Mission Report - " + dates);
+    titleCell.setCellStyle(titleCellStyle);
+    sheet.addMergedRegion(new CellRangeAddress(0, 0, 2, 6));
+  }
+
+  private void createDirectionRow(Sheet sheet, CellStyle directionCellStyle, String directionName) {
+    Row directionRow = sheet.createRow(1);
+    Cell directionCell = directionRow.createCell(0);
+    directionCell.setCellValue("Direction: " + directionName);
+    directionCell.setCellStyle(directionCellStyle);
+  }
+
+  private void createHeaderRow(Sheet sheet, CellStyle headerCellStyle) {
+    Row headerRow = sheet.createRow(3);
+    String[] headers = {
+      "MISSIONS",
+      "ACTIVITES",
+      "PREVISIONS",
+      "INDICATEUR DE PERFORMANCE",
+      "REALISATION",
+      "RECOMMENDATION",
+      "OBSERVATION"
+    };
+
+    for (int i = 0; i < headers.length; i++) {
+      Cell cell = headerRow.createCell(i);
+      cell.setCellValue(headers[i]);
+      cell.setCellStyle(headerCellStyle);
+    }
+  }
+
+  private int addMissionData(
+      Sheet sheet,
+      int rowIdx,
+      Mission mission,
+      CellStyle missionCellStyle,
+      CellStyle activityCellStyle) {
+    List<Activity> activities = mission.getActivity();
+    int totalPerformanceIndicators =
+        activities.stream().mapToInt(activity -> activity.getPerformanceRealization().size()).sum();
+
+    for (int i = 0; i < activities.size(); i++) {
+      Activity activity = activities.get(i);
+      List<PerformanceRealization> realizations = activity.getPerformanceRealization();
+      int realizationRows = realizations.size();
+
+      for (int j = 0; j < realizationRows; j++) {
+        Row row = sheet.createRow(rowIdx);
+
+        // Merge mission cell if more than one row to merge
+        if (rowIdx == 4 || (i == 0 && j == 0)) {
+          if (totalPerformanceIndicators > 1) {
+            sheet.addMergedRegion(
+                new CellRangeAddress(rowIdx, rowIdx + totalPerformanceIndicators - 1, 0, 0));
+          }
+          Cell missionCell = row.createCell(0);
+          missionCell.setCellValue(mission.getDescription());
+          missionCell.setCellStyle(missionCellStyle);
+        }
+
+        // Merge activity and forecast cells if more than one row to merge
+        if (j == 0) {
+          if (realizationRows > 1) {
+            sheet.addMergedRegion(new CellRangeAddress(rowIdx, rowIdx + realizationRows - 1, 1, 1));
+            sheet.addMergedRegion(new CellRangeAddress(rowIdx, rowIdx + realizationRows - 1, 2, 2));
+          }
+
+          Cell activityCell = row.createCell(1);
+          activityCell.setCellValue(activity.getDescription());
+          activityCell.setCellStyle(activityCellStyle);
+
+          Cell predictionCell = row.createCell(2);
+          predictionCell.setCellValue(activity.getPrediction());
+          predictionCell.setCellStyle(activityCellStyle);
+        }
+
+        // Complete the achievements
+        PerformanceRealization realization = realizations.get(j);
+        row.createCell(3).setCellValue(realization.getKPI());
+        row.createCell(4).setCellValue(realization.getRealization());
+
+        rowIdx++;
+      }
+
+      // Add recommendations and observation
+      addRecommendationsAndObservation(sheet, rowIdx - 1, activity);
+    }
+
+    return rowIdx;
+  }
+
+  private void addRecommendationsAndObservation(Sheet sheet, int rowIdx, Activity activity) {
+    List<Recommendation> recommendations = activity.getRecommendations();
+    if (!recommendations.isEmpty()) {
+      StringBuilder recommendationText = new StringBuilder();
+      for (Recommendation recommendation : recommendations) {
+        recommendationText.append("• ").append(recommendation.getDescription()).append("\n");
+      }
+      sheet.getRow(rowIdx).createCell(5).setCellValue(recommendationText.toString());
+    } else {
+      sheet.getRow(rowIdx).createCell(5).setCellValue("");
+    }
+
+    sheet.getRow(rowIdx).createCell(6).setCellValue(activity.getObservation());
+  }
+
+  private void autoSizeColumns(Sheet sheet) {
+    for (int i = 0; i < 7; i++) {
+      sheet.autoSizeColumn(i);
+    }
+    sheet.setColumnWidth(1, 10000);
+    sheet.setColumnWidth(2, 10000);
+  }
 }
