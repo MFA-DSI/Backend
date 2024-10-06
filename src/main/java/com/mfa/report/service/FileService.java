@@ -19,7 +19,12 @@ import com.mfa.report.model.Recommendation;
 import com.mfa.report.service.utils.FontUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
@@ -225,35 +230,56 @@ public class FileService {
     }
   }
 
-  public byte[] createMissionReportExcel(
-      List<Mission> missions, String directionName, String dates) {
+  public byte[] createMissionReportExcel(List<Mission> missions, String dates) {
     try (XSSFWorkbook workbook = new XSSFWorkbook();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
 
-      Sheet sheet = workbook.createSheet("Mission Report");
-
-      // Create styles for various cell types
+      // Create styles for the cells
       CellStyle headerCellStyle = createHeaderCellStyle(workbook);
       CellStyle titleCellStyle = createTitleCellStyle(workbook);
       CellStyle directionCellStyle = createDirectionCellStyle(workbook);
       CellStyle missionCellStyle = createMissionCellStyle(workbook);
       CellStyle activityCellStyle = createActivityCellStyle(workbook);
 
-      // Create title and header sections
-      createTitleRow(sheet, titleCellStyle, dates);
-      createDirectionRow(sheet, directionCellStyle, directionName);
-      createHeaderRow(sheet, headerCellStyle);
+      // Group missions by directionId
+      Map<String, List<Mission>> missionsByDirection = missions.stream()
+              .collect(Collectors.groupingBy(mission -> mission.getDirection().getId()));
 
-      // Add mission and activity data
-      int rowIdx = 4;
-      for (Mission mission : missions) {
-        rowIdx = addMissionData(sheet, rowIdx, mission, missionCellStyle, activityCellStyle);
+      // Track used sheet names to ensure uniqueness
+      Set<String> usedSheetNames = new HashSet<>();
+
+      // For each direction
+      for (Map.Entry<String, List<Mission>> entry : missionsByDirection.entrySet()) {
+        String directionId = entry.getKey();
+        List<Mission> missionsForDirection = entry.getValue();
+        String directionDescription = getDirectionDescriptionById(directionId);
+
+        // Create a base sheet name from the direction ID (truncate to 25 chars to leave room for uniqueness counter)
+        String baseSheetName = "Direction " + directionDescription;
+        baseSheetName = truncateSheetName(baseSheetName, 25); // Truncate the name if necessary
+
+        // Generate a unique sheet name
+        String sheetName = makeUniqueSheetName(workbook, baseSheetName, usedSheetNames);
+
+        // Create a new sheet for each direction
+        Sheet sheet = workbook.createSheet(sheetName);
+
+        // Create title, direction, and header rows
+        createTitleRow(sheet, titleCellStyle, dates);
+        createDirectionRow(sheet, directionCellStyle, directionDescription);
+        createHeaderRow(sheet, headerCellStyle);
+
+        // Add mission and activity data
+        int rowIdx = 4;
+        for (Mission mission : missionsForDirection) {
+          rowIdx = addMissionData(sheet, rowIdx, mission, missionCellStyle, activityCellStyle);
+        }
+
+        // Auto-size columns for better readability
+        autoSizeColumns(sheet);
       }
 
-      // Auto-size columns for better readability
-      autoSizeColumns(sheet);
-
-      // Write the workbook content to the output stream
+      // Write the workbook to the output stream
       workbook.write(byteArrayOutputStream);
       return byteArrayOutputStream.toByteArray();
 
@@ -261,6 +287,25 @@ public class FileService {
       e.printStackTrace();
     }
     return null;
+  }
+
+  private String truncateSheetName(String sheetName, int maxLength) {
+    // Truncate the name to a safe length for Excel sheets (31 characters is the limit)
+    return sheetName.length() > maxLength ? sheetName.substring(0, maxLength) : sheetName;
+  }
+
+  private String makeUniqueSheetName(Workbook workbook, String baseName, Set<String> usedSheetNames) {
+    String uniqueName = baseName;
+    int counter = 1;
+
+    // Ensure the sheet name is unique by appending a counter if needed
+    while (usedSheetNames.contains(uniqueName) || workbook.getSheet(uniqueName) != null) {
+      uniqueName = baseName + " (" + counter + ")";
+      counter++;
+    }
+
+    usedSheetNames.add(uniqueName);
+    return uniqueName;
   }
 
   private CellStyle createHeaderCellStyle(Workbook workbook) {
@@ -344,13 +389,13 @@ public class FileService {
   private void createHeaderRow(Sheet sheet, CellStyle headerCellStyle) {
     Row headerRow = sheet.createRow(3);
     String[] headers = {
-      "MISSIONS",
-      "ACTIVITES",
-      "PREVISIONS",
-      "INDICATEUR DE PERFORMANCE",
-      "REALISATION",
-      "RECOMMENDATION",
-      "OBSERVATION"
+            "MISSIONS",
+            "ACTIVITES",
+            "PREVISIONS",
+            "INDICATEUR DE PERFORMANCE",
+            "REALISATION",
+            "RECOMMENDATION",
+            "OBSERVATION"
     };
 
     for (int i = 0; i < headers.length; i++) {
@@ -360,15 +405,9 @@ public class FileService {
     }
   }
 
-  private int addMissionData(
-      Sheet sheet,
-      int rowIdx,
-      Mission mission,
-      CellStyle missionCellStyle,
-      CellStyle activityCellStyle) {
+  private int addMissionData(Sheet sheet, int rowIdx, Mission mission, CellStyle missionCellStyle, CellStyle activityCellStyle) {
     List<Activity> activities = mission.getActivity();
-    int totalPerformanceIndicators =
-        activities.stream().mapToInt(activity -> activity.getPerformanceRealization().size()).sum();
+    int totalPerformanceIndicators = activities.stream().mapToInt(activity -> activity.getPerformanceRealization().size()).sum();
 
     for (int i = 0; i < activities.size(); i++) {
       Activity activity = activities.get(i);
@@ -381,8 +420,7 @@ public class FileService {
         // Merge mission cell if more than one row to merge
         if (rowIdx == 4 || (i == 0 && j == 0)) {
           if (totalPerformanceIndicators > 1) {
-            sheet.addMergedRegion(
-                new CellRangeAddress(rowIdx, rowIdx + totalPerformanceIndicators - 1, 0, 0));
+            sheet.addMergedRegion(new CellRangeAddress(rowIdx, rowIdx + totalPerformanceIndicators - 1, 0, 0));
           }
           Cell missionCell = row.createCell(0);
           missionCell.setCellValue(mission.getDescription());
@@ -442,4 +480,10 @@ public class FileService {
     sheet.setColumnWidth(1, 10000);
     sheet.setColumnWidth(2, 10000);
   }
+
+  private String getDirectionDescriptionById(String directionId) {
+
+    return "Direction " + directionId; // Exemple de retour
+  }
+
 }
