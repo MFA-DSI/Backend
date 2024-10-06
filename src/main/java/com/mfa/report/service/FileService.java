@@ -46,6 +46,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class FileService {
   private final MissionService missionService;
+  private final DirectionService directionService;
   private final FontUtils fontUtils;
 
   public byte[] createActivityPdf(List<Activity> activities) throws DocumentException, IOException {
@@ -482,8 +483,7 @@ public class FileService {
   }
 
   private String getDirectionDescriptionById(String directionId) {
-
-    return "Direction " + directionId; // Exemple de retour
+    return directionService.getDirectionById(directionId).getName();
   }
 
 }
