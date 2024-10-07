@@ -46,7 +46,7 @@ public class FileController {
         return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 
-    @GetMapping("/mission/export/excel")
+    @PostMapping("/mission/export/excel")
     public ResponseEntity<byte[]> generateExcel(@RequestBody List<String> missionIds) throws IOException {
         List<Mission> missions = missionService.findMissionsByIds(missionIds);
         log.info(String.valueOf(missions.size()));
