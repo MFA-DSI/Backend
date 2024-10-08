@@ -36,7 +36,7 @@ public class FileController {
         }
 
         // Step 2: Generate the PDF
-        byte[] pdfBytes = fileService.createMissionReport(missions);
+        byte[] pdfBytes = fileService.createMissionReport(missions,"Juillet");
 
         // Step 3: Set HTTP Headers and return PDF
         HttpHeaders headers = new HttpHeaders();

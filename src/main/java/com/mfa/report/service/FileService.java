@@ -19,10 +19,7 @@ import com.mfa.report.model.Recommendation;
 import com.mfa.report.service.utils.FontUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
@@ -41,6 +38,14 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import com.itextpdf.html2pdf.HtmlConverter;
+
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -48,6 +53,7 @@ public class FileService {
   private final MissionService missionService;
   private final DirectionService directionService;
   private final FontUtils fontUtils;
+  private final TemplateEngine templateEngine;
 
   public byte[] createActivityPdf(List<Activity> activities) throws DocumentException, IOException {
     Document document = new Document();
@@ -87,149 +93,22 @@ public class FileService {
     return outputStream.toByteArray();
   }
 
-  public byte[] createMissionReport(List<Mission> missions) {
-    try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-      Document document = new Document(PageSize.A4.rotate(), 1f, 1f, 0f, 0f);
-      PdfWriter.getInstance(document, byteArrayOutputStream);
-      document.open();
+  public byte[] createMissionReport(List<Mission> missions, String month) {
+    Context context = new Context();
+    context.setVariable("missions", missions != null ? missions : Collections.emptyList());
+    context.setVariable("month", month);
 
-      Paragraph title =
-          new Paragraph(
-              "COMPTE RENDU TRIMESTRIEL Mois de JUILLET",
-              FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16));
-      title.setAlignment(Element.ALIGN_CENTER);
-      document.add(title);
-      document.add(Chunk.NEWLINE);
+    String htmlContent = templateEngine.process("missionReport", context);
 
-      // Create a table for missions and activities
-      PdfPTable table = new PdfPTable(7); // 7 columns
-      table.setWidthPercentage(100);
-
-      // Add table headers
-      addTableHeader(
-          table,
-          new String[] {
-            "MISSIONS",
-            "ACTIVITES",
-            "PREVISIONS",
-            "INDICATEUR DE PERFORMANCE",
-            "REALISATION",
-            "RECOMMENDATION",
-            "OBSERVATION"
-          });
-
-      // Iterate through each mission
-      for (Mission mission : missions) {
-        String missionDescription = mission.getDescription();
-        boolean isFirstActivity = true;
-        int activityCount = mission.getActivity().size();
-
-        // Check if the mission has activities
-        if (activityCount > 0) {
-          for (Activity activity : mission.getActivity()) {
-            // Add the mission description only once for the first activity
-            if (isFirstActivity) {
-              PdfPCell missionCell =
-                  new PdfPCell(new Phrase(missionDescription, fontUtils.toMissionTitle()));
-              missionCell.setRowspan(activityCount);
-              missionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-              missionCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-              table.addCell(missionCell);
-              isFirstActivity = false;
-            }
-
-            // Add activity details
-            table.addCell(activity.getDescription());
-            table.addCell(activity.getPrediction());
-
-            if (!activity.getPerformanceRealization().isEmpty()) {
-              // Table for Performance Realizations
-              PdfPTable realizationTable = new PdfPTable(1);
-              realizationTable.setWidthPercentage(104); // Adjusted to match the first table
-
-              // Table for KPIs
-              PdfPTable kpiTable = new PdfPTable(1);
-              kpiTable.setWidthPercentage(104);
-              int realizationCount = activity.getPerformanceRealization().size();
-              List<PerformanceRealization> realizations = activity.getPerformanceRealization();
-
-              for (int i = 0; i < realizationCount; i++) {
-                PerformanceRealization realization = realizations.get(i);
-
-                // Create realization cell
-                PdfPCell realizationCell = new PdfPCell(new Phrase(realization.getRealization()));
-                realizationCell.setBorderWidthTop(0f);
-                // Set border bottom to 1f only for the last element
-                realizationCell.setBorderWidthBottom(i == realizationCount - 1 ? 0f : 1f);
-                realizationTable.addCell(realizationCell);
-
-                // Create KPI cell
-                PdfPCell kpiCell = new PdfPCell(new Phrase(String.valueOf(realization.getKPI())));
-                kpiCell.setBorderWidthTop(
-                    0f); // Optional: you can manage KPI cell borders similarly if needed
-                kpiCell.setBorderWidthBottom(
-                    i == realizationCount - 1 ? 0f : 1f); // Same for KPI cell
-                kpiTable.addCell(kpiCell);
-              }
-
-              // Add both tables to the main table
-              PdfPCell realizationContainer = new PdfPCell();
-              realizationContainer.addElement(realizationTable);
-              table.addCell(realizationContainer);
-
-              PdfPCell kpiContainer = new PdfPCell();
-              kpiContainer.addElement(kpiTable);
-              table.addCell(kpiContainer);
-            } else {
-              table.addCell(""); // Empty cell for no realization
-              table.addCell(""); // Empty cell for no KPI
-            }
-
-            // Add recommendations if available
-            if (!activity.getRecommendations().isEmpty()) {
-              PdfPCell recommendationCell = new PdfPCell();
-              Paragraph recommendationContent = new Paragraph();
-              for (Recommendation recommendation : activity.getRecommendations()) {
-                recommendationContent.add("• " + recommendation.getDescription() + "\n");
-              }
-              recommendationCell.addElement(recommendationContent);
-              table.addCell(recommendationCell);
-            } else {
-              table.addCell("Aucune recommandation");
-            }
-
-            // Add observations
-            table.addCell(activity.getObservation());
-          }
-        } else {
-          // Add mission even if no activities
-          PdfPCell missionCell =
-              new PdfPCell(new Phrase(missionDescription, fontUtils.toMissionTitle()));
-          missionCell.setColspan(7); // Span across all columns if no activities
-          missionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-          missionCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-          table.addCell(missionCell);
-        }
-      }
-
-      // Add the table to the document
-      document.add(table);
-      document.close();
-      return byteArrayOutputStream.toByteArray();
+    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+      HtmlConverter.convertToPdf(htmlContent, outputStream);
+      return outputStream.toByteArray();
     } catch (Exception e) {
       e.printStackTrace();
     }
     return null;
   }
 
-  private void addTableHeader(PdfPTable table, String[] headers) {
-    for (String header : headers) {
-      PdfPCell headerCell = new PdfPCell(new Phrase(header));
-      headerCell.setBackgroundColor(BaseColor.GREEN.darker());
-      headerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-      table.addCell(headerCell);
-    }
-  }
 
   public byte[] createMissionReportExcel(List<Mission> missions, String dates) {
     try (XSSFWorkbook workbook = new XSSFWorkbook();

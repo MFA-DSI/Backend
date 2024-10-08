@@ -6,6 +6,8 @@ import com.mfa.report.model.Recommendation;
 import com.mfa.report.model.User;
 import com.mfa.report.repository.NotificationRepository;
 import com.mfa.report.repository.exception.NotFoundException;
+
+import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -19,9 +21,9 @@ public class NotificationService {
   private final NextTaskService nextTaskService;
   private final UserService userService;
 
-  public Notification getNotification(String userId) {
+  public List<Notification> getNotification(String userId) {
     return repository
-        .findByUserId(userId)
+        .findAllByUserId(userId)
         .orElseThrow(() -> new NotFoundException("userId with id." + userId + " not found"));
   }
 
@@ -51,7 +53,7 @@ public class NotificationService {
     List<NextTask> pastTasks = nextTaskService.getNextTaskPastDate();
 
     if (!pastTasks.isEmpty()) {
-      List<User> users = userService.getAllUser();
+      List<User> users = nextTaskService.getResponsibleFromNextTask(LocalDate.now());
       for (NextTask task : pastTasks) {
         for (User user : users) {
           sendNotification(task, user);
@@ -66,5 +68,12 @@ public class NotificationService {
     notification.setDescription("The task '" + task.getDescription() + "' is overdue.");
     notification.setUser(user);
     repository.save(notification);
+  }
+
+  public Notification updateNotificationStatus(String id){
+    Notification notification = repository.findById(id).orElseThrow(()->new NotFoundException("Notification with id:"+id+" not found"));
+    notification.setViewStatus(true);
+    return repository.save(notification);
+
   }
 }

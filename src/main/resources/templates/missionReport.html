@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Tableau des Missions et Activités</title>
+    <style>
+        body{
+            margin: 0,
+            padding: 0
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #00FF00; /* Vert */
+        }
+        .deleted {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<h1>Missions et Activités</h1>
+<table>
+    <thead>
+    <tr>
+        <th>MISIONS</th>
+        <th>ACTIVITES</th>
+        <th>PREVISIONS</th>
+        <th>INDICATEUR DE PERFORMANCE</th>
+        <th>REALISATION</th>
+        <th>RECOMMANDATION</th>
+        <th>OBSERVATION</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td rowspan="2">test</td>
+        <td>Analyse des besoins</td>
+        <td class="deleted">deleted</td>
+        <td>1</td>
+        <td>12</td>
+        <td>csckgikdsgisdgisdg</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>test activité</td>
+        <td class="deleted">deleted</td>
+        <td>8012345678</td>
+        <td>80</td>
+        <td>aaa</td>
+        <td>Réunion avec les parties prenantes</td>
+    </tr>
+    <tr>
+        <td rowspan="2">autre mission</td>
+        <td>Deuxième activité</td>
+        <td>prévision 1</td>
+        <td>80</td>
+        <td>aa</td>
+        <td>recommandation 1</td>
+        <td>observation 1</td>
+    </tr>
+    <tr>
+        <td>Troisième activité</td>
+        <td>prévision 2</td>
+        <td>12</td>
+        <td>bbb</td>
+        <td>recommandation 2</td>
+        <td>observation 2</td>
+    </tr>
+    <!-- Ajouter d'autres missions et activités ici -->
+    </tbody>
+</table>
+</body>
+</html>
