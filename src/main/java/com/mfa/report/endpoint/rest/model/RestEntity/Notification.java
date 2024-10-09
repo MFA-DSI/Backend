@@ -13,5 +13,6 @@ public class Notification{
     private String id;
     private String description;
     private boolean viewStatus;
+    private String status;
 
 }

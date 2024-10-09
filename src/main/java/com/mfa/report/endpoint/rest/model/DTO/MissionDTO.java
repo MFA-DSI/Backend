@@ -11,9 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class MissionDTO {
-    private String id;
-    private String name;
-    private DirectionDTO direction;
-    private String serviceId;
-    private List<ActivityDTO> activityList;
+  private String id;
+  private String name;
+  private DirectionDTO direction;
+  private String serviceId;
+  private String postedBy;
+  private List<ActivityDTO> activityList;
 }

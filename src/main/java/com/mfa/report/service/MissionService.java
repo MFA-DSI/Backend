@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -53,7 +55,6 @@ public class MissionService {
   public Mission crUpdateMission(Mission mission) {
     Mission mission1 = repository.save(mission);
     mission1.getActivity().forEach(activity -> activity.setMission(mission1));
-
     return mission1;
   }
 

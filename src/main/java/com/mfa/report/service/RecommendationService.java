@@ -51,7 +51,7 @@ public class RecommendationService {
       savedRecommendation = repository.save(mapper.toRestSave(recommendationDTO,activity));
     } else {
       savedRecommendation = repository.save(mapper.toRestSave(recommendationDTO,activity));
-      notificationService.sendNotificationToResponsible(responsibles, savedRecommendation);
+      notificationService.sendRecommendationNotificationToResponsible(responsibles, savedRecommendation);
     }
 
     return savedRecommendation;

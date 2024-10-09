@@ -4,10 +4,8 @@ import com.mfa.report.endpoint.rest.mapper.ActivityMapper;
 import com.mfa.report.endpoint.rest.mapper.MissionMapper;
 import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
 import com.mfa.report.endpoint.rest.model.RestEntity.MissionWithDirectionName;
-import com.mfa.report.model.Activity;
-import com.mfa.report.model.Direction;
-import com.mfa.report.model.Mission;
-import com.mfa.report.model.Service;
+import com.mfa.report.model.*;
+import com.mfa.report.model.event.MissionPostedEvent;
 import com.mfa.report.model.validator.ActivityValidator;
 import com.mfa.report.model.validator.DirectionValidator;
 import com.mfa.report.model.validator.MissionValidator;
@@ -18,9 +16,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
@@ -31,13 +38,11 @@ public class MissionController {
 
   private final MissionService service;
   private final ActivityService activityService;
-  private final TaskService taskService;
-  private final NextTaskService nextTaskService;
-  private final RecommendationService recommendationService;
-  private final PerformanceRealizationService performanceRealization;
   private final AssociatedEntitiesService associatedEntitiesService;
   private final DirectionService directionService;
   private  final ServiceService serviceService;
+  private final NotificationService notificationService;
+  private final UserService userService;
 
   private final MissionMapper mapper;
   private final ActivityMapper activityMapper;
@@ -45,6 +50,9 @@ public class MissionController {
   private final MissionValidator missionValidator;
   private final ActivityValidator activityValidator;
   private final DirectionValidator directionValidator;
+
+  @Autowired
+  private ApplicationEventPublisher eventPublisher;
 
   @GetMapping("/mission")
   public MissionWithDirectionName getMissionById(@RequestParam String id) {
@@ -91,6 +99,7 @@ public class MissionController {
       @RequestBody MissionDTO missionDTO) {
     Direction direction = directionService.getDirectionById(directionId);
     directionValidator.acceptUser(direction, userId);
+    missionDTO.setPostedBy(userId);
 
     Service service1 = serviceService.getServiceById(missionDTO.getServiceId());
     Mission mission = mapper.toRest(missionDTO, direction,service1);
@@ -112,7 +121,7 @@ public class MissionController {
 
     mission.setActivity(activityList);
     service.crUpdateMission(mission);
-
+    eventPublisher.publishEvent(new MissionPostedEvent(mission, direction));
     return mapper.toDomainWithService(mission);
   }
 

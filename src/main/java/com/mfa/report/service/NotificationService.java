@@ -1,9 +1,6 @@
 package com.mfa.report.service;
 
-import com.mfa.report.model.NextTask;
-import com.mfa.report.model.Notification;
-import com.mfa.report.model.Recommendation;
-import com.mfa.report.model.User;
+import com.mfa.report.model.*;
 import com.mfa.report.repository.NotificationRepository;
 import com.mfa.report.repository.exception.NotFoundException;
 
@@ -31,19 +28,11 @@ public class NotificationService {
     repository.save(notification);
   }
 
-  public void sendNotificationToResponsible(
+  public void sendRecommendationNotificationToResponsible(
       List<User> responsibles, Recommendation recommandation) {
     for (User responsible : responsibles) {
-      Notification notification = new Notification();
-      notification.setUser(responsible);
-
-      notification.setDescription(
-          responsible.getGrade()
-              + " "
-              + responsible.getFirstname()
-              + " a soumis une récommendation sur "
-              + recommandation.getActivity().getDescription());
-      notification.setRecommendation(recommandation);
+      RecommendationNotification notification =
+          new RecommendationNotification(recommandation, responsible);
       repository.save(notification);
     }
   }
@@ -56,24 +45,40 @@ public class NotificationService {
       List<User> users = nextTaskService.getResponsibleFromNextTask(LocalDate.now());
       for (NextTask task : pastTasks) {
         for (User user : users) {
-          sendNotification(task, user);
+          sendTaskNotification(task, user);
         }
       }
     }
   }
 
   @Async
-  public void sendNotification(NextTask task, User user) {
-    Notification notification = new Notification();
-    notification.setDescription("The task '" + task.getDescription() + "' is overdue.");
-    notification.setUser(user);
+  public void sendTaskNotification(NextTask task, User user) {
+    NextTaskNotification notification =  new NextTaskNotification(task,user);
     repository.save(notification);
   }
 
-  public Notification updateNotificationStatus(String id){
-    Notification notification = repository.findById(id).orElseThrow(()->new NotFoundException("Notification with id:"+id+" not found"));
+  public Notification updateNotificationStatus(String id) {
+    Notification notification =
+        repository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Notification with id:" + id + " not found"));
     notification.setViewStatus(true);
     return repository.save(notification);
+  }
 
+
+  @Async
+  public void createMissionNotification(User user, Mission mission) {
+    MissionAddedNotification notification = new
+        MissionAddedNotification(mission,user);
+    repository.save(notification);
+  }
+
+  @Async
+  public void notify(User user, Mission mission) {
+    // Implémentation de la notification (ex. envoi d'email ou de message)
+    System.out.println(
+        "Notifying " + user.getEmail() + " about mission " + mission.getDescription());
+    // Utilise un service d'email ou de message ici (par exemple, envoi d'email)
   }
 }

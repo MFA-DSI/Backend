@@ -3,6 +3,7 @@ package com.mfa.report.endpoint.rest.controller;
 
 import com.mfa.report.endpoint.rest.mapper.NotificationMapper;
 import com.mfa.report.endpoint.rest.model.DTO.NotificationDTO;
+import com.mfa.report.endpoint.rest.model.RestEntity.Notification;
 import com.mfa.report.service.NotificationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,5 @@ public class NotificationController {
 
 
     @PutMapping("/notification/update")
-    public ResponseEntity<NotificationDTO> updateNotification(@RequestParam String id){
-        return ResponseEntity.ok(mapper.toDomain(service.updateNotificationStatus(id)));
-    }
-}
+    public ResponseEntity<Notification> updateNotification(@RequestParam String id){
+        return ResponseEntity.ok().body(mapper.toDomainView(service.updateNotificationStatus(id)));}}

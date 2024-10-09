@@ -16,5 +16,6 @@ public class Mission {
     String id;
     String description;
     Service service;
+    String postedBy;
     List<Activity> activityList;
 }

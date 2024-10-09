@@ -42,4 +42,8 @@ public class Mission {
       cascade = CascadeType.ALL,
       orphanRemoval = true)
   private List<Activity> activity;
+
+  @ManyToOne
+  @JoinColumn(name = "posted_by")
+  private User postedBy;
 }

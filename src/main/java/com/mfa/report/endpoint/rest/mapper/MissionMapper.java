@@ -7,6 +7,8 @@ import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
 import com.mfa.report.model.Service;
 import java.util.stream.Collectors;
+
+import com.mfa.report.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,7 @@ public class MissionMapper {
   private final DirectionMapper directionMapper;
   private final ActivityMapper activityMapper;
   private final ServiceMapper serviceMapper;
+  private final UserService userService;
 
   public MissionDTO toDomain(Mission mission) {
     return MissionDTO.builder()
@@ -75,6 +78,7 @@ public class MissionMapper {
   public Mission toRest(MissionDTO mission, Direction direction, Service service) {
     return Mission.builder()
         .description(mission.getName())
+        .postedBy(userService.getUserById(mission.getPostedBy()))
         .direction(direction)
         .service(service)
         .build();
