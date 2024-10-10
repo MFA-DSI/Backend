@@ -4,6 +4,7 @@ import com.mfa.report.model.enumerated.NotificationStatus;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +13,11 @@ import java.time.LocalDateTime;
 public class RecommendationNotification extends Notification {
 
     @ManyToOne
-    private final Recommendation recommendation;
+    private Recommendation recommendation;
+
+    public RecommendationNotification() {
+    }
+
 
     public RecommendationNotification(Recommendation recommendation, User recipient) {
         super.setDescription("Nouvelle recommandation: " + recommendation.getDescription());

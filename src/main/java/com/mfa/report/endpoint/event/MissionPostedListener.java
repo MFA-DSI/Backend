@@ -19,6 +19,7 @@ public class MissionPostedListener {
   public void onMissionPosted(MissionPostedEvent event) {
     Mission mission = event.getMission();
     Direction direction = event.getDirection();
+
     User poster = mission.getPostedBy();
 
     List<User> responsibles = direction.getResponsible();

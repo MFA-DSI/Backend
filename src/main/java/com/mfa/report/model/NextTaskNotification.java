@@ -4,6 +4,7 @@ import com.mfa.report.model.enumerated.NotificationStatus;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,9 @@ import java.time.LocalDateTime;
 public class NextTaskNotification extends Notification {
     @ManyToOne
     private NextTask task;
+
+    public NextTaskNotification() {
+    }
 
     public NextTaskNotification(NextTask task, User recipient) {
         super.setDescription("Nouvelle tâche à venir: " + task.getDescription());

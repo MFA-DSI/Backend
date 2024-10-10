@@ -67,7 +67,6 @@ public class NotificationService {
   }
 
 
-  @Async
   public void createMissionNotification(User user, Mission mission) {
     MissionAddedNotification notification = new
         MissionAddedNotification(mission,user);
