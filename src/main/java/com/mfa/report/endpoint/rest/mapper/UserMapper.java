@@ -2,6 +2,7 @@ package com.mfa.report.endpoint.rest.mapper;
 
 import com.mfa.report.endpoint.rest.model.DTO.SignInUserDTO;
 import com.mfa.report.endpoint.rest.model.DTO.UserDTO;
+import com.mfa.report.endpoint.rest.model.RestEntity.DirectionResponsible;
 import com.mfa.report.endpoint.rest.model.RestEntity.Responsible;
 import com.mfa.report.model.User;
 import com.mfa.report.model.enumerated.Grade;
@@ -67,6 +68,16 @@ public class UserMapper {
         .grade(String.valueOf(user.getGrade()))
         .function(user.getFunction())
         .direction(user.getDirection().getName())
+        .build();
+  }
+
+  public DirectionResponsible toDomainResponsible(User user) {
+    return DirectionResponsible.builder()
+        .id(user.getId())
+        .firstName(user.getFirstname())
+        .lastName(user.getLastname())
+        .function(user.getFunction())
+        .grade(String.valueOf(user.getGrade()))
         .build();
   }
 }

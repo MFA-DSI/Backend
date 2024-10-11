@@ -1,9 +1,12 @@
 package com.mfa.report.endpoint.rest.controller;
 
 import com.mfa.report.endpoint.rest.mapper.DirectionMapper;
+import com.mfa.report.endpoint.rest.mapper.UserMapper;
 import com.mfa.report.endpoint.rest.model.DTO.DirectionDTO;
 import com.mfa.report.endpoint.rest.model.DTO.DirectionNameDTO;
+import com.mfa.report.endpoint.rest.model.RestEntity.DirectionResponsible;
 import com.mfa.report.model.Direction;
+import com.mfa.report.model.User;
 import com.mfa.report.service.DirectionService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DirectionController {
   private final DirectionService service;
   private final DirectionMapper mapper;
+  private final UserMapper userMapper;
 
   @GetMapping("/{id}")
   public DirectionDTO getDirectionById(@PathVariable String id) {
@@ -54,5 +58,11 @@ public class DirectionController {
     direction.setName(directionDTO.getName());
     service.save(direction);
     return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toSignDomain(direction));
+  }
+  
+  @GetMapping("/responsible")
+  public ResponseEntity<List<DirectionResponsible>> getAllDirectionResponsible(@RequestParam String directionId){
+      List<User> responsibles = service.getDirectionById(directionId).getResponsible();
+      return ResponseEntity.ok(responsibles.stream().map(userMapper::toDomainResponsible).collect(Collectors.toUnmodifiableList()));
   }
 }
