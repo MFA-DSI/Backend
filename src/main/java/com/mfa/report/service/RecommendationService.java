@@ -5,6 +5,8 @@ import com.mfa.report.endpoint.rest.model.DTO.RecommendationDTO;
 import com.mfa.report.model.Activity;
 import com.mfa.report.model.Recommendation;
 import com.mfa.report.model.User;
+import com.mfa.report.model.event.MissionPostedEvent;
+import com.mfa.report.model.event.RecommendationPostedEvent;
 import com.mfa.report.repository.RecommendationRepository;
 import jakarta.transaction.Transactional;
 
@@ -12,6 +14,8 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +26,9 @@ public class RecommendationService {
   private final UserService userService;
   private final RecommendationMapper mapper;
   private final NotificationService notificationService;
+
+  @Autowired
+  private ApplicationEventPublisher eventPublisher;
 
   public Recommendation getRecommendationByActivity(String id) {
     return repository.findByActivityId(id);
@@ -49,9 +56,10 @@ public class RecommendationService {
     if (isCommitterResponsible) {
       recommendationDTO.setValidate_status(true);
       savedRecommendation = repository.save(mapper.toRestSave(recommendationDTO,activity));
+      eventPublisher.publishEvent(new RecommendationPostedEvent(savedRecommendation, committer.getDirection()));
     } else {
       savedRecommendation = repository.save(mapper.toRestSave(recommendationDTO,activity));
-      notificationService.sendRecommendationNotificationToResponsible(responsibles, savedRecommendation);
+      eventPublisher.publishEvent(new RecommendationPostedEvent(savedRecommendation, committer.getDirection()));
     }
 
     return savedRecommendation;

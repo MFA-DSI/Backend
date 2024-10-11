@@ -29,7 +29,7 @@ public class AuthController {
     return ResponseEntity.status(200).body(response);
   }
 
-  @PostMapping("/signup")
+  @PostMapping("/createUser")
   public ResponseEntity<AuthResponse> signUp(@RequestBody SignUp sign) {
     directionService.getDirectionById(sign.getDirectionId());
     AuthResponse response = authService.signUp(sign);

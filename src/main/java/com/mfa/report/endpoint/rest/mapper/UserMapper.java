@@ -57,4 +57,16 @@ public class UserMapper {
         .grade(String.valueOf(user.getGrade()))
         .build();
   }
+
+  public com.mfa.report.endpoint.rest.model.RestEntity.User toDomainUser(User user) {
+    return com.mfa.report.endpoint.rest.model.RestEntity.User.builder()
+        .id(user.getId())
+        .mail(user.getEmail())
+        .lastname(user.getLastname())
+        .firstname(user.getFirstname())
+        .grade(String.valueOf(user.getGrade()))
+        .function(user.getFunction())
+        .direction(user.getDirection().getName())
+        .build();
+  }
 }

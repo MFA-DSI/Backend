@@ -28,8 +28,26 @@ public class MissionPostedListener {
         .filter(responsible -> !responsible.equals(poster))
         .forEach(
             responsible -> {
-              notificationService.notify(responsible, mission);
+              notificationService.notifyMission(responsible, mission);
               notificationService.createMissionNotification(responsible, mission);
             });
   }
+
+    @EventListener
+    public void onMissionUpdated(MissionPostedEvent event) {
+        Mission mission = event.getMission();
+        Direction direction = event.getDirection();
+
+        User poster = mission.getPostedBy();
+
+        List<User> responsibles = direction.getResponsible();
+
+        responsibles.stream()
+                .filter(responsible -> !responsible.equals(poster))
+                .forEach(
+                        responsible -> {
+                            notificationService.notifyMission(responsible, mission);
+                            notificationService.createMissionNotification(responsible, mission);
+                        });
+    }
 }

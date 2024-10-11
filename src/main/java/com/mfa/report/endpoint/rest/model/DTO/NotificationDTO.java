@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -16,4 +18,5 @@ public class NotificationDTO {
   private boolean viewStatus;
   private String status;
   private String userId;
+  private LocalDateTime creationDatetime;
 }

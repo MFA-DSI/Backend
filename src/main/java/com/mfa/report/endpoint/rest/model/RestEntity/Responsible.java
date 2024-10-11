@@ -14,5 +14,4 @@ public class Responsible {
     private String userName;
     private String grade;
     private String directionName;
-
 }

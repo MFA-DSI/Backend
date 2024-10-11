@@ -73,11 +73,26 @@ public class NotificationService {
     repository.save(notification);
   }
 
+  public void createRecommendationNotification(User user, Recommendation recommendation) {
+    RecommendationNotification notification = new RecommendationNotification(recommendation, user);
+    repository.save(notification);
+  }
+
+
   @Async
-  public void notify(User user, Mission mission) {
+  public void notifyMission(User user, Mission mission) {
     // Implémentation de la notification (ex. envoi d'email ou de message)
     System.out.println(
         "Notifying " + user.getEmail() + " about mission " + mission.getDescription());
+    // Utilise un service d'email ou de message ici (par exemple, envoi d'email)
+  }
+
+
+  @Async
+  public void notifyRecommendation(User user, Recommendation recommendation) {
+    // Implémentation de la notification (ex. envoi d'email ou de message)
+    System.out.println(
+            "Notifying " + user.getEmail() + " about recommendation " + recommendation.getDescription());
     // Utilise un service d'email ou de message ici (par exemple, envoi d'email)
   }
 }
