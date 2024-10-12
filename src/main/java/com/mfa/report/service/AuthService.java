@@ -6,6 +6,7 @@ import com.mfa.report.endpoint.rest.model.SignUp;
 import com.mfa.report.model.User;
 import com.mfa.report.model.enumerated.Grade;
 import com.mfa.report.model.enumerated.Role;
+import com.mfa.report.repository.exception.BadRequestException;
 import com.mfa.report.service.Auth.TokenService;
 import java.util.List;
 import java.util.Objects;
@@ -29,12 +30,23 @@ public class AuthService {
     String email = toAuth.getEmail();
     User user = userService.getUserByUserMail(email);
 
+    if (user == null) {
+      throw new BadRequestException("Invalid credentials");
+    }
+
+    // Vérifier si le mot de passe correspond
+    boolean isPasswordMatch = passwordEncoder.matches(toAuth.getPassword(), user.getPassword());
+
+    if (!isPasswordMatch) {
+      throw new BadRequestException("Invalid credentials");
+    }
     return AuthResponse.builder()
-        .token(jwtService.generateToken(user.getRole(), user.getId()))
-        .userId(user.getId())
-        .directionId(user.getDirection().getId())
-        .build();
+            .token(jwtService.generateToken(user.getRole(), user.getId()))
+            .userId(user.getId())
+            .directionId(user.getDirection().getId())
+            .build();
   }
+
 
   public AuthResponse signUp(SignUp toSignUp) {
     String email = toSignUp.getEmail();
