@@ -6,6 +6,7 @@ import com.mfa.report.endpoint.rest.model.SignUp;
 import com.mfa.report.model.User;
 import com.mfa.report.model.enumerated.Grade;
 import com.mfa.report.model.enumerated.Role;
+import com.mfa.report.model.validator.UserValidator;
 import com.mfa.report.repository.exception.BadRequestException;
 import com.mfa.report.service.Auth.TokenService;
 import java.util.List;
@@ -25,6 +26,7 @@ public class AuthService {
   private final String AUTHORIZATION_HEADER = "Authorization";
   private final int BEARER_PREFIX_COUNT = 7;
   private final DirectionService directionService;
+  private  final UserValidator userValidator;
 
   public AuthResponse signIn(Auth toAuth) {
     String email = toAuth.getEmail();
@@ -50,32 +52,44 @@ public class AuthService {
 
   public AuthResponse signUp(SignUp toSignUp) {
     String email = toSignUp.getEmail();
-    User existingUser = userService.getUserByUserMail(email);
-    if (Objects.nonNull(existingUser)) {
-      throw new DuplicateKeyException("User with the email address: " + email + " already exists.");
+    String phoneNumbers = toSignUp.getPhoneNumbers();
+
+    if ((email == null || !userValidator.isValidEmail(email)) && (phoneNumbers == null || phoneNumbers.isEmpty())) {
+      throw new IllegalArgumentException("Either a valid email or at least one valid phone number must be provided.");
     }
 
-    String hashedPassword = passwordEncoder.encode(toSignUp.getPassword());
-    User createdUser =
-        userService
+    userValidator.validatePhoneNumbers(phoneNumbers);
+
+    if (email != null) {
+      User existingUser = userService.getUserByUserMail(email);
+      if (existingUser != null) {
+        throw new DuplicateKeyException("User with the email address: " + email + " already exists.");
+      }
+    }
+
+    User createdUser = userService
             .crupdateUser(
-                List.of(
-                    User.builder()
-                        .email(toSignUp.getEmail())
-                        .firstname(toSignUp.getFirstname())
-                        .lastname(toSignUp.getLastname())
-                        .direction(directionService.getDirectionById(toSignUp.getDirectionId()))
-                        .role(Role.user)
-                        .grade(Grade.valueOf(toSignUp.getGrade()))
-                        .function(toSignUp.getFunction())
-                        .password(hashedPassword)
-                        .build()))
+                    List.of(
+                            User.builder()
+                                    .email(email)
+                                    .phoneNumbers(phoneNumbers)
+                                    .firstname(toSignUp.getFirstname())
+                                    .lastname(toSignUp.getLastname())
+                                    .direction(directionService.getDirectionById(toSignUp.getDirectionId()))
+                                    .role(Role.user)
+                                    .grade(Grade.valueOf(toSignUp.getGrade()))
+                                    .function(toSignUp.getFunction())
+                                    .password(null)
+                                    .approved(false)
+                                    .build()))
             .get(0);
+
     directionService.saveNewUserToResponsible(toSignUp.getDirectionId(), createdUser);
+
     return AuthResponse.builder()
-        .token(jwtService.generateToken(createdUser.getRole(), createdUser.getId()))
-        .userId(createdUser.getId())
-        .directionId(toSignUp.getDirectionId())
-        .build();
+            .token(jwtService.generateToken(createdUser.getRole(), createdUser.getId()))
+            .userId(createdUser.getId())
+            .directionId(toSignUp.getDirectionId())
+            .build();
   }
 }

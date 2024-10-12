@@ -52,6 +52,12 @@ public class User implements Serializable {
   @NotBlank(message = "password is mandatory")
   private String password;
 
+  private Boolean approved;
+
+  private  String phoneNumbers;
+
+  private boolean firstLogin ;
+
   @Enumerated(EnumType.STRING)
   private Role role;
 
