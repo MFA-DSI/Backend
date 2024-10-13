@@ -23,6 +23,7 @@ public class UserMapper {
         .grade(user.getGrade().name())
         .function(user.getFunction())
         .mail(user.getEmail())
+        .phoneNumbers(user.getPhoneNumbers())
         .directionId(user.getDirection().getId())
         .build();
   }
@@ -46,6 +47,7 @@ public class UserMapper {
         .lastname(userDTO.getLastname())
         .grade(Grade.valueOf(userDTO.getGrade()))
         .function(userDTO.getFunction())
+        .phoneNumbers(userDTO.getPhoneNumbers())
         .direction(directionService.getDirectionById(userDTO.getDirectionId()))
         .build();
   }
@@ -67,6 +69,7 @@ public class UserMapper {
         .firstname(user.getFirstname())
         .grade(String.valueOf(user.getGrade()))
         .function(user.getFunction())
+        .phoneNumbers(user.getPhoneNumbers())
         .direction(user.getDirection().getName())
         .build();
   }

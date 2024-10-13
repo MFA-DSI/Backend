@@ -16,5 +16,6 @@ public class User {
     private String mail;
     private String function;
     private String grade;
+    private String phoneNumbers;
     private String direction;
 }
