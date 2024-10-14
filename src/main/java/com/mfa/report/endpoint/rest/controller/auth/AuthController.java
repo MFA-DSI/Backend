@@ -2,6 +2,7 @@ package com.mfa.report.endpoint.rest.controller.auth;
 
 import com.mfa.report.endpoint.rest.model.Auth;
 import com.mfa.report.endpoint.rest.model.AuthResponse;
+import com.mfa.report.endpoint.rest.model.FirstAuth;
 import com.mfa.report.endpoint.rest.model.RestEntity.NewUser;
 import com.mfa.report.endpoint.rest.model.SignUp;
 import com.mfa.report.service.AuthService;
@@ -9,11 +10,9 @@ import com.mfa.report.service.DirectionService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -25,9 +24,29 @@ public class AuthController {
   private final DirectionService directionService;
 
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> signIn(@RequestBody Auth auth) {
-    AuthResponse response = authService.signIn(auth);
-    return ResponseEntity.status(200).body(response);
+  public ResponseEntity<?> signIn(@RequestBody Auth auth) {
+    Object response = authService.signIn(auth);
+
+    if (response instanceof Map) {
+      return ResponseEntity.status(200).body(response);
+    }
+    return ResponseEntity.status(200).body((AuthResponse) response);
+  }
+
+  @PutMapping("/first_login")
+  public ResponseEntity<AuthResponse> firstSignIn(@RequestParam String userId,@RequestBody FirstAuth auth) {
+    AuthResponse response = authService.updateUserPassword(userId,auth.getOldPassword(),auth.getNewPassword());
+
+    return ResponseEntity.status(200).body( response);
+  }
+
+
+
+
+  @PutMapping("/user/approve")
+  public ResponseEntity<String> approveUser(@RequestParam String toApproveId,@RequestParam String userId) {
+    authService.approveUser(toApproveId,userId);
+    return ResponseEntity.status(200).body("user with id "+toApproveId+" approved");
   }
 
   @PostMapping("/createUser")

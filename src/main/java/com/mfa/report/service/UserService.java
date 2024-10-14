@@ -20,6 +20,11 @@ public class UserService {
     return userRepository.saveAll(toCrupdate);
   }
 
+
+  public User crupdateUser(User toCrupdate) {
+    return userRepository.save(toCrupdate);
+  }
+
   public User getUserByUserMail(String mail) {
     return userRepository.findByEmail(mail);
   }
@@ -43,6 +48,7 @@ public class UserService {
     user1.setEmail(user.getMail());
     return userRepository.save(user1);
   }
+
 
   public List<User> getAllUser(){
     return userRepository.findAll();

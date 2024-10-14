@@ -9,8 +9,10 @@ import com.mfa.report.model.enumerated.Grade;
 import com.mfa.report.model.enumerated.Role;
 import com.mfa.report.model.validator.UserValidator;
 import com.mfa.report.repository.exception.BadRequestException;
+import com.mfa.report.repository.exception.ForbiddenException;
 import com.mfa.report.service.Auth.TokenService;
 import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.dao.DuplicateKeyException;
@@ -29,7 +31,7 @@ public class AuthService {
   private final DirectionService directionService;
   private final UserValidator userValidator;
 
-  public AuthResponse signIn(Auth toAuth) {
+  public Object signIn(Auth toAuth) {
     String email = toAuth.getEmail();
     User user = userService.getUserByUserMail(email);
 
@@ -37,11 +39,58 @@ public class AuthService {
       throw new BadRequestException("Invalid credentials");
     }
 
+    if (!user.getApproved()) {
+      throw new BadRequestException("You must be approved by your admin");
+    }
     boolean isPasswordMatch = passwordEncoder.matches(toAuth.getPassword(), user.getPassword());
-
     if (!isPasswordMatch) {
       throw new BadRequestException("Invalid credentials");
     }
+
+    if (user.isFirstLogin()) {
+      return Map.of(
+          "message", "You must change your password upon first login", "userId", user.getId());
+    }
+
+    return AuthResponse.builder()
+        .token(jwtService.generateToken(user.getRole(), user.getId()))
+        .userId(user.getId())
+        .directionId(user.getDirection().getId())
+        .build();
+  }
+
+  public void approveUser(String toApproveUserId, String userId) {
+    User user = userService.getUserById(userId);
+    if (!user.getRole().equals(Role.ADMIN)) {
+      throw new ForbiddenException("Your not authorized to approve user");
+    }
+    User userToApprove = userService.getUserById(toApproveUserId);
+    userToApprove.setApproved(true);
+    userService.crupdateUser(userToApprove);
+  }
+
+  public AuthResponse updateUserPassword(String userId, String password, String newPassword) {
+    User user = userService.getUserById(userId);
+
+    if (!user.isFirstLogin()) {
+      throw new BadRequestException("User already approved");
+    }
+
+    boolean isPasswordMatch = passwordEncoder.matches(password, user.getPassword());
+    if (!isPasswordMatch) {
+      throw new BadRequestException("Current password is incorrect.");
+    }
+
+    if (passwordEncoder.matches(newPassword, user.getPassword())) {
+      throw new BadRequestException("New password cannot be the same as the old password.");
+    }
+
+    String hashedNewPassword = passwordEncoder.encode(newPassword);
+    user.setFirstLogin(false);
+    user.setPassword(hashedNewPassword);
+
+    userService.crupdateUser(user);
+
     return AuthResponse.builder()
         .token(jwtService.generateToken(user.getRole(), user.getId()))
         .userId(user.getId())
@@ -69,7 +118,6 @@ public class AuthService {
       }
     }
 
-
     String tempPassword = generateTemporaryPassword();
     User createdUser =
         userService
@@ -86,6 +134,7 @@ public class AuthService {
                         .function(toSignUp.getFunction())
                         .password(passwordEncoder.encode(tempPassword))
                         .approved(false)
+                        .firstLogin(true)
                         .build()))
             .get(0);
 
@@ -108,11 +157,9 @@ public class AuthService {
           "Either a valid email or at least one valid phone number must be provided.");
     }
 
-
-    if(phoneNumbers!= null){
+    if (phoneNumbers != null) {
       userValidator.validatePhoneNumbers(phoneNumbers);
     }
-
 
     if (email != null) {
       User existingUser = userService.getUserByUserMail(email);
@@ -136,21 +183,22 @@ public class AuthService {
                         .grade(Grade.valueOf(toSignUp.getGrade()))
                         .function(toSignUp.getFunction())
                         .password(passwordEncoder.encode(tempPassword))
-                        .approved(false)
+                        .approved(true)
+                        .firstLogin(true)
                         .build()))
             .get(0);
 
     directionService.saveNewUserToResponsible(toSignUp.getDirectionId(), createdUser);
 
     return NewUser.builder()
-            .id(createdUser.getId())
-            .identity((getValidIdentity(createdUser.getEmail(), createdUser.getPhoneNumbers())))
-            .password(tempPassword)
-            .build();
+        .id(createdUser.getId())
+        .identity((getValidIdentity(createdUser.getEmail(), createdUser.getPhoneNumbers())))
+        .password(tempPassword)
+        .build();
   }
 
   private String generateTemporaryPassword() {
-    return  RandomStringUtils.randomAlphanumeric(15);
+    return RandomStringUtils.randomAlphanumeric(15);
   }
 
   private String getValidIdentity(String email, String phoneNumber) {
