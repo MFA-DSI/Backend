@@ -2,6 +2,7 @@ package com.mfa.report.endpoint.rest.controller.auth;
 
 import com.mfa.report.endpoint.rest.model.Auth;
 import com.mfa.report.endpoint.rest.model.AuthResponse;
+import com.mfa.report.endpoint.rest.model.RestEntity.NewUser;
 import com.mfa.report.endpoint.rest.model.SignUp;
 import com.mfa.report.service.AuthService;
 import com.mfa.report.service.DirectionService;
@@ -30,9 +31,16 @@ public class AuthController {
   }
 
   @PostMapping("/createUser")
-  public ResponseEntity<AuthResponse> signUp(@RequestBody SignUp sign) {
+  public ResponseEntity<NewUser> signUp(@RequestBody SignUp sign) {
     directionService.getDirectionById(sign.getDirectionId());
-    AuthResponse response = authService.signUp(sign);
+    NewUser response = authService.signUp(sign);
+    return ResponseEntity.status(201).body(response);
+  }
+
+  @PostMapping("/createAdmin")
+  public ResponseEntity<NewUser> signUpAdmin(@RequestBody SignUp sign) {
+    directionService.getDirectionById(sign.getDirectionId());
+    NewUser response = authService.signUpAdmin(sign);
     return ResponseEntity.status(201).body(response);
   }
 }

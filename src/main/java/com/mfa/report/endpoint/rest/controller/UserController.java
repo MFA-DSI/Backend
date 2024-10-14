@@ -27,4 +27,5 @@ public class UserController {
   public ResponseEntity<User> getUserInformation(@RequestParam String id) {
     return ResponseEntity.ok(mapper.toDomainUser(service.getUserById(id)));
   }
+
 }
