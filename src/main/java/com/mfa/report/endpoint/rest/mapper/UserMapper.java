@@ -81,6 +81,7 @@ public class UserMapper {
         .lastName(user.getLastname())
         .function(user.getFunction())
         .grade(String.valueOf(user.getGrade()))
+        .approved(user.getApproved())
         .build();
   }
 }

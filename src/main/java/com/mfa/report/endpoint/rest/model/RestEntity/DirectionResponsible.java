@@ -16,4 +16,5 @@ public class DirectionResponsible {
     private String lastName;
     private String grade;
     private String function;
+    private boolean approved;
 }
