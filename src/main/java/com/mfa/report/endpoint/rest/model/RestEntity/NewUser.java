@@ -13,4 +13,6 @@ public class NewUser {
     private String id;
     private String identity;
     private String password;
+    private String name;
+    private String directionName;
 }

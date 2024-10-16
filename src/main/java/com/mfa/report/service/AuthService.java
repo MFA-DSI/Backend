@@ -194,6 +194,13 @@ public class AuthService {
         .id(createdUser.getId())
         .identity((getValidIdentity(createdUser.getEmail(), createdUser.getPhoneNumbers())))
         .password(tempPassword)
+        .directionName(createdUser.getDirection().getName())
+        .name(
+            createdUser.getGrade()
+                + "_"
+                + createdUser.getLastname()
+                + "_"
+                + createdUser.getFirstname())
         .build();
   }
 
