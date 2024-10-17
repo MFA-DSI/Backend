@@ -44,9 +44,9 @@ public class AuthController {
 
 
   @PutMapping("/user/approve")
-  public ResponseEntity<String> approveUser(@RequestParam String toApproveId,@RequestParam String userId) {
-    authService.approveUser(toApproveId,userId);
-    return ResponseEntity.status(200).body("user with id "+toApproveId+" approved");
+  public ResponseEntity<NewUser> approveUser(@RequestParam String toApproveId,@RequestParam String userId) {
+    NewUser newUser = authService.approveUser(toApproveId,userId);
+    return ResponseEntity.status(200).body(newUser);
   }
 
   @PostMapping("/createUser")

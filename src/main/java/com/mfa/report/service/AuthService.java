@@ -49,7 +49,12 @@ public class AuthService {
 
     if (user.isFirstLogin()) {
       return Map.of(
-          "message", "You must change your password upon first login", "userId", user.getId());
+          "message",
+          "You must change your password upon first login",
+          "userId",
+          user.getId(),
+          "name",
+          user.getGrade() + " " + user.getFirstname() + " " + user.getLastname());
     }
 
     return AuthResponse.builder()
@@ -59,14 +64,28 @@ public class AuthService {
         .build();
   }
 
-  public void approveUser(String toApproveUserId, String userId) {
+  public NewUser approveUser(String toApproveUserId, String userId) {
     User user = userService.getUserById(userId);
     if (!user.getRole().equals(Role.ADMIN)) {
       throw new ForbiddenException("Your not authorized to approve user");
     }
     User userToApprove = userService.getUserById(toApproveUserId);
+    String tempPassword = generateTemporaryPassword();
+    userToApprove.setPassword(passwordEncoder.encode(tempPassword));
     userToApprove.setApproved(true);
     userService.crupdateUser(userToApprove);
+
+    return NewUser.builder()
+            .id(userToApprove.getId())
+            .identity((getValidIdentity(userToApprove.getEmail(), userToApprove.getPhoneNumbers())))
+            .name(
+                    userToApprove.getGrade()
+                            + "_"
+                            + userToApprove.getLastname()
+                            + "_"
+                            + userToApprove.getFirstname())
+            .password(tempPassword)
+            .build();
   }
 
   public AuthResponse updateUserPassword(String userId, String password, String newPassword) {
@@ -132,7 +151,7 @@ public class AuthService {
                         .role(Role.user)
                         .grade(Grade.valueOf(toSignUp.getGrade()))
                         .function(toSignUp.getFunction())
-                        .password(passwordEncoder.encode(tempPassword))
+                        .password(null)
                         .approved(false)
                         .firstLogin(true)
                         .build()))
