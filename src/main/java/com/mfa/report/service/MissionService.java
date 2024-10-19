@@ -62,14 +62,14 @@ public class MissionService {
     repository.delete(mission);
   }
 
-  public List<Mission> getActivitiesForWeek(
+  public List<Mission> getMissionActivitiesForWeek(
       LocalDate weekStartDate, String directionId, int page, int pageSize) {
     LocalDate weekEndDate = weekStartDate.plusDays(6);
     Pageable pageable = PageRequest.of(page - 1, pageSize);
     return repository.findByDirectionAndDate(weekStartDate, weekEndDate, pageable).getContent();
   }
 
-  public List<Mission> getActivitiesForMonth(
+  public List<Mission> getMissionActivitiesForMonth(
       int year, int month, String directionId, int page, int pageSize) {
     LocalDate monthStartDate = LocalDate.of(year, month, 1);
     LocalDate monthEndDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth());
@@ -78,7 +78,7 @@ public class MissionService {
     return repository.findByDirectionAndDate(monthStartDate, monthEndDate, pageable).getContent();
   }
 
-  public List<Mission> getActivitiesForQuarter(
+  public List<Mission> getMissionActivitiesForQuarter(
       int year, int quarter, String directionId, int page, int pageSize) {
     LocalDate quarterStartDate;
     LocalDate quarterEndDate =

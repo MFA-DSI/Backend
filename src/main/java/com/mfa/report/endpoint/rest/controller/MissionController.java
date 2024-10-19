@@ -40,7 +40,7 @@ public class MissionController {
   private final ActivityService activityService;
   private final AssociatedEntitiesService associatedEntitiesService;
   private final DirectionService directionService;
-  private  final ServiceService serviceService;
+  private final ServiceService serviceService;
   private final NotificationService notificationService;
   private final UserService userService;
 
@@ -51,8 +51,7 @@ public class MissionController {
   private final ActivityValidator activityValidator;
   private final DirectionValidator directionValidator;
 
-  @Autowired
-  private ApplicationEventPublisher eventPublisher;
+  @Autowired private ApplicationEventPublisher eventPublisher;
 
   @GetMapping("/mission")
   public MissionWithDirectionName getMissionById(@RequestParam String id) {
@@ -73,13 +72,13 @@ public class MissionController {
   @GetMapping("/mission/name")
   @Cacheable(value = "mission", key = "#directionId")
   public List<MissionWithDirectionName> getAllMissionNameByDirectionId(
-          @RequestParam(name = "directionId") String directionId,
-          @RequestParam(defaultValue = "1", name = "page") Integer page,
-          @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
+      @RequestParam(name = "directionId") String directionId,
+      @RequestParam(defaultValue = "1", name = "page") Integer page,
+      @RequestParam(defaultValue = "15", name = "page_size") Integer pageSize) {
 
     return service.getMissionByDirectionId(directionId, page, pageSize).stream()
-            .map(mapper::toDomainDirection)
-            .toList();
+        .map(mapper::toDomainDirection)
+        .toList();
   }
 
   @GetMapping("/mission/all")
@@ -102,7 +101,7 @@ public class MissionController {
     missionDTO.setPostedBy(userId);
 
     Service service1 = serviceService.getServiceById(missionDTO.getServiceId());
-    Mission mission = mapper.toRest(missionDTO, direction,service1);
+    Mission mission = mapper.toRest(missionDTO, direction, service1);
 
     List<Activity> activityList =
         missionDTO.getActivityList().stream()
@@ -176,7 +175,7 @@ public class MissionController {
       @RequestParam String directionId,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "15") int pageSize) {
-    return service.getActivitiesForWeek(weekStartDate, directionId, page, pageSize).stream()
+    return service.getMissionActivitiesForWeek(weekStartDate, directionId, page, pageSize).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
@@ -189,7 +188,7 @@ public class MissionController {
       @RequestParam String directionId,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "15") int pageSize) {
-    return service.getActivitiesForMonth(year, month, directionId, page, pageSize).stream()
+    return service.getMissionActivitiesForMonth(year, month, directionId, page, pageSize).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
@@ -202,7 +201,9 @@ public class MissionController {
       @RequestParam String directionId,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "15") int pageSize) {
-    return service.getActivitiesForQuarter(year, quarter, directionId, page, pageSize).stream()
+    return service
+        .getMissionActivitiesForQuarter(year, quarter, directionId, page, pageSize)
+        .stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
