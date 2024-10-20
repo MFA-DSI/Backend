@@ -28,6 +28,10 @@ public class NotificationService {
     repository.save(notification);
   }
 
+  public void deleteNotificationByMissionId(Mission mission) {
+    repository.deleteAllNotificationFromMission_Id(mission);
+  }
+
   public void sendRecommendationNotificationToResponsible(
       List<User> responsibles, Recommendation recommandation) {
     for (User responsible : responsibles) {
@@ -53,7 +57,7 @@ public class NotificationService {
 
   @Async
   public void sendTaskNotification(NextTask task, User user) {
-    NextTaskNotification notification =  new NextTaskNotification(task,user);
+    NextTaskNotification notification = new NextTaskNotification(task, user);
     repository.save(notification);
   }
 
@@ -66,10 +70,8 @@ public class NotificationService {
     return repository.save(notification);
   }
 
-
   public void createMissionNotification(User user, Mission mission) {
-    MissionAddedNotification notification = new
-        MissionAddedNotification(mission,user);
+    MissionAddedNotification notification = new MissionAddedNotification(mission, user);
     repository.save(notification);
   }
 
@@ -77,7 +79,6 @@ public class NotificationService {
     RecommendationNotification notification = new RecommendationNotification(recommendation, user);
     repository.save(notification);
   }
-
 
   @Async
   public void notifyMission(User user, Mission mission) {
@@ -87,12 +88,14 @@ public class NotificationService {
     // Utilise un service d'email ou de message ici (par exemple, envoi d'email)
   }
 
-
   @Async
   public void notifyRecommendation(User user, Recommendation recommendation) {
     // Implémentation de la notification (ex. envoi d'email ou de message)
     System.out.println(
-            "Notifying " + user.getEmail() + " about recommendation " + recommendation.getDescription());
+        "Notifying "
+            + user.getEmail()
+            + " about recommendation "
+            + recommendation.getDescription());
     // Utilise un service d'email ou de message ici (par exemple, envoi d'email)
   }
 }

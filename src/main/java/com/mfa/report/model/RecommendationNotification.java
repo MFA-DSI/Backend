@@ -1,6 +1,7 @@
 package com.mfa.report.model;
 
 import com.mfa.report.model.enumerated.NotificationStatus;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @DiscriminatorValue("RECOMMENDATION_CREATED")
 public class RecommendationNotification extends Notification {
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Recommendation recommendation;
 
     public RecommendationNotification() {

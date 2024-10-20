@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MissionService {
   private final MissionRepository repository;
-
+  private final NotificationService notificationService;
 
 
   public Mission getMissionById(String id) {
@@ -59,6 +59,7 @@ public class MissionService {
   }
 
   public void deleteMission(Mission mission) {
+    notificationService.deleteNotificationByMissionId(mission);
     repository.delete(mission);
   }
 

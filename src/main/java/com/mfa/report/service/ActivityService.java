@@ -9,6 +9,7 @@ import com.mfa.report.endpoint.rest.mapper.ActivityMapper;
 import com.mfa.report.endpoint.rest.model.DTO.ActivityDTO;
 import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
 import com.mfa.report.model.Activity;
+import com.mfa.report.model.Mission;
 import com.mfa.report.repository.ActivityRepository;
 import com.mfa.report.repository.Dao.ActivityDAO;
 import com.mfa.report.repository.exception.NotFoundException;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 public class ActivityService {
   private final ActivityRepository repository;
   private final ActivityDAO activityDAO;
+  private  final NotificationService notificationService;
 
 
 
@@ -61,10 +63,6 @@ public class ActivityService {
 
   public void UpdateActivities(List<Activity> activityList) {
     repository.saveAll(activityList);
-  }
-
-  public void deleteActivity(Activity activity) {
-    repository.delete(activity);
   }
 
   public Activity saveActivityDetails(ActivityDTO activityDTO) {
@@ -132,5 +130,12 @@ public class ActivityService {
     return repository.findAllById(ids);
   }
 
+  public void deleteActivity(Activity activity) {
+    Mission mission = activity.getMission();
+
+    notificationService.deleteNotificationByMissionId(mission);
+
+    repository.delete(activity);
+  }
 
 }

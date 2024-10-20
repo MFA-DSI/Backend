@@ -1,5 +1,6 @@
 package com.mfa.report.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -46,4 +47,5 @@ public class Mission {
   @ManyToOne
   @JoinColumn(name = "posted_by")
   private User postedBy;
+
 }

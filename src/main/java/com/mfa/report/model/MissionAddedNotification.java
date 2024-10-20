@@ -1,9 +1,7 @@
 package com.mfa.report.model;
 
 import com.mfa.report.model.enumerated.NotificationStatus;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
