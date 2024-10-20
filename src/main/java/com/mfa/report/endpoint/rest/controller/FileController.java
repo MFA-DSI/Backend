@@ -38,12 +38,45 @@ public class FileController {
     private final LocalDateUtils localDateUtils;
     private final DirectionValidator directionValidator;
 
+
+    @PostMapping("/mission/export/pdf")
+    public ResponseEntity<byte[]> generateMissionPdf( @RequestBody List<String> missionIds) {
+        List<Mission> missions = missionService.findMissionsByIds(missionIds);
+
+        if (missions.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        // Step 2: Generate the PDF
+        byte[] pdfBytes = fileService.createMissionReport(missions,"Juillet");
+
+        // Step 3: Set HTTP Headers and return PDF
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("filename", "mission_report.pdf");
+
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
+
+    @PostMapping("/mission/export/excel")
+    public ResponseEntity<byte[]> generateExcel(@RequestBody List<String> missionIds) throws IOException {
+        List<Mission> missions = missionService.findMissionsByIds(missionIds);
+        log.info(String.valueOf(missions.size()));
+        byte[] resource = fileService.createMissionReportExcel(missions,"Juillet");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=missions.xlsx")
+                .contentLength(resource.length)
+                .body(resource);
+    }
+
     @PostMapping("/mydirection/mission/export/week/excel")
     public ResponseEntity<byte[]> generateWeekReport(@RequestParam String directionId, @RequestParam LocalDate date, @RequestParam int pageSize) throws IOException {
         String reportTitle = localDateUtils.generateReportTitleForWeek(date);
+        log.info(reportTitle);
        Direction direction = directionService.getDirectionById(directionId);
         List<Mission> missions = missionService.getMissionActivitiesForWeek(date, directionId, 1, pageSize);
-        byte[] resource = fileService.createMissionReportExcel(missions, "Juillet");
+        log.info(String.valueOf(missions.size()));
+        byte[] resource = fileService.createMissionReportExcelForDirection(missions, reportTitle,directionId);
         String formattedDate = date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         String fileName = direction.getName() + " Activités + - semaine du+" + formattedDate + ".xlsx";
 

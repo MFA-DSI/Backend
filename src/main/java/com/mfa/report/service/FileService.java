@@ -109,6 +109,69 @@ public class FileService {
     return null;
   }
 
+  public byte[] createMissionReportExcelForDirection(List<Mission> missions, String dates, String directionId) {
+    try (XSSFWorkbook workbook = new XSSFWorkbook();
+         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+
+      // Create styles for the cells
+      CellStyle headerCellStyle = createHeaderCellStyle(workbook);
+      CellStyle titleCellStyle = createTitleCellStyle(workbook);
+      CellStyle directionCellStyle = createDirectionCellStyle(workbook);
+      CellStyle missionCellStyle = createMissionCellStyle(workbook);
+      CellStyle activityCellStyle = createActivityCellStyle(workbook);
+      CellStyle noActivityCellStyle = createNoActivityCellStyle(workbook); // Style for the no activity message
+
+      // Filter missions by the provided directionId
+      List<Mission> missionsForDirection = missions.stream()
+              .filter(mission -> mission.getDirection().getId().equals(directionId))
+              .collect(Collectors.toList());
+
+      // Create a sheet for the direction
+      String directionDescription = getDirectionDescriptionById(directionId);
+      String sheetName = "Direction " + directionDescription;
+      sheetName = truncateSheetName(sheetName, 25); // Truncate the name if necessary
+
+      // Create a new sheet
+      Sheet sheet = workbook.createSheet(sheetName);
+
+      // Create title, direction, and header rows
+      createTitleRow(sheet, titleCellStyle, dates);
+      createDirectionRow(sheet, directionCellStyle, directionDescription);
+      createHeaderRow(sheet, headerCellStyle);
+
+      // Add mission and activity data or no activity message
+      int rowIdx = 4;
+      if (missionsForDirection.isEmpty()) {
+        Row noActivityRow = sheet.createRow(rowIdx);
+        Cell noActivityCell = noActivityRow.createCell(0);
+        noActivityCell.setCellValue("Aucune activité cette semaine");
+        noActivityCell.setCellStyle(noActivityCellStyle); // Apply custom style if needed
+      } else {
+        for (Mission mission : missionsForDirection) {
+          rowIdx = addMissionData(sheet, rowIdx, mission, missionCellStyle, activityCellStyle);
+        }
+      }
+
+      // Auto-size columns for better readability
+      autoSizeColumns(sheet);
+
+      // Write the workbook to the output stream
+      workbook.write(byteArrayOutputStream);
+      return byteArrayOutputStream.toByteArray();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  // Assume this method is defined to create a style for the no activity message
+  private CellStyle createNoActivityCellStyle(XSSFWorkbook workbook) {
+    CellStyle style = workbook.createCellStyle();
+    // Add any specific styling, e.g., font size, color, etc.
+    return style;
+  }
+
 
   public byte[] createMissionReportExcel(List<Mission> missions, String dates) {
     try (XSSFWorkbook workbook = new XSSFWorkbook();
@@ -254,7 +317,7 @@ public class FileService {
   private void createTitleRow(Sheet sheet, CellStyle titleCellStyle, String dates) {
     Row titleRow = sheet.createRow(0);
     Cell titleCell = titleRow.createCell(2);
-    titleCell.setCellValue("Mission Report - " + dates);
+    titleCell.setCellValue("Rapport des activités du " + dates);
     titleCell.setCellStyle(titleCellStyle);
     sheet.addMergedRegion(new CellRangeAddress(0, 0, 2, 6));
   }
