@@ -12,18 +12,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MissionPostedListener {
-
   @Autowired private NotificationService notificationService;
 
   @EventListener
   public void onMissionPosted(MissionPostedEvent event) {
     Mission mission = event.getMission();
     Direction direction = event.getDirection();
-
     User poster = mission.getPostedBy();
-
     List<User> responsibles = direction.getResponsible();
-
     responsibles.stream()
         .filter(responsible -> !responsible.equals(poster))
         .forEach(

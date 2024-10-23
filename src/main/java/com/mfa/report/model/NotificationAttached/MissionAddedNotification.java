@@ -1,9 +1,11 @@
-package com.mfa.report.model;
+package com.mfa.report.model.NotificationAttached;
 
+import com.mfa.report.model.Mission;
+import com.mfa.report.model.Notification;
+import com.mfa.report.model.User;
 import com.mfa.report.model.enumerated.NotificationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 
 import java.time.LocalDateTime;
 

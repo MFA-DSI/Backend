@@ -1,6 +1,9 @@
 package com.mfa.report.service;
 
 import com.mfa.report.model.*;
+import com.mfa.report.model.NotificationAttached.MissionAddedNotification;
+import com.mfa.report.model.NotificationAttached.NextTaskNotification;
+import com.mfa.report.model.NotificationAttached.RecommendationNotification;
 import com.mfa.report.repository.NotificationRepository;
 import com.mfa.report.repository.exception.NotFoundException;
 

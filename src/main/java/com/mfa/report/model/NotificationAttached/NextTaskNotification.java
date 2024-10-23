@@ -1,12 +1,13 @@
-package com.mfa.report.model;
+package com.mfa.report.model.NotificationAttached;
 
+import com.mfa.report.model.NextTask;
+import com.mfa.report.model.Notification;
+import com.mfa.report.model.User;
 import com.mfa.report.model.enumerated.NotificationStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 
 import java.time.LocalDateTime;
 

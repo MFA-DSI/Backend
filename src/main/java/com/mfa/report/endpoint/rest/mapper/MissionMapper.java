@@ -6,6 +6,9 @@ import com.mfa.report.endpoint.rest.model.RestEntity.MissionWithDirectionName;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
 import com.mfa.report.model.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 import com.mfa.report.service.UserService;
@@ -33,17 +36,17 @@ public class MissionMapper {
         .build();
   }
 
-
-  public com.mfa.report.endpoint.rest.model.RestEntity.Mission toDomainWithService(Mission mission) {
+  public com.mfa.report.endpoint.rest.model.RestEntity.Mission toDomainWithService(
+      Mission mission) {
     return com.mfa.report.endpoint.rest.model.RestEntity.Mission.builder()
-            .id(mission.getId())
-            .description(mission.getDescription())
-            .service(serviceMapper.toDomain(mission.getService()))
-            .activityList(
-                    mission.getActivity().stream()
-                            .map(activityMapper::toDomainList)
-                            .collect(Collectors.toList()))
-            .build();
+        .id(mission.getId())
+        .description(mission.getDescription())
+        .service(serviceMapper.toDomain(mission.getService()))
+        .activityList(
+            mission.getActivity().stream()
+                .map(activityMapper::toDomainList)
+                .collect(Collectors.toList()))
+        .build();
   }
 
   public com.mfa.report.endpoint.rest.model.RestEntity.Mission toDomainList(Mission mission) {
@@ -80,6 +83,7 @@ public class MissionMapper {
         .description(mission.getName())
         .postedBy(userService.getUserById(mission.getPostedBy()))
         .direction(direction)
+        .creationDatetime(LocalDateTime.now())
         .service(service)
         .build();
   }

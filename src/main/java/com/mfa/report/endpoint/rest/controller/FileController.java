@@ -75,7 +75,6 @@ public class FileController {
         log.info(reportTitle);
        Direction direction = directionService.getDirectionById(directionId);
         List<Mission> missions = missionService.getMissionActivitiesForWeek(date, directionId, 1, pageSize);
-        log.info(String.valueOf(missions.size()));
         byte[] resource = fileService.createMissionReportExcelForDirection(missions, reportTitle,directionId);
         String formattedDate = date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         String fileName = direction.getName() + " Activités + - semaine du+" + formattedDate + ".xlsx";
@@ -87,15 +86,15 @@ public class FileController {
                 .body(resource);
     }
 
-
-
     @PostMapping("/mydirection/mission/export/monthly/excel")
-    public ResponseEntity<byte[]> generateMonthReport(@RequestParam String directionId, @RequestParam int year,@RequestParam int month, @RequestParam int pageSize,@RequestParam String userId) throws IOException {
+    public ResponseEntity<byte[]> generateMonthReport(@RequestParam String directionId, @RequestParam int year,@RequestParam int month, @RequestParam int pageSize) throws IOException {
         // TODO: verify user and make a validation if not responsible
-        String monthName = localDateUtils.getMonthName(month);
+        String monthName = "mois "+ localDateUtils.getMonthName(month);
+
+        Direction direction = directionService.getDirectionById(directionId);
         List<Mission> missions = missionService.getMissionActivitiesForMonth(year,month, directionId, 1, pageSize);
-        byte[] resource = fileService.createMissionReportExcel(missions, monthName);
-        String fileName = missions.get(0).getDirection().getName() + "+mission+ - mois du+" + monthName+ " " + year+ ".xlsx";
+        byte[] resource = fileService.createMissionReportExcelForDirection(missions, monthName,directionId);
+        String fileName = direction.getName() + "+mission+ - mois du+" + monthName+ " " + year+ ".xlsx";
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
                 .contentLength(resource.length)
@@ -103,11 +102,12 @@ public class FileController {
     }
 
     @PostMapping("/mydirection/mission/export/quarter/excel")
-    public ResponseEntity<byte[]> generateQuarterReport(@RequestParam String directionId, @RequestParam int year,@RequestParam int quarter, @RequestParam int pageSize,@RequestParam String userId) throws IOException {
-        String quarterNumber = localDateUtils.getQuarterName(quarter);
+    public ResponseEntity<byte[]> generateQuarterReport(@RequestParam String directionId, @RequestParam int year,@RequestParam int quarter, @RequestParam int pageSize) throws IOException {
+        String quarterNumber = localDateUtils.getQuarterName(quarter)+" "+year;
+        Direction direction = directionService.getDirectionById(directionId);
         List<Mission> missions = missionService.getMissionActivitiesForQuarter(year,quarter, directionId, 1, pageSize);
-        byte[] resource = fileService.createMissionReportExcel(missions, quarterNumber);
-        String fileName = missions.get(0).getDirection().getName() + "+mission du+" + quarterNumber+ "du " + year+ ".xlsx";
+        byte[] resource = fileService.createMissionReportExcelForDirection(missions, quarterNumber,directionId);
+        String fileName = direction.getName()  + "+mission du+" + quarterNumber+ "du " + year+ ".xlsx";
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
                 .contentLength(resource.length)

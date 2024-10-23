@@ -41,12 +41,12 @@ public class MissionService {
   }
 
   public List<Mission> getAllMission(int page, int pageSize) {
-    Pageable pageable = PageRequest.of(page - 1, pageSize);
+    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "creationDatetime"));
     return repository.findAll(pageable).getContent();
   }
 
   public List<Mission> getMissionByDirectionId(String directionId, Integer page, Integer pageSize) {
-    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(ASC, "description"));
+    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "creationDatetime"));
     return repository.findAllByDirectionId(directionId, pageable);
   }
 
@@ -66,7 +66,7 @@ public class MissionService {
   public List<Mission> getMissionActivitiesForWeek(
       LocalDate weekStartDate, String directionId, int page, int pageSize) {
     LocalDate weekEndDate = weekStartDate.plusDays(6);
-    Pageable pageable = PageRequest.of(page - 1, pageSize);
+    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.ASC, "creationDatetime"));
     return repository.findByDirectionAndDate(weekStartDate, weekEndDate, pageable).getContent();
   }
 
@@ -75,7 +75,7 @@ public class MissionService {
     LocalDate monthStartDate = LocalDate.of(year, month, 1);
     LocalDate monthEndDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth());
 
-    Pageable pageable = PageRequest.of(page - 1, pageSize);
+    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.ASC, "creationDatetime"));
     return repository.findByDirectionAndDate(monthStartDate, monthEndDate, pageable).getContent();
   }
 
@@ -102,7 +102,7 @@ public class MissionService {
           }
           default -> throw new IllegalArgumentException("Invalid quarter: " + quarter);
         };
-    Pageable pageable = PageRequest.of(page - 1, pageSize);
+    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.ASC, "creationDatetime"));
     return repository
         .findByDirectionAndDate(quarterStartDate, quarterEndDate, pageable)
         .getContent();
