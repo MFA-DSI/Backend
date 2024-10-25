@@ -41,14 +41,11 @@ public class MissionController {
   private final AssociatedEntitiesService associatedEntitiesService;
   private final DirectionService directionService;
   private final ServiceService serviceService;
-  private final NotificationService notificationService;
-  private final UserService userService;
 
   private final MissionMapper mapper;
   private final ActivityMapper activityMapper;
 
-  private final MissionValidator missionValidator;
-  private final ActivityValidator activityValidator;
+
   private final DirectionValidator directionValidator;
 
   @Autowired private ApplicationEventPublisher eventPublisher;
@@ -169,8 +166,7 @@ public class MissionController {
   }
 
   @GetMapping("/mission/week")
-  @Cacheable(value = "mission", key = "#directionId")
-  public List<MissionDTO> getActivitiesForWeek(
+  public List<MissionDTO> getMissionsForWeek(
       @RequestParam LocalDate weekStartDate,
       @RequestParam String directionId,
       @RequestParam(defaultValue = "1") int page,
@@ -180,9 +176,9 @@ public class MissionController {
         .collect(Collectors.toUnmodifiableList());
   }
 
+
   @GetMapping("/mission/month")
-  @Cacheable(value = "mission", key = "#directionId")
-  public List<MissionDTO> getActivitiesForMonth(
+  public List<MissionDTO> getMissionsForMonth(
       @RequestParam int year,
       @RequestParam int month,
       @RequestParam String directionId,
@@ -194,8 +190,7 @@ public class MissionController {
   }
 
   @GetMapping("/mission/quarter")
-  @Cacheable(value = "mission", key = "#directionId")
-  public List<MissionDTO> getActivitiesForQuarter(
+  public List<MissionDTO> getMissionsForQuarter(
       @RequestParam int year,
       @RequestParam int quarter,
       @RequestParam String directionId,
