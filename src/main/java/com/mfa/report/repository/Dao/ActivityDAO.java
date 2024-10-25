@@ -33,7 +33,7 @@ public class ActivityDAO {
     List<Predicate> predicates = new ArrayList<>();
 
 // Add some conditions and pagination
-    if (directionId != null && !directionId.isEmpty()) {
+    if (directionId != null && !directionId.isEmpty() && !directionId.equals("all")) {
       Predicate directionPredicate = cb.equal(mission.get("direction").get("id"), directionId);
       predicates.add(directionPredicate);
     }

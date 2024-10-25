@@ -6,9 +6,7 @@ import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
 import com.mfa.report.endpoint.rest.model.RestEntity.MissionWithDirectionName;
 import com.mfa.report.model.*;
 import com.mfa.report.model.event.MissionPostedEvent;
-import com.mfa.report.model.validator.ActivityValidator;
 import com.mfa.report.model.validator.DirectionValidator;
-import com.mfa.report.model.validator.MissionValidator;
 import com.mfa.report.service.*;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -44,7 +42,6 @@ public class MissionController {
 
   private final MissionMapper mapper;
   private final ActivityMapper activityMapper;
-
 
   private final DirectionValidator directionValidator;
 
@@ -166,31 +163,30 @@ public class MissionController {
   }
 
   @GetMapping("/mission/week")
-  public List<MissionDTO> getMissionsForWeek(
+  public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getMissionsForWeek(
       @RequestParam LocalDate weekStartDate,
       @RequestParam String directionId,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "15") int pageSize) {
     return service.getMissionActivitiesForWeek(weekStartDate, directionId, page, pageSize).stream()
-        .map(mapper::toDomain)
+        .map(mapper::toDomainList)
         .collect(Collectors.toUnmodifiableList());
   }
 
-
   @GetMapping("/mission/month")
-  public List<MissionDTO> getMissionsForMonth(
+  public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getMissionsForMonth(
       @RequestParam int year,
       @RequestParam int month,
       @RequestParam String directionId,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "15") int pageSize) {
     return service.getMissionActivitiesForMonth(year, month, directionId, page, pageSize).stream()
-        .map(mapper::toDomain)
+        .map(mapper::toDomainList)
         .collect(Collectors.toUnmodifiableList());
   }
 
   @GetMapping("/mission/quarter")
-  public List<MissionDTO> getMissionsForQuarter(
+  public List<com.mfa.report.endpoint.rest.model.RestEntity.Mission> getMissionsForQuarter(
       @RequestParam int year,
       @RequestParam int quarter,
       @RequestParam String directionId,
@@ -199,7 +195,7 @@ public class MissionController {
     return service
         .getMissionActivitiesForQuarter(year, quarter, directionId, page, pageSize)
         .stream()
-        .map(mapper::toDomain)
+        .map(mapper::toDomainList)
         .collect(Collectors.toUnmodifiableList());
   }
 }

@@ -11,6 +11,7 @@ import com.mfa.report.repository.exception.NotFoundException;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
@@ -29,7 +30,6 @@ public class MissionService {
   private final MissionRepository repository;
   private final NotificationService notificationService;
 
-
   public Mission getMissionById(String id) {
     return repository
         .findById(id)
@@ -41,16 +41,16 @@ public class MissionService {
   }
 
   public List<Mission> getAllMission(int page, int pageSize) {
-    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "creationDatetime"));
+    Pageable pageable =
+        PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "creationDatetime"));
     return repository.findAll(pageable).getContent();
   }
 
   public List<Mission> getMissionByDirectionId(String directionId, Integer page, Integer pageSize) {
-    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "creationDatetime"));
+    Pageable pageable =
+        PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "creationDatetime"));
     return repository.findAllByDirectionId(directionId, pageable);
   }
-
-
 
   public Mission crUpdateMission(Mission mission) {
     Mission mission1 = repository.save(mission);
@@ -66,18 +66,33 @@ public class MissionService {
   public List<Mission> getMissionActivitiesForWeek(
       LocalDate weekStartDate, String directionId, int page, int pageSize) {
     LocalDate weekEndDate = weekStartDate.plusDays(6);
-    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.ASC, "creationDatetime"));
-    return repository.findByDirectionAndDate(weekStartDate, weekEndDate, pageable).getContent();
-  }
+    Pageable pageable =
+        PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.ASC, "creationDatetime"));
 
+    if(Objects.equals(directionId, "all")){
+      return repository
+              .findByDirectionAndDate(weekStartDate, weekEndDate, pageable)
+              .getContent();
+    }
+
+    return repository.findByDirectionIdAndDate(directionId,weekStartDate,weekEndDate,pageable).getContent();
+  }
   public List<Mission> getMissionActivitiesForMonth(
       int year, int month, String directionId, int page, int pageSize) {
     LocalDate monthStartDate = LocalDate.of(year, month, 1);
     LocalDate monthEndDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth());
 
-    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.ASC, "creationDatetime"));
-    return repository.findByDirectionAndDate(monthStartDate, monthEndDate, pageable).getContent();
+    Pageable pageable =
+        PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.ASC, "creationDatetime"));
+    if(Objects.equals(directionId, "all")){
+      return repository
+              .findByDirectionAndDate(monthStartDate, monthEndDate, pageable)
+              .getContent();
+    }
+
+    return repository.findByDirectionIdAndDate(directionId,monthStartDate,monthEndDate,pageable).getContent();
   }
+
 
   public List<Mission> getMissionActivitiesForQuarter(
       int year, int quarter, String directionId, int page, int pageSize) {
@@ -102,9 +117,17 @@ public class MissionService {
           }
           default -> throw new IllegalArgumentException("Invalid quarter: " + quarter);
         };
-    Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.ASC, "creationDatetime"));
+    Pageable pageable =
+        PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.ASC, "creationDatetime"));
+
+    if (Objects.equals(directionId, "all")) {
+      return repository
+          .findByDirectionAndDate(quarterStartDate, quarterEndDate, pageable)
+          .getContent();
+    }
+
     return repository
-        .findByDirectionAndDate(quarterStartDate, quarterEndDate, pageable)
+        .findByDirectionIdAndDate(directionId, quarterStartDate, quarterEndDate, pageable)
         .getContent();
   }
 }
