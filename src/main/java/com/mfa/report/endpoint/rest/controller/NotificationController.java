@@ -20,8 +20,9 @@ public class NotificationController {
     private final NotificationMapper mapper;
 
     @GetMapping("/notification/user")
-    public List<NotificationDTO> getAllNotification(@RequestParam String userId){
-        return service.getNotification(userId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
+    public List<NotificationDTO> getAllNotification(@RequestParam String userId,@RequestParam(defaultValue = "1") int page,
+    @RequestParam(defaultValue = "15") int pageSize){
+        return service.getNotification(userId,page,pageSize).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
     }
 
 

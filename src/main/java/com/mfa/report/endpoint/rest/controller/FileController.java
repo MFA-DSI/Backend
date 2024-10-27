@@ -62,7 +62,7 @@ public class FileController {
     public ResponseEntity<byte[]> generateExcel(@RequestBody List<String> missionIds) throws IOException {
         List<Mission> missions = missionService.findMissionsByIds(missionIds);
         log.info(String.valueOf(missions.size()));
-        byte[] resource = fileService.createMissionReportExcel(missions,"Juillet");
+        byte[] resource = fileService.createMissionReportExcel(missions);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=missions.xlsx")
                 .contentLength(resource.length)

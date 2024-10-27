@@ -15,7 +15,7 @@ public class LocalDateUtils {
         String monthName = date.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault());
         int year = date.getYear();
 
-        return weekOfMonth + (weekOfMonth == 1 ? "ère" : "ème") + " semaine du mois de " + monthName + " " + year;
+        return "du "+weekOfMonth + (weekOfMonth == 1 ? "ère" : "ème") + " semaine du mois de " + monthName + " " + year;
     }
 
     public String getMonthName(int monthNumber) {

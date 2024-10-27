@@ -173,7 +173,7 @@ public class FileService {
   }
 
 
-  public byte[] createMissionReportExcel(List<Mission> missions, String dates) {
+  public byte[] createMissionReportExcel(List<Mission> missions) {
     try (XSSFWorkbook workbook = new XSSFWorkbook();
          ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
 
@@ -208,7 +208,7 @@ public class FileService {
         Sheet sheet = workbook.createSheet(sheetName);
 
         // Create title, direction, and header rows
-        createTitleRow(sheet, titleCellStyle, dates);
+        createTitleRow(sheet, titleCellStyle, "inter-direction");
         createDirectionRow(sheet, directionCellStyle, directionDescription);
         createHeaderRow(sheet, headerCellStyle);
 
@@ -317,7 +317,7 @@ public class FileService {
   private void createTitleRow(Sheet sheet, CellStyle titleCellStyle, String dates) {
     Row titleRow = sheet.createRow(0);
     Cell titleCell = titleRow.createCell(2);
-    titleCell.setCellValue("Rapport des activités du " + dates);
+    titleCell.setCellValue("Rapport des activités  " + dates);
     titleCell.setCellStyle(titleCellStyle);
     sheet.addMergedRegion(new CellRangeAddress(0, 0, 2, 6));
   }

@@ -85,6 +85,7 @@ public class AuthService {
                             + "_"
                             + userToApprove.getFirstname())
             .password(tempPassword)
+            .directionName(userToApprove.getDirection().getName())
             .build();
   }
 

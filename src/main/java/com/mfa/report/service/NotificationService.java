@@ -10,6 +10,9 @@ import com.mfa.report.repository.exception.NotFoundException;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -21,10 +24,11 @@ public class NotificationService {
   private final NextTaskService nextTaskService;
   private final UserService userService;
 
-  public List<Notification> getNotification(String userId) {
-    return repository
-        .findAllByUserId(userId)
-        .orElseThrow(() -> new NotFoundException("userId with id." + userId + " not found"));
+  public List<Notification> getNotification(String userId, int page, int pageSize) {
+    Pageable pageable =
+        PageRequest.of(page - 1, pageSize,Sort.by("creationDatetime").descending());
+
+    return repository.findAllByUserId(userId, pageable).getContent();
   }
 
   public void addNotification(Notification notification) {
