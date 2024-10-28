@@ -50,6 +50,13 @@ public class ActivityController {
         .collect(Collectors.toUnmodifiableList());
   }
 
+  @GetMapping("/activities/top")
+  public List<Object[]> getActivitiesForTopActiveDirection(
+          @RequestParam LocalDate weekStartDate, @RequestParam(required = false) LocalDate endDate,@RequestParam(defaultValue ="1") int page,@RequestParam(defaultValue = "15") int pageSize) {
+    return activityService.getActivitiesForTopDirection(weekStartDate, endDate,page,pageSize);
+  }
+
+
 
   @GetMapping("/activities/all")
   public List<ActivityDTO> getAllActivities(@RequestParam(defaultValue = "1")  int page, @RequestParam(defaultValue = "15",name = "page_size") int pageSize) {

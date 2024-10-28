@@ -50,4 +50,39 @@ public class ActivityDAO {
     return  typedQuery.getResultList();
 
   }
+
+  public List<Object[]> findTopActivitiesByDateRangeAndDirection(
+          LocalDate startDate, LocalDate endDate, int page, int pageSize) {
+
+    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
+
+    Root<Activity> activity = query.from(Activity.class);
+    Join<Activity, Mission> mission = activity.join("mission", JoinType.LEFT);
+    Join<Mission, Direction> direction = mission.join("direction", JoinType.LEFT);
+
+    // Création de la condition de filtrage par date
+    List<Predicate> predicates = new ArrayList<>();
+    if (startDate != null && endDate != null) {
+      Predicate dateRangePredicate = cb.between(activity.get("dueDatetime"), startDate, endDate);
+      predicates.add(dateRangePredicate);
+    }
+
+    // Sélectionne la direction et le nombre total d'activités par direction
+    query.multiselect(
+            direction.get("id"), // Identifiant de la direction
+            direction.get("name"), // Nom de la direction
+            cb.count(activity) // Compte le nombre d'activités
+    );
+
+    query.where(cb.and(predicates.toArray(new Predicate[0])));
+    query.groupBy(direction.get("id"), direction.get("name"));
+    query.orderBy(cb.desc(cb.count(activity)));
+
+    TypedQuery<Object[]> typedQuery = entityManager.createQuery(query);
+    typedQuery.setFirstResult((page - 1) * pageSize);
+    typedQuery.setMaxResults(pageSize);
+
+    return typedQuery.getResultList();
+  }
 }

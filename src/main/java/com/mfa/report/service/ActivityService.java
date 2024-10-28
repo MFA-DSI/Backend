@@ -137,5 +137,11 @@ public class ActivityService {
 
     repository.delete(activity);
   }
+  public List<Object[]> getActivitiesForTopDirection(
+          LocalDate startDate,LocalDate endDate, int page, int pageSize) {
+    return activityDAO.findTopActivitiesByDateRangeAndDirection(
+            startDate,endDate, page, pageSize);
+  }
+
 
 }

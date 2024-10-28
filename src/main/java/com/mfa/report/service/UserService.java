@@ -28,6 +28,9 @@ public class UserService {
   public User getUserByUserMail(String mail) {
     return userRepository.findByEmail(mail);
   }
+  public User getUserByPhoneNumbers(String phone){
+    return  userRepository.findByPhoneNumbers(phone);
+  }
 
   public User getUserById(String id) {
     return userRepository

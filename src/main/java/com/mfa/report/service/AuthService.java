@@ -66,7 +66,7 @@ public class AuthService {
 
   public NewUser approveUser(String toApproveUserId, String userId) {
     User user = userService.getUserById(userId);
-    if (!user.getRole().equals(Role.ADMIN)) {
+    if (!user.getRole().equals(Role.ADMIN) && !user.getRole().equals(Role.SUPER_ADMIN)){
       throw new ForbiddenException("Your not authorized to approve user");
     }
     User userToApprove = userService.getUserById(toApproveUserId);
@@ -127,16 +127,25 @@ public class AuthService {
       throw new IllegalArgumentException(
           "Either a valid email or at least one valid phone number must be provided.");
     }
-    if (phoneNumbers != null) {
-      userValidator.validatePhoneNumbers(phoneNumbers);
-    }
-    if (email != null) {
-      User existingUser = userService.getUserByUserMail(email);
-      if (existingUser != null) {
-        throw new DuplicateKeyException(
-            "User with the email address: " + email + " already exists.");
+    if (phoneNumbers != null || email != null) {
+      if (phoneNumbers != null) {
+        userValidator.validatePhoneNumbers(phoneNumbers);
+        User existingUser = userService.getUserByPhoneNumbers(phoneNumbers);
+        if (existingUser != null) {
+          throw new DuplicateKeyException(
+                  "User with the phone numbers: " + phoneNumbers + " already exists.");
+        }
+      }
+
+      if (email != null) {
+        User existingUser = userService.getUserByUserMail(email);
+        if (existingUser != null) {
+          throw new DuplicateKeyException(
+                  "User with the email address: " + email + " already exists.");
+        }
       }
     }
+
 
     String tempPassword = generateTemporaryPassword();
     User createdUser =
