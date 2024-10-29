@@ -3,6 +3,8 @@ package com.mfa.report.endpoint.rest.mapper;
 import com.mfa.report.endpoint.rest.model.DTO.ActivityDTO;
 import com.mfa.report.model.Activity;
 import com.mfa.report.service.MissionService;
+
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -56,6 +58,7 @@ public class ActivityMapper {
         .prediction(activityDTO.getPrediction())
         .observation(activityDTO.getObservation())
         .dueDatetime(activityDTO.getDueDatetime())
+        .creationDatetime(LocalDateTime.now())
         .build();
   }
 

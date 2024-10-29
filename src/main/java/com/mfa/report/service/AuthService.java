@@ -36,6 +36,10 @@ public class AuthService {
     User user = userService.getUserByUserMail(email);
 
     if (user == null) {
+      user = userService.getUserByPhoneNumbers(email);
+    }
+
+    if (user == null) {
       throw new BadRequestException("Invalid credentials");
     }
 

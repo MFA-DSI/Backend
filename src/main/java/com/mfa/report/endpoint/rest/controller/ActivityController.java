@@ -10,7 +10,9 @@ import com.mfa.report.model.validator.DirectionValidator;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.mfa.report.service.*;
@@ -51,7 +53,7 @@ public class ActivityController {
   }
 
   @GetMapping("/activities/top")
-  public List<Object[]> getActivitiesForTopActiveDirection(
+  public List<Map<String, Object>> getActivitiesForTopActiveDirection(
           @RequestParam LocalDate weekStartDate, @RequestParam(required = false) LocalDate endDate,@RequestParam(defaultValue ="1") int page,@RequestParam(defaultValue = "15") int pageSize) {
     return activityService.getActivitiesForTopDirection(weekStartDate, endDate,page,pageSize);
   }
@@ -113,6 +115,7 @@ public class ActivityController {
     activity.setPrediction(activityDTO.getPrediction());
     activity.setObservation(activityDTO.getObservation());
     activity.setDescription(activityDTO.getDescription());
+    activity.setCreationDatetime(LocalDateTime.now());
     Activity savedActivity = activityService.crUpdateActivity(activity);
 
     return mapper.toDomain(savedActivity);

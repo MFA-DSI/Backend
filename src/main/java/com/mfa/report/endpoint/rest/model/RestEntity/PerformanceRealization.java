@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class PerformanceRealization {
     private  String id;
-    private Long indicators;
+    private Double indicators;
     private String realization;
     private String realizationType;
 }

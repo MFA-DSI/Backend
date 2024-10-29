@@ -23,7 +23,7 @@ public class PerformanceRealization {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private String id;
 
-  private Long KPI;
+  private double KPI;
   private String realization;
 
   @Enumerated(EnumType.STRING)

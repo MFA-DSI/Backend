@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -53,7 +55,7 @@ public class ActivityService {
   }
 
   public Page<Activity> getActivities(int page, int pageSize) {
-    Pageable pageable = PageRequest.of(page - 1, pageSize);
+    Pageable pageable = PageRequest.of(page - 1, pageSize ,Sort.by(Sort.Direction.DESC, "creationDatetime"));
     return repository.findAll(pageable);
   }
 
@@ -137,9 +139,9 @@ public class ActivityService {
 
     repository.delete(activity);
   }
-  public List<Object[]> getActivitiesForTopDirection(
+  public List<Map<String, Object>> getActivitiesForTopDirection(
           LocalDate startDate,LocalDate endDate, int page, int pageSize) {
-    return activityDAO.findTopActivitiesByDateRangeAndDirection(
+    return activityDAO.findEfficiencyByDateRangeAndDirection(
             startDate,endDate, page, pageSize);
   }
 

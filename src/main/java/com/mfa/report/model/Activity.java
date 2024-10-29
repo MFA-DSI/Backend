@@ -3,6 +3,7 @@ package com.mfa.report.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,6 +32,7 @@ public class Activity {
   private String prediction;
   private LocalDate dueDatetime;
   private String observation;
+  private LocalDateTime creationDatetime;
 
   @ManyToOne
   @NotBlank(message = "Activity mission is mandatory")
