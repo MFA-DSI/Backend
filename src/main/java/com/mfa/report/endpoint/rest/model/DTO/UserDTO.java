@@ -16,6 +16,7 @@ public class UserDTO {
   private String mail;
   private String phoneNumbers;
   private String function;
+  private boolean staff;
   private String grade;
   private String directionId;
 }

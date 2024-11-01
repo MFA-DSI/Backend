@@ -54,9 +54,9 @@ public class User implements Serializable {
 
   private Boolean approved;
 
-  private  String phoneNumbers;
+  private String phoneNumbers;
 
-  private boolean firstLogin ;
+  private boolean firstLogin;
 
   @Enumerated(EnumType.STRING)
   private Role role;
@@ -66,6 +66,8 @@ public class User implements Serializable {
 
   @NotBlank(message = "function is mandatory")
   private String function;
+
+  private boolean staff;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
   private List<Notification> notificationList;

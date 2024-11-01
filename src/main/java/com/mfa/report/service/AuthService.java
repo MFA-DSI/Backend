@@ -62,7 +62,7 @@ public class AuthService {
     }
 
     return AuthResponse.builder()
-        .token(jwtService.generateToken(user.getRole(), user.getId()))
+        .token(jwtService.generateToken(user.getRole(), String.valueOf(user.isStaff())))
         .userId(user.getId())
         .directionId(user.getDirection().getId())
         .build();
@@ -70,7 +70,7 @@ public class AuthService {
 
   public NewUser approveUser(String toApproveUserId, String userId) {
     User user = userService.getUserById(userId);
-    if (!user.getRole().equals(Role.ADMIN) && !user.getRole().equals(Role.SUPER_ADMIN)){
+    if (!user.getRole().equals(Role.ADMIN) && !user.getRole().equals(Role.SUPER_ADMIN)) {
       throw new ForbiddenException("Your not authorized to approve user");
     }
     User userToApprove = userService.getUserById(toApproveUserId);
@@ -80,17 +80,17 @@ public class AuthService {
     userService.crupdateUser(userToApprove);
 
     return NewUser.builder()
-            .id(userToApprove.getId())
-            .identity((getValidIdentity(userToApprove.getEmail(), userToApprove.getPhoneNumbers())))
-            .name(
-                    userToApprove.getGrade()
-                            + "_"
-                            + userToApprove.getLastname()
-                            + "_"
-                            + userToApprove.getFirstname())
-            .password(tempPassword)
-            .directionName(userToApprove.getDirection().getName())
-            .build();
+        .id(userToApprove.getId())
+        .identity((getValidIdentity(userToApprove.getEmail(), userToApprove.getPhoneNumbers())))
+        .name(
+            userToApprove.getGrade()
+                + "_"
+                + userToApprove.getLastname()
+                + "_"
+                + userToApprove.getFirstname())
+        .password(tempPassword)
+        .directionName(userToApprove.getDirection().getName())
+        .build();
   }
 
   public AuthResponse updateUserPassword(String userId, String password, String newPassword) {
@@ -137,7 +137,7 @@ public class AuthService {
         User existingUser = userService.getUserByPhoneNumbers(phoneNumbers);
         if (existingUser != null) {
           throw new DuplicateKeyException(
-                  "User with the phone numbers: " + phoneNumbers + " already exists.");
+              "User with the phone numbers: " + phoneNumbers + " already exists.");
         }
       }
 
@@ -145,11 +145,10 @@ public class AuthService {
         User existingUser = userService.getUserByUserMail(email);
         if (existingUser != null) {
           throw new DuplicateKeyException(
-                  "User with the email address: " + email + " already exists.");
+              "User with the email address: " + email + " already exists.");
         }
       }
     }
-
 
     String tempPassword = generateTemporaryPassword();
     User createdUser =
@@ -213,11 +212,13 @@ public class AuthService {
                         .lastname(toSignUp.getLastname())
                         .direction(directionService.getDirectionById(toSignUp.getDirectionId()))
                         .role(Role.ADMIN)
+                        .staff(toSignUp.isStaff())
                         .grade(Grade.valueOf(toSignUp.getGrade()))
                         .function(toSignUp.getFunction())
                         .password(passwordEncoder.encode(tempPassword))
                         .approved(true)
                         .firstLogin(true)
+                        .staff(toSignUp.isStaff())
                         .build()))
             .get(0);
 

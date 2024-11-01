@@ -19,5 +19,6 @@ public class SignUp {
   private String function;
   private String grade;
   private String password;
+  private boolean staff;
   private String directionId;
 }

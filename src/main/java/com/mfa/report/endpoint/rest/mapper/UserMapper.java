@@ -25,6 +25,7 @@ public class UserMapper {
         .mail(user.getEmail())
         .phoneNumbers(user.getPhoneNumbers())
         .directionId(user.getDirection().getId())
+        .staff(user.isStaff())
         .build();
   }
 
@@ -48,6 +49,7 @@ public class UserMapper {
         .grade(Grade.valueOf(userDTO.getGrade()))
         .function(userDTO.getFunction())
         .phoneNumbers(userDTO.getPhoneNumbers())
+        .staff(userDTO.isStaff())
         .direction(directionService.getDirectionById(userDTO.getDirectionId()))
         .build();
   }

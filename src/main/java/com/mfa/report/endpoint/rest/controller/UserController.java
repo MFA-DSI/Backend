@@ -3,6 +3,7 @@ package com.mfa.report.endpoint.rest.controller;
 import com.mfa.report.endpoint.rest.mapper.UserMapper;
 import com.mfa.report.endpoint.rest.model.DTO.UserDTO;
 import com.mfa.report.endpoint.rest.model.RestEntity.User;
+import com.mfa.report.model.enumerated.Grade;
 import com.mfa.report.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/user/")
+@RequestMapping("/user")
 @CrossOrigin(origins = "*")
 @Slf4j
 public class UserController {
@@ -19,8 +20,15 @@ public class UserController {
   private final UserMapper mapper;
 
   @PutMapping("/modify")
-  public ResponseEntity<UserDTO> modifyRole(@RequestParam String id, @RequestParam String role) {
-    return ResponseEntity.ok(mapper.toDomain(service.ModifyUserRole(id, role)));
+  public ResponseEntity<UserDTO> modifyUserInformation(@RequestParam String id, @RequestBody   UserDTO userInfoUpdate) {
+    com.mfa.report.model.User user = service.getUserById(id);
+    user.setFirstname(userInfoUpdate.getFirstname());
+    user.setLastname(userInfoUpdate.getLastname());
+    user.setGrade(Grade.valueOf(userInfoUpdate.getGrade()));
+    user.setEmail(userInfoUpdate.getMail());
+    user.setPhoneNumbers(userInfoUpdate.getPhoneNumbers());
+    service.crupdateUser(user);
+    return ResponseEntity.ok(mapper.toDomain(user));
   }
 
   @GetMapping("/information")

@@ -20,7 +20,7 @@ public class ExcelService {
 
         // Créer la première ligne pour les en-têtes
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"Désignation", "Tâche", "Tâche Prochaine", "Date", "Observation", "Prédiction", "Autre"};
+        String[] headers = {"Désignation", "Tâche", "Tâche Prochaine", "Date", "Observation", "Prévision", "Autre"};
 
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);

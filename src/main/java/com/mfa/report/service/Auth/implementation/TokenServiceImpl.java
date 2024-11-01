@@ -25,7 +25,7 @@ public class TokenServiceImpl implements TokenService {
   private long expiryOffset;
 
   @Override
-  public Token generateToken(Role role, String userId) {
+  public Token generateToken(Role role, String isStaff) {
 
     String jwtToken =
         JWT.create()
@@ -34,7 +34,7 @@ public class TokenServiceImpl implements TokenService {
                 .withIssuer(issuer)
                 .withAudience("direction-audience")
                 .withClaim("role", List.of(role.toString()))
-                .withClaim("userId", userId)
+                .withClaim("isStaff", isStaff)
                 .withExpiresAt(new Date().toInstant().plusMillis(expiryOffset))
                 .sign(algorithm);
 
