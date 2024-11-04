@@ -34,7 +34,7 @@ public class TokenServiceImpl implements TokenService {
                 .withIssuer(issuer)
                 .withAudience("direction-audience")
                 .withClaim("role", List.of(role.toString()))
-                .withClaim("isStaff", isStaff)
+                .withClaim("isStaff", isStaff )
                 .withExpiresAt(new Date().toInstant().plusMillis(expiryOffset))
                 .sign(algorithm);
 

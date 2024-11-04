@@ -4,9 +4,11 @@ package com.mfa.report.endpoint.rest.controller;
 import com.mfa.report.endpoint.rest.controller.utils.LocalDateUtils;
 import com.mfa.report.endpoint.rest.mapper.MissionMapper;
 import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
+import com.mfa.report.model.Activity;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
 import com.mfa.report.model.validator.DirectionValidator;
+import com.mfa.report.service.ActivityService;
 import com.mfa.report.service.DirectionService;
 import com.mfa.report.service.FileService;
 import com.mfa.report.service.MissionService;
@@ -16,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -35,8 +38,35 @@ public class FileController {
     private final MissionService missionService;
     private final MissionMapper missionMapper;
     private final DirectionService directionService;
+    private  final ActivityService activityService;
     private final LocalDateUtils localDateUtils;
     private final DirectionValidator directionValidator;
+
+
+    @GetMapping("/activity/export/excel")
+    public void exportExcel(@RequestBody List<String> ids, HttpServletResponse response) throws IOException {
+        List<Activity> activities = activityService.getActivitiesByIds(ids);
+        byte[] excelBytes = fileService.createActivityExcel(activities);
+
+        log.info(String.valueOf(activities.size()));
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=activities.xlsx");
+        response.setContentLength(excelBytes.length);
+        response.getOutputStream().write(excelBytes);
+        response.getOutputStream().flush();
+    }
+
+    @GetMapping("/activity/report/excel")
+    public ResponseEntity<byte[]> getActivityReportWeekly(@RequestParam String directionId, @RequestParam LocalDate date, @RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15") int pageSize) throws IOException {
+        List<Activity> activities = activityService.getActivitiesForWeek(date,directionId,page,pageSize);
+        byte[] excelBytes = fileService.createActivityReportExcel("DSI",date,activities);
+            String filename = "file-activities";
+        log.info(String.valueOf(activities.size()));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=activities.xlsx")
+                .contentLength(excelBytes.length)
+                .body(excelBytes);
+    }
 
 
     @PostMapping("/mission/export/pdf")
@@ -69,6 +99,8 @@ public class FileController {
                 .body(resource);
     }
 
+
+    // TODO: change this to activity display
     @PostMapping("/mydirection/mission/export/week/excel")
     public ResponseEntity<byte[]> generateWeekReport(@RequestParam String directionId, @RequestParam LocalDate date, @RequestParam int pageSize) throws IOException {
         String reportTitle = localDateUtils.generateReportTitleForWeek(date);

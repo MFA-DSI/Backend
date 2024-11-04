@@ -19,12 +19,14 @@ import com.mfa.report.service.*;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+@Slf4j
 @RequestMapping("/direction/")
 @CrossOrigin(origins = "*")
 @RestController
@@ -146,17 +148,7 @@ public class ActivityController {
             .headers(headers)
             .body(docBytes);
 }
-  @GetMapping("/activity/export/excel")
-  public void exportExcel(@RequestParam List<String> ids, HttpServletResponse response) throws IOException {
-    List<Activity> activities = activityService.getActivitiesByIds(ids);
-    byte[] excelBytes = excelService.createActivityExcel(activities);
 
-    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    response.setHeader("Content-Disposition", "attachment; filename=activities.xlsx");
-    response.setContentLength(excelBytes.length);
-    response.getOutputStream().write(excelBytes);
-    response.getOutputStream().flush();
-  }
 
 
 

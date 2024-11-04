@@ -12,13 +12,11 @@ import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-import com.mfa.report.model.Activity;
-import com.mfa.report.model.Mission;
-import com.mfa.report.model.PerformanceRealization;
-import com.mfa.report.model.Recommendation;
+import com.mfa.report.model.*;
 import com.mfa.report.service.utils.FontUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -165,6 +163,205 @@ public class FileService {
     return null;
   }
 
+  public byte[] createActivityExcel(List<Activity> activities) throws IOException {
+    try (XSSFWorkbook workbook = new XSSFWorkbook();
+         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+
+      // Create cell styles (customize as needed)
+      CellStyle headerCellStyle = createHeaderCellStyle(workbook);
+      CellStyle activityCellStyle = createActivityCellStyle(workbook);
+
+      // Enable word wrap and left alignment for activity and task cells
+      activityCellStyle.setWrapText(true);
+      activityCellStyle.setAlignment(HorizontalAlignment.LEFT);
+
+      // Enable word wrap for header cell style as well
+      headerCellStyle.setWrapText(true);
+      headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
+
+      // Create a sheet
+      Sheet sheet = workbook.createSheet("Activities");
+
+      // Create header row with increased height for better readability
+      Row headerRow = sheet.createRow(0);
+      headerRow.setHeightInPoints(40); // Increase header row height for wrapping
+
+      String[] headers = {
+              "ACTIVITÉS MENSUELLES PRÉVUES (désignation)",
+              "SOUS-ACTIVITÉS RÉALISÉES (OU TÂCHES) HEBDOMADAIRES",
+              "SOUS-ACTIVITÉS À RÉALISER POUR LA SEMAINE PROCHAINE",
+              "OBSERVATIONS",
+              "PRÉVISION"
+      };
+      for (int i = 0; i < headers.length; i++) {
+        Cell cell = headerRow.createCell(i);
+        cell.setCellValue(headers[i]);
+        cell.setCellStyle(headerCellStyle);
+      }
+
+      // Populate activities and related lists
+      int rowIdx = 1;
+      for (Activity activity : activities) {
+        // Row for the main activity information
+        Row activityRow = sheet.createRow(rowIdx++);
+
+        // Activity description
+        activityRow.createCell(0).setCellValue(activity.getDescription());
+
+        // Join task descriptions with newline character for realized weekly tasks
+        String realizedTasks = activity.getTaskList().stream()
+                .map(task -> "- " + task.getDescription())
+                .collect(Collectors.joining("\n"));
+        Cell taskCell = activityRow.createCell(1);
+        taskCell.setCellValue(realizedTasks);
+        taskCell.setCellStyle(activityCellStyle);
+
+        // Join next task descriptions with newline character for next week's tasks
+        String nextWeekTasks = activity.getNexTaskList().stream()
+                .map(nextTask -> "- " + nextTask.getDescription())
+                .collect(Collectors.joining("\n"));
+        Cell nextTaskCell = activityRow.createCell(2);
+        nextTaskCell.setCellValue(nextWeekTasks);
+        nextTaskCell.setCellStyle(activityCellStyle);
+
+        // Observations and predictions
+        Cell observationCell = activityRow.createCell(3);
+        observationCell.setCellValue(activity.getObservation());
+        observationCell.setCellStyle(activityCellStyle);
+
+        Cell predictionCell = activityRow.createCell(4);
+        predictionCell.setCellValue(activity.getPrediction());
+        predictionCell.setCellStyle(activityCellStyle);
+
+        // Set left alignment and wrapping for all cells in the main row
+        for (int i = 0; i < headers.length; i++) {
+          Cell cell = activityRow.getCell(i);
+          if (cell == null) {
+            cell = activityRow.createCell(i);
+          }
+          cell.setCellStyle(activityCellStyle);
+        }
+      }
+
+      // Auto-size columns for readability
+      for (int i = 0; i < headers.length; i++) {
+        sheet.autoSizeColumn(i);
+      }
+
+      // Write the workbook to the output stream
+      workbook.write(byteArrayOutputStream);
+      return byteArrayOutputStream.toByteArray();
+    }
+  }
+
+  public byte[] createActivityReportExcel(String directionName, LocalDate startDate, List<Activity> activities) throws IOException {
+    LocalDate endDate = startDate.plusDays(7);
+    try (XSSFWorkbook workbook = new XSSFWorkbook();
+         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+
+      // Create cell styles
+      CellStyle headerCellStyle = createHeaderCellStyle(workbook);
+      CellStyle activityCellStyle = createActivityCellStyle(workbook);
+      activityCellStyle.setWrapText(true);
+      activityCellStyle.setAlignment(HorizontalAlignment.LEFT);
+
+      // Styles for direction and title rows
+      CellStyle titleStyle = workbook.createCellStyle();
+      Font titleFont = workbook.createFont();
+      titleFont.setBold(true);
+      titleFont.setFontHeightInPoints((short) 14);  // Title font size
+      titleStyle.setFont(titleFont);
+
+      CellStyle subtitleStyle = workbook.createCellStyle();
+      Font subtitleFont = workbook.createFont();
+      subtitleFont.setBold(true);
+      subtitleFont.setFontHeightInPoints((short) 12);  // Subtitle font size
+      subtitleStyle.setFont(subtitleFont);
+
+      // Create a sheet
+      Sheet sheet = workbook.createSheet("Activities");
+
+      // Add direction name at the top
+      Row directionRow = sheet.createRow(0);
+      Cell directionCell = directionRow.createCell(0);
+      directionCell.setCellValue("Direction: " + directionName);
+      directionCell.setCellStyle(titleStyle);
+
+      // Merge cells for direction title for a more centered display
+      sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
+
+      // Add report title with date range on the second row
+      Row titleRow = sheet.createRow(1);
+      Cell titleCell = titleRow.createCell(0);
+      titleCell.setCellValue("COMPTE RENDU DES ACTIVITES HEBDOMADAIRES DE LA " + directionName + " DU " + startDate.toString() + " AU " + endDate.toString());
+      titleCell.setCellStyle(subtitleStyle);
+
+      // Merge cells for the title row
+      sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 4));
+
+      // Create header row for the table
+      Row headerRow = sheet.createRow(3);
+      headerRow.setHeightInPoints(40); // Increase header row height for readability
+
+      String[] headers = {
+              "ACTIVITÉS MENSUELLES PRÉVUES (désignation)",
+              "SOUS-ACTIVITÉS RÉALISÉES (OU TÂCHES) HEBDOMADAIRES",
+              "SOUS-ACTIVITÉS À RÉALISER POUR LA SEMAINE PROCHAINE",
+              "OBSERVATIONS",
+              "PRÉVISION"
+      };
+
+      for (int i = 0; i < headers.length; i++) {
+        Cell cell = headerRow.createCell(i);
+        cell.setCellValue(headers[i]);
+        cell.setCellStyle(headerCellStyle);
+      }
+
+      // Populate activities and related lists
+      int rowIdx = 4;
+      for (Activity activity : activities) {
+        Row activityRow = sheet.createRow(rowIdx++);
+
+        // Activity description
+        activityRow.createCell(0).setCellValue(activity.getDescription());
+
+        // Realized weekly tasks
+        String realizedTasks = activity.getTaskList().stream()
+                .map(task -> "- " + task.getDescription())
+                .collect(Collectors.joining("\n"));
+        Cell taskCell = activityRow.createCell(1);
+        taskCell.setCellValue(realizedTasks);
+        taskCell.setCellStyle(activityCellStyle);
+
+        // Next week's tasks
+        String nextWeekTasks = activity.getNexTaskList().stream()
+                .map(nextTask -> "- " + nextTask.getDescription())
+                .collect(Collectors.joining("\n"));
+        Cell nextTaskCell = activityRow.createCell(2);
+        nextTaskCell.setCellValue(nextWeekTasks);
+        nextTaskCell.setCellStyle(activityCellStyle);
+
+        // Observations and predictions
+        Cell observationCell = activityRow.createCell(3);
+        observationCell.setCellValue(activity.getObservation());
+        observationCell.setCellStyle(activityCellStyle);
+
+        Cell predictionCell = activityRow.createCell(4);
+        predictionCell.setCellValue(activity.getPrediction());
+        predictionCell.setCellStyle(activityCellStyle);
+      }
+
+      // Auto-size columns for readability
+      for (int i = 0; i < headers.length; i++) {
+        sheet.autoSizeColumn(i);
+      }
+
+      // Write the workbook to the output stream
+      workbook.write(byteArrayOutputStream);
+      return byteArrayOutputStream.toByteArray();
+    }
+  }
+
   // Assume this method is defined to create a style for the no activity message
   private CellStyle createNoActivityCellStyle(XSSFWorkbook workbook) {
     CellStyle style = workbook.createCellStyle();
@@ -172,6 +369,13 @@ public class FileService {
     return style;
   }
 
+
+
+  private CellStyle createTaskCellStyle(Workbook workbook) {
+    CellStyle style = workbook.createCellStyle();
+    // Customize style for task rows
+    return style;
+  }
 
   public byte[] createMissionReportExcel(List<Mission> missions) {
     try (XSSFWorkbook workbook = new XSSFWorkbook();
