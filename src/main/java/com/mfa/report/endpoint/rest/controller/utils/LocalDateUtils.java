@@ -3,9 +3,12 @@ package com.mfa.report.endpoint.rest.controller.utils;
 
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.WeekFields;
+import java.util.Date;
 import java.util.Locale;
 
 @Component
@@ -31,6 +34,11 @@ public class LocalDateUtils {
             case 4 -> "4ème trimestre";
             default -> throw new IllegalArgumentException("Invalid quarter number: " + quarterNumber);
         };
+    }
+
+    public String formatDate(LocalDate date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        return date.format(formatter);
     }
 
 }

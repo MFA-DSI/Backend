@@ -1,27 +1,15 @@
 package com.mfa.report.service;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.mfa.report.endpoint.rest.mapper.ActivityMapper;
 import com.mfa.report.endpoint.rest.model.DTO.ActivityDTO;
-import com.mfa.report.endpoint.rest.model.DTO.MissionDTO;
 import com.mfa.report.model.Activity;
 import com.mfa.report.model.Mission;
 import com.mfa.report.repository.ActivityRepository;
 import com.mfa.report.repository.Dao.ActivityDAO;
 import com.mfa.report.repository.exception.NotFoundException;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -36,9 +24,7 @@ import org.springframework.stereotype.Service;
 public class ActivityService {
   private final ActivityRepository repository;
   private final ActivityDAO activityDAO;
-  private  final NotificationService notificationService;
-
-
+  private final NotificationService notificationService;
 
   public String toString(Object object) {
     return "YourClass [attribute1=" + object;
@@ -55,7 +41,8 @@ public class ActivityService {
   }
 
   public Page<Activity> getActivities(int page, int pageSize) {
-    Pageable pageable = PageRequest.of(page - 1, pageSize ,Sort.by(Sort.Direction.DESC, "creationDatetime"));
+    Pageable pageable =
+        PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "creationDatetime"));
     return repository.findAll(pageable);
   }
 
@@ -128,7 +115,7 @@ public class ActivityService {
     repository.delete(activity);
   }
 
-  public List<Activity> getActivitiesByIds(List<String>ids){
+  public List<Activity> getActivitiesByIds(List<String> ids) {
     return repository.findAllById(ids);
   }
 
@@ -139,11 +126,15 @@ public class ActivityService {
 
     repository.delete(activity);
   }
+
   public List<Map<String, Object>> getActivitiesForTopDirection(
-          LocalDate startDate,LocalDate endDate, int page, int pageSize) {
-    return activityDAO.findEfficiencyByDateRangeAndDirection(
-            startDate,endDate, page, pageSize);
+      LocalDate startDate, LocalDate endDate, int page, int pageSize) {
+    return activityDAO.findEfficiencyByDateRangeAndDirection(startDate, endDate, page, pageSize);
   }
 
-
+  public List<Map<String, Object>> getMonthlyActivitiesCountByDateRanger(
+      String directionId, LocalDate startDate, LocalDate endDate, int page, int pageSize) {
+    return activityDAO.findMonthlyActivityCountByDateRangeAndDirection(
+        startDate, endDate, directionId, page, pageSize);
+  }
 }

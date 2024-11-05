@@ -123,6 +123,60 @@ public class ActivityDAO {
     return resultList;
   }
 
+  public List<Map<String, Object>> findMonthlyActivityCountByDateRangeAndDirection(
+          LocalDate startDate, LocalDate endDate, String directionId, int page, int pageSize) {
+
+    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
+
+    Root<Activity> activity = query.from(Activity.class);
+    Join<Activity, Mission> mission = activity.join("mission", JoinType.LEFT);
+    Join<Mission, Direction> direction = mission.join("direction", JoinType.LEFT);
+
+    List<Predicate> predicates = new ArrayList<>();
+
+    // Condition sur la plage de dates
+    if (startDate != null && endDate != null) {
+      Predicate dateRangePredicate = cb.between(activity.get("dueDatetime"), startDate, endDate);
+      predicates.add(dateRangePredicate);
+    }
+
+    // Condition sur la direction
+    if (directionId != null) {
+      Predicate directionPredicate = cb.equal(direction.get("id"), directionId);
+      predicates.add(directionPredicate);
+    }
+
+    // Troncature de la date au niveau du mois pour l'agrégation mensuelle
+    Expression<LocalDate> monthExpression = cb.function("DATE_TRUNC", LocalDate.class, cb.literal("month"), activity.get("dueDatetime"));
+
+    // Multiselect pour obtenir la date du mois et le nombre total d'activités pour chaque mois
+    query.multiselect(
+            monthExpression,           // Mois de l'activité
+            cb.count(activity)         // Nombre total d'activités pour le mois
+    );
+
+    query.where(cb.and(predicates.toArray(new Predicate[0])));
+    query.groupBy(monthExpression);
+    query.orderBy(cb.asc(monthExpression));
+
+    TypedQuery<Object[]> typedQuery = entityManager.createQuery(query);
+    typedQuery.setFirstResult((page - 1) * pageSize);
+    typedQuery.setMaxResults(pageSize);
+
+    List<Object[]> results = typedQuery.getResultList();
+    List<Map<String, Object>> resultList = new ArrayList<>();
+
+    for (Object[] result : results) {
+      Map<String, Object> resultMap = new HashMap<>();
+      resultMap.put("date", result[0]);
+      resultMap.put("totalActivities", result[1]);
+      resultList.add(resultMap);
+    }
+
+    return resultList;
+  }
+
 
 
 }

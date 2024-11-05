@@ -43,7 +43,7 @@ public class FileController {
     private final DirectionValidator directionValidator;
 
 
-    @GetMapping("/activity/export/excel")
+    @PostMapping("/activity/export/excel")
     public void exportExcel(@RequestBody List<String> ids, HttpServletResponse response) throws IOException {
         List<Activity> activities = activityService.getActivitiesByIds(ids);
         byte[] excelBytes = fileService.createActivityExcel(activities);
@@ -56,7 +56,7 @@ public class FileController {
         response.getOutputStream().flush();
     }
 
-    @GetMapping("/activity/report/excel")
+    @PostMapping("/activity/report/excel")
     public ResponseEntity<byte[]> getActivityReportWeekly(@RequestParam String directionId, @RequestParam LocalDate date, @RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15") int pageSize) throws IOException {
         List<Activity> activities = activityService.getActivitiesForWeek(date,directionId,page,pageSize);
         byte[] excelBytes = fileService.createActivityReportExcel("DSI",date,activities);
@@ -106,8 +106,8 @@ public class FileController {
         String reportTitle = localDateUtils.generateReportTitleForWeek(date);
         log.info(reportTitle);
        Direction direction = directionService.getDirectionById(directionId);
-        List<Mission> missions = missionService.getMissionActivitiesForWeek(date, directionId, 1, pageSize);
-        byte[] resource = fileService.createMissionReportExcelForDirection(missions, reportTitle,directionId);
+        List<Activity> activities = activityService.getActivitiesForWeek(date, directionId, 1, pageSize);
+        byte[] resource = fileService.createActivityReportExcel(direction.getName(), date,activities);
         String formattedDate = date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         String fileName = direction.getName() + " Activités + - semaine du+" + formattedDate + ".xlsx";
 

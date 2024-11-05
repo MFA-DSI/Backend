@@ -12,6 +12,7 @@ import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.mfa.report.endpoint.rest.controller.utils.LocalDateUtils;
 import com.mfa.report.model.*;
 import com.mfa.report.service.utils.FontUtils;
 import java.io.ByteArrayOutputStream;
@@ -51,6 +52,7 @@ public class FileService {
   private final MissionService missionService;
   private final DirectionService directionService;
   private final FontUtils fontUtils;
+  private final LocalDateUtils dateUtils;
   private final TemplateEngine templateEngine;
 
   public byte[] createActivityPdf(List<Activity> activities) throws DocumentException, IOException {
@@ -180,14 +182,14 @@ public class FileService {
       headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
 
       // Create a sheet
-      Sheet sheet = workbook.createSheet("Activities");
+      Sheet sheet = workbook.createSheet("Activités des directions");
 
       // Create header row with increased height for better readability
       Row headerRow = sheet.createRow(0);
       headerRow.setHeightInPoints(40); // Increase header row height for wrapping
 
       String[] headers = {
-              "ACTIVITÉS MENSUELLES PRÉVUES (désignation)",
+              "ACTIVITÉS MENSUELLES PRÉVUES",
               "SOUS-ACTIVITÉS RÉALISÉES (OU TÂCHES) HEBDOMADAIRES",
               "SOUS-ACTIVITÉS À RÉALISER POUR LA SEMAINE PROCHAINE",
               "OBSERVATIONS",
@@ -255,7 +257,7 @@ public class FileService {
   }
 
   public byte[] createActivityReportExcel(String directionName, LocalDate startDate, List<Activity> activities) throws IOException {
-    LocalDate endDate = startDate.plusDays(7);
+    LocalDate endDate = startDate.plusDays(5);
     try (XSSFWorkbook workbook = new XSSFWorkbook();
          ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
 
@@ -265,18 +267,23 @@ public class FileService {
       activityCellStyle.setWrapText(true);
       activityCellStyle.setAlignment(HorizontalAlignment.LEFT);
 
+      // Enable word wrap for header cell style as well
+      headerCellStyle.setWrapText(true);
+      headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
+
       // Styles for direction and title rows
       CellStyle titleStyle = workbook.createCellStyle();
       Font titleFont = workbook.createFont();
       titleFont.setBold(true);
-      titleFont.setFontHeightInPoints((short) 14);  // Title font size
+      titleFont.setFontHeightInPoints((short) 16);  // Title font size
       titleStyle.setFont(titleFont);
 
       CellStyle subtitleStyle = workbook.createCellStyle();
       Font subtitleFont = workbook.createFont();
       subtitleFont.setBold(true);
-      subtitleFont.setFontHeightInPoints((short) 12);  // Subtitle font size
+      subtitleFont.setFontHeightInPoints((short) 14);  // Subtitle font size
       subtitleStyle.setFont(subtitleFont);
+      subtitleStyle.setAlignment(HorizontalAlignment.CENTER);
 
       // Create a sheet
       Sheet sheet = workbook.createSheet("Activities");
@@ -293,7 +300,7 @@ public class FileService {
       // Add report title with date range on the second row
       Row titleRow = sheet.createRow(1);
       Cell titleCell = titleRow.createCell(0);
-      titleCell.setCellValue("COMPTE RENDU DES ACTIVITES HEBDOMADAIRES DE LA " + directionName + " DU " + startDate.toString() + " AU " + endDate.toString());
+      titleCell.setCellValue("COMPTE RENDU DES ACTIVITES HEBDOMADAIRES DE LA " + directionName + " DU " + dateUtils.formatDate(startDate)  + " AU " + dateUtils.formatDate(endDate));
       titleCell.setCellStyle(subtitleStyle);
 
       // Merge cells for the title row
@@ -304,7 +311,7 @@ public class FileService {
       headerRow.setHeightInPoints(40); // Increase header row height for readability
 
       String[] headers = {
-              "ACTIVITÉS MENSUELLES PRÉVUES (désignation)",
+              "ACTIVITÉS MENSUELLES PRÉVUES",
               "SOUS-ACTIVITÉS RÉALISÉES (OU TÂCHES) HEBDOMADAIRES",
               "SOUS-ACTIVITÉS À RÉALISER POUR LA SEMAINE PROCHAINE",
               "OBSERVATIONS",
@@ -463,7 +470,7 @@ public class FileService {
     CellStyle headerCellStyle = workbook.createCellStyle();
     headerCellStyle.setFont(headerFont);
     headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
-    headerCellStyle.setFillForegroundColor(IndexedColors.BRIGHT_GREEN.getIndex());
+    headerCellStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
     headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
     return headerCellStyle;

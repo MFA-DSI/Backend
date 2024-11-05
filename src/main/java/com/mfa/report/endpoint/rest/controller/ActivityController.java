@@ -7,24 +7,21 @@ import com.mfa.report.model.Activity;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
 import com.mfa.report.model.validator.DirectionValidator;
-
+import com.mfa.report.service.*;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.mfa.report.service.*;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequestMapping("/direction/")
@@ -40,56 +37,74 @@ public class ActivityController {
   private final FileService fileService;
   private final DOCService docService;
   private final ExcelService excelService;
-  private  final AssociatedEntitiesService associatedEntitiesService;
+  private final AssociatedEntitiesService associatedEntitiesService;
 
   private final DirectionValidator directionValidator;
 
-
-
   @GetMapping("/activities/week")
   public List<ActivityDTO> getActivitiesForWeek(
-      @RequestParam LocalDate weekStartDate, @RequestParam(required = false) String directionId,@RequestParam(defaultValue ="1") int page,@RequestParam(defaultValue = "15") int pageSize) {
-    return activityService.getActivitiesForWeek(weekStartDate, directionId,page,pageSize).stream()
+      @RequestParam LocalDate weekStartDate,
+      @RequestParam(required = false) String directionId,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "15") int pageSize) {
+    return activityService.getActivitiesForWeek(weekStartDate, directionId, page, pageSize).stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
 
   @GetMapping("/activities/top")
   public List<Map<String, Object>> getActivitiesForTopActiveDirection(
-          @RequestParam LocalDate weekStartDate, @RequestParam(required = false) LocalDate endDate,@RequestParam(defaultValue ="1") int page,@RequestParam(defaultValue = "15") int pageSize) {
-    return activityService.getActivitiesForTopDirection(weekStartDate, endDate,page,pageSize);
+      @RequestParam LocalDate weekStartDate,
+      @RequestParam(required = false) LocalDate endDate,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "15") int pageSize) {
+    return activityService.getActivitiesForTopDirection(weekStartDate, endDate, page, pageSize);
   }
 
-
+  @GetMapping("/activities/direction/statistics")
+  public List<Map<String, Object>> getMonthlyActivityCountByDateRangeAndDirection(
+      @RequestParam String directionId,
+      @RequestParam LocalDate weekStartDate,
+      @RequestParam(required = false) LocalDate endDate,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "15") int pageSize) {
+    return activityService.getMonthlyActivitiesCountByDateRanger(
+        directionId, weekStartDate, endDate, page, pageSize);
+  }
 
   @GetMapping("/activities/all")
-  public List<ActivityDTO> getAllActivities(@RequestParam(defaultValue = "1")  int page, @RequestParam(defaultValue = "15",name = "page_size") int pageSize) {
-    return activityService.getActivities(page,pageSize).getContent().stream()
+  public List<ActivityDTO> getAllActivities(
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "15", name = "page_size") int pageSize) {
+    return activityService.getActivities(page, pageSize).getContent().stream()
         .map(mapper::toDomain)
         .collect(Collectors.toUnmodifiableList());
   }
 
-
   @GetMapping("/activity/direction")
-  public List<ActivityDTO> getAllActivitiesByDirectionId(@RequestParam String directionId,@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "15",name = "page_size") int pageSize){
-    return activityService.getActivitiesByDirectionId(directionId,page,pageSize).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
+  public List<ActivityDTO> getAllActivitiesByDirectionId(
+      @RequestParam String directionId,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "15", name = "page_size") int pageSize) {
+    return activityService.getActivitiesByDirectionId(directionId, page, pageSize).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toUnmodifiableList());
   }
 
   @GetMapping("/activity")
-  public ActivityDTO getActivityById(@RequestParam String id){
+  public ActivityDTO getActivityById(@RequestParam String id) {
     return mapper.toDomain(activityService.getActivityById(id));
   }
+
   @DeleteMapping("/activity/delete")
   public ResponseEntity<String> deleteActivity(
-          @RequestParam(name = "activityId") String activityId,
-          @RequestParam(name = "userId") String userId) {
-
+      @RequestParam(name = "activityId") String activityId,
+      @RequestParam(name = "userId") String userId) {
 
     Activity existingActivity = activityService.getActivityById(activityId);
     if (existingActivity == null) {
       return ResponseEntity.notFound().build();
     }
-
 
     Mission associatedMission = existingActivity.getMission();
     if (associatedMission == null) {
@@ -102,11 +117,9 @@ public class ActivityController {
     }
     directionValidator.acceptUser(associatedDirection, userId);
 
-
     activityService.deleteActivity(existingActivity);
     return ResponseEntity.ok("Activity deleted successfully"); // Return 204 No Content
   }
-
 
   @PutMapping("/activity/update")
   @Transactional
@@ -124,7 +137,8 @@ public class ActivityController {
   }
 
   @GetMapping("/activity/export/pdf")
-  public void exportPdf(@RequestParam List<String> ids, HttpServletResponse response) throws IOException, DocumentException {
+  public void exportPdf(@RequestParam List<String> ids, HttpServletResponse response)
+      throws IOException, DocumentException {
     List<Activity> activities = activityService.getActivitiesByIds(ids);
     byte[] pdfBytes = fileService.createActivityPdf(activities);
 
@@ -135,7 +149,8 @@ public class ActivityController {
   }
 
   @GetMapping("/activity/export/doc")
-  public ResponseEntity<byte[]> exportDoc(@RequestParam List<String> ids, HttpServletResponse response) throws IOException {
+  public ResponseEntity<byte[]> exportDoc(
+      @RequestParam List<String> ids, HttpServletResponse response) throws IOException {
     List<Activity> activities = activityService.getActivitiesByIds(ids);
     byte[] docBytes = docService.createActivityDoc(activities);
 
@@ -144,13 +159,6 @@ public class ActivityController {
     headers.setContentDispositionFormData("attachment", "document.docx");
     headers.setContentLength(docBytes.length);
 
-    return ResponseEntity.ok()
-            .headers(headers)
-            .body(docBytes);
-}
-
-
-
-
-
+    return ResponseEntity.ok().headers(headers).body(docBytes);
+  }
 }
