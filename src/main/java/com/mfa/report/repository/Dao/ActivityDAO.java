@@ -55,44 +55,52 @@ public class ActivityDAO {
 
   }
 
+
   public List<Map<String, Object>> findEfficiencyByDateRangeAndDirection(
           LocalDate startDate, LocalDate endDate, int page, int pageSize) {
 
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
 
-    Root<Activity> activity = query.from(Activity.class);
-    Join<Activity, Mission> mission = activity.join("mission", JoinType.LEFT);
-    Join<Mission, Direction> direction = mission.join("direction", JoinType.LEFT);
+    // Utiliser Direction comme racine pour inclure toutes les directions
+    Root<Direction> direction = query.from(Direction.class);
+    Join<Direction, Mission> mission = direction.join("mission", JoinType.LEFT);
+    Join<Mission, Activity> activity = mission.join("activity", JoinType.LEFT);
     Join<Activity, PerformanceRealization> performance = activity.join("performanceRealization", JoinType.LEFT);
 
     List<Predicate> predicates = new ArrayList<>();
+
+    // Ajouter condition de date seulement si startDate et endDate sont fournis
     if (startDate != null && endDate != null) {
       Predicate dateRangePredicate = cb.between(activity.get("dueDatetime"), startDate, endDate);
       predicates.add(dateRangePredicate);
     }
 
-    // Condition pour sélectionner uniquement les performances de type PERCENTAGE
+    // Condition pour les performances de type PERCENTAGE
     Predicate percentageCondition = cb.equal(performance.get("realizationType"), RealizationType.percentage);
 
-    // Condition pour compter les activités "terminées"
+    // Condition pour les activités terminées
     Predicate completedCondition = cb.and(
             cb.equal(performance.get("KPI"), 100),
             percentageCondition
     );
 
-    // Multiselect avec les champs nécessaires, incluant les calculs pour les performances de type PERCENTAGE
+    // Multiselect pour inclure toutes les directions, même sans activités
     query.multiselect(
-            direction.get("id"),                                      // Identifiant de la direction
-            direction.get("name"),                                    // Nom de la direction
-            cb.count(activity),                                       // Nombre total d'activités
-            cb.sum(cb.<Long>selectCase().when(completedCondition, 1L).otherwise(0L)), // Nombre d'activités "terminées"
-            cb.sum(cb.<Long>selectCase().when(completedCondition, 0L).otherwise(1L)), // Nombre d'activités "en cours"
-            cb.avg(cb.<Double>selectCase().when(percentageCondition, performance.get("KPI")).otherwise(0.0)), // Moyenne des KPI pour les performances de type PERCENTAGE
-            cb.sum(cb.<Double>selectCase().when(percentageCondition, performance.get("KPI")).otherwise(0.0))  // Somme des KPI pour les performances de type PERCENTAGE
+            direction.get("id"),                                        // ID de la direction
+            direction.get("name"),                                      // Nom de la direction
+            cb.coalesce(cb.count(activity.get("id")), 0L),              // Nombre total d'activités (0 si null)
+            cb.coalesce(cb.sum(cb.<Long>selectCase().when(completedCondition, 1L).otherwise(0L)), 0L), // Activités terminées
+            cb.coalesce(cb.sum(cb.<Long>selectCase().when(cb.and(cb.not(completedCondition), cb.isNotNull(activity.get("id"))), 1L).otherwise(0L)), 0L), // Activités en cours
+            cb.coalesce(cb.avg(cb.<Double>selectCase().when(percentageCondition, performance.get("KPI")).otherwise(cb.literal(null))), 0.0), // Moyenne KPI
+            cb.coalesce(cb.sum(cb.<Double>selectCase().when(percentageCondition, performance.get("KPI")).otherwise(0.0)), 0.0)  // Somme KPI
     );
 
-    query.where(cb.and(predicates.toArray(new Predicate[0])));
+    // Appliquer les filtres si présents
+    if (!predicates.isEmpty()) {
+      query.where(cb.and(predicates.toArray(new Predicate[0])));
+    }
+
     query.groupBy(direction.get("id"), direction.get("name"));
     query.orderBy(cb.desc(cb.avg(performance.get("KPI"))));
 
@@ -107,7 +115,8 @@ public class ActivityDAO {
       Map<String, Object> resultMap = new HashMap<>();
       long totalActivities = (Long) result[2];
       double sumPerformanceIndicators = (Double) result[6];
-      double efficiencyPercentage = (totalActivities > 0) ? (totalActivities/sumPerformanceIndicators) * 100 : 0;
+      double efficiencyPercentage = (totalActivities > 0 && sumPerformanceIndicators > 0) ?
+              (totalActivities / sumPerformanceIndicators) * 100 : 0;
 
       resultMap.put("directionId", result[0]);
       resultMap.put("directionName", result[1]);
@@ -123,8 +132,12 @@ public class ActivityDAO {
     return resultList;
   }
 
-  public List<Map<String, Object>> findMonthlyActivityCountByDateRangeAndDirection(
-          LocalDate startDate, LocalDate endDate, String directionId, int page, int pageSize) {
+
+  public List<Map<String, Object>> findMonthlyActivityCountByYearAndDirection(
+          int year, String directionId, int page, int pageSize) {
+
+    LocalDate startDate = LocalDate.of(year, 1, 1);
+    LocalDate endDate = LocalDate.of(year, 12, 31);
 
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
@@ -135,46 +148,53 @@ public class ActivityDAO {
 
     List<Predicate> predicates = new ArrayList<>();
 
-    // Condition sur la plage de dates
-    if (startDate != null && endDate != null) {
-      Predicate dateRangePredicate = cb.between(activity.get("dueDatetime"), startDate, endDate);
-      predicates.add(dateRangePredicate);
-    }
+    // Condition on the year range
+    Predicate dateRangePredicate = cb.between(activity.get("dueDatetime"), startDate, endDate);
+    predicates.add(dateRangePredicate);
 
-    // Condition sur la direction
+    // Condition on the direction if specified
     if (directionId != null) {
       Predicate directionPredicate = cb.equal(direction.get("id"), directionId);
       predicates.add(directionPredicate);
     }
 
-    // Troncature de la date au niveau du mois pour l'agrégation mensuelle
+    // Group by month
     Expression<LocalDate> monthExpression = cb.function("DATE_TRUNC", LocalDate.class, cb.literal("month"), activity.get("dueDatetime"));
-
-    // Multiselect pour obtenir la date du mois et le nombre total d'activités pour chaque mois
-    query.multiselect(
-            monthExpression,           // Mois de l'activité
-            cb.count(activity)         // Nombre total d'activités pour le mois
-    );
-
+    query.multiselect(monthExpression, cb.count(activity));
     query.where(cb.and(predicates.toArray(new Predicate[0])));
     query.groupBy(monthExpression);
     query.orderBy(cb.asc(monthExpression));
 
     TypedQuery<Object[]> typedQuery = entityManager.createQuery(query);
-    typedQuery.setFirstResult((page - 1) * pageSize);
-    typedQuery.setMaxResults(pageSize);
-
     List<Object[]> results = typedQuery.getResultList();
-    List<Map<String, Object>> resultList = new ArrayList<>();
 
+    // Initialize a map with all months of the year set to 0 totalActivities
+    Map<LocalDate, Long> monthlyCounts = new HashMap<>();
+    for (int month = 1; month <= 12; month++) {
+      monthlyCounts.put(LocalDate.of(year, month, 1), 0L);
+    }
+
+    // Populate actual counts from the query results
     for (Object[] result : results) {
+      LocalDate month = (LocalDate) result[0];
+      Long count = (Long) result[1];
+      monthlyCounts.put(month, count);
+    }
+
+    // Convert the map to the desired result format
+    List<Map<String, Object>> resultList = new ArrayList<>();
+    for (Map.Entry<LocalDate, Long> entry : monthlyCounts.entrySet()) {
       Map<String, Object> resultMap = new HashMap<>();
-      resultMap.put("date", result[0]);
-      resultMap.put("totalActivities", result[1]);
+      resultMap.put("date", entry.getKey());
+      resultMap.put("totalActivities", entry.getValue());
       resultList.add(resultMap);
     }
 
-    return resultList;
+    // Apply pagination manually
+    int fromIndex = Math.min((page - 1) * pageSize, resultList.size());
+    int toIndex = Math.min(fromIndex + pageSize, resultList.size());
+
+    return resultList.subList(fromIndex, toIndex);
   }
 
 

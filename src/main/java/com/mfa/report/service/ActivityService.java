@@ -129,12 +129,12 @@ public class ActivityService {
 
   public List<Map<String, Object>> getActivitiesForTopDirection(
       LocalDate startDate, LocalDate endDate, int page, int pageSize) {
-    return activityDAO.findEfficiencyByDateRangeAndDirection(startDate, endDate, page, pageSize);
+    return activityDAO.findEfficiencyByDateRangeAndDirection(startDate, endDate, page, 1000);
   }
 
   public List<Map<String, Object>> getMonthlyActivitiesCountByDateRanger(
-      String directionId, LocalDate startDate, LocalDate endDate, int page, int pageSize) {
-    return activityDAO.findMonthlyActivityCountByDateRangeAndDirection(
-        startDate, endDate, directionId, page, pageSize);
+      String directionId, int year, int page, int pageSize) {
+    return activityDAO.findMonthlyActivityCountByYearAndDirection(
+        year, directionId, page, pageSize);
   }
 }

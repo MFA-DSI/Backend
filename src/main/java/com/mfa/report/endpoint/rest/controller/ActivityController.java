@@ -57,19 +57,18 @@ public class ActivityController {
       @RequestParam LocalDate weekStartDate,
       @RequestParam(required = false) LocalDate endDate,
       @RequestParam(defaultValue = "1") int page,
-      @RequestParam(defaultValue = "15") int pageSize) {
+      @RequestParam(defaultValue = "100") int pageSize) {
     return activityService.getActivitiesForTopDirection(weekStartDate, endDate, page, pageSize);
   }
 
-  @GetMapping("/activities/direction/statistics")
+  @GetMapping("/activities/statistics")
   public List<Map<String, Object>> getMonthlyActivityCountByDateRangeAndDirection(
       @RequestParam String directionId,
-      @RequestParam LocalDate weekStartDate,
-      @RequestParam(required = false) LocalDate endDate,
-      @RequestParam(defaultValue = "1") int page,
-      @RequestParam(defaultValue = "15") int pageSize) {
+  @RequestParam int year,
+  @RequestParam(defaultValue = "1") int page,
+  @RequestParam(defaultValue = "12") int pageSize) {
     return activityService.getMonthlyActivitiesCountByDateRanger(
-        directionId, weekStartDate, endDate, page, pageSize);
+            directionId, year, page, pageSize);
   }
 
   @GetMapping("/activities/all")
