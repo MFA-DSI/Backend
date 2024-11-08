@@ -129,6 +129,7 @@ public class ActivityService {
 
   public List<Map<String, Object>> getActivitiesForTopDirection(
       LocalDate startDate, LocalDate endDate, int page, int pageSize) {
+    endDate = startDate.plusMonths(12);
     return activityDAO.findEfficiencyByDateRangeAndDirection(startDate, endDate, page, 1000);
   }
 

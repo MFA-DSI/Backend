@@ -62,7 +62,6 @@ public class ActivityDAO {
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
 
-    // Utiliser Direction comme racine pour inclure toutes les directions
     Root<Direction> direction = query.from(Direction.class);
     Join<Direction, Mission> mission = direction.join("mission", JoinType.LEFT);
     Join<Mission, Activity> activity = mission.join("activity", JoinType.LEFT);
@@ -70,39 +69,38 @@ public class ActivityDAO {
 
     List<Predicate> predicates = new ArrayList<>();
 
-    // Ajouter condition de date seulement si startDate et endDate sont fournis
-    if (startDate != null && endDate != null) {
-      Predicate dateRangePredicate = cb.between(activity.get("dueDatetime"), startDate, endDate);
-      predicates.add(dateRangePredicate);
+    // Appliquer le filtre de date uniquement sur les activités, sans exclure les directions sans activité
+    if (startDate != null) {
+      if (endDate != null) {
+        predicates.add(cb.between(activity.get("dueDatetime"), startDate, endDate));
+      } else {
+        predicates.add(cb.greaterThanOrEqualTo(activity.get("dueDatetime"), startDate));
+      }
     }
 
-    // Condition pour les performances de type PERCENTAGE
     Predicate percentageCondition = cb.equal(performance.get("realizationType"), RealizationType.percentage);
-
-    // Condition pour les activités terminées
     Predicate completedCondition = cb.and(
             cb.equal(performance.get("KPI"), 100),
             percentageCondition
     );
 
-    // Multiselect pour inclure toutes les directions, même sans activités
     query.multiselect(
-            direction.get("id"),                                        // ID de la direction
-            direction.get("name"),                                      // Nom de la direction
-            cb.coalesce(cb.count(activity.get("id")), 0L),              // Nombre total d'activités (0 si null)
+            direction.get("id"),                                    // ID de la direction
+            direction.get("name"),                                  // Nom de la direction
+            cb.coalesce(cb.count(activity.get("id")), 0L),          // Nombre total d'activités (0 si null)
             cb.coalesce(cb.sum(cb.<Long>selectCase().when(completedCondition, 1L).otherwise(0L)), 0L), // Activités terminées
             cb.coalesce(cb.sum(cb.<Long>selectCase().when(cb.and(cb.not(completedCondition), cb.isNotNull(activity.get("id"))), 1L).otherwise(0L)), 0L), // Activités en cours
             cb.coalesce(cb.avg(cb.<Double>selectCase().when(percentageCondition, performance.get("KPI")).otherwise(cb.literal(null))), 0.0), // Moyenne KPI
             cb.coalesce(cb.sum(cb.<Double>selectCase().when(percentageCondition, performance.get("KPI")).otherwise(0.0)), 0.0)  // Somme KPI
     );
 
-    // Appliquer les filtres si présents
+    // Appliquer les filtres si présents (sans exclure les directions sans activité)
     if (!predicates.isEmpty()) {
-      query.where(cb.and(predicates.toArray(new Predicate[0])));
+      query.where(cb.or(cb.and(predicates.toArray(new Predicate[0])), cb.isNull(activity.get("id"))));
     }
 
     query.groupBy(direction.get("id"), direction.get("name"));
-    query.orderBy(cb.desc(cb.avg(performance.get("KPI"))));
+    query.orderBy(cb.asc(direction.get("name")));
 
     TypedQuery<Object[]> typedQuery = entityManager.createQuery(query);
     typedQuery.setFirstResult((page - 1) * pageSize);
@@ -113,17 +111,21 @@ public class ActivityDAO {
 
     for (Object[] result : results) {
       Map<String, Object> resultMap = new HashMap<>();
-      long totalActivities = (Long) result[2];
-      double sumPerformanceIndicators = (Double) result[6];
-      double efficiencyPercentage = (totalActivities > 0 && sumPerformanceIndicators > 0) ?
-              (totalActivities / sumPerformanceIndicators) * 100 : 0;
 
       resultMap.put("directionId", result[0]);
       resultMap.put("directionName", result[1]);
-      resultMap.put("totalActivities", totalActivities);
-      resultMap.put("completedActivities", result[3]);
-      resultMap.put("ongoingActivities", result[4]);
-      resultMap.put("averagePerformanceIndicator", result[5]);
+      resultMap.put("totalActivities", result[2]);
+
+      // Initialiser les valeurs pour les activités et performances
+      Long completedActivities = (Long) result[3];
+      Long ongoingActivities = (Long) result[4];
+      Double averagePerformanceIndicator = (Double) result[5];
+      Double efficiencyPercentage = (Double) result[6];
+
+      // Calculer l'efficacité si les indicateurs sont valides
+      resultMap.put("completedActivities", completedActivities);
+      resultMap.put("ongoingActivities", ongoingActivities);
+      resultMap.put("averagePerformanceIndicator", averagePerformanceIndicator);
       resultMap.put("efficiencyPercentage", efficiencyPercentage);
 
       resultList.add(resultMap);
@@ -131,6 +133,7 @@ public class ActivityDAO {
 
     return resultList;
   }
+
 
 
   public List<Map<String, Object>> findMonthlyActivityCountByYearAndDirection(
