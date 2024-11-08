@@ -6,12 +6,9 @@ import com.mfa.report.endpoint.rest.model.RestEntity.MissionWithDirectionName;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
 import com.mfa.report.model.Service;
-
-import java.time.LocalDate;
+import com.mfa.report.service.UserService;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
-
-import com.mfa.report.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -80,6 +77,7 @@ public class MissionMapper {
 
   public Mission toRest(MissionDTO mission, Direction direction, Service service) {
     return Mission.builder()
+        .id(mission.getId())
         .description(mission.getName())
         .postedBy(userService.getUserById(mission.getPostedBy()))
         .direction(direction)

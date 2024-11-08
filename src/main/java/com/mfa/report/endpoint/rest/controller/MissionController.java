@@ -10,6 +10,7 @@ import com.mfa.report.model.validator.DirectionValidator;
 import com.mfa.report.service.*;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -86,37 +87,64 @@ public class MissionController {
 
   @PutMapping("/mission/create")
   @Transactional
-  public com.mfa.report.endpoint.rest.model.RestEntity.Mission createMission(
-      @RequestParam(name = "directionId") String directionId,
-      @RequestParam(name = "userId") String userId,
-      @RequestBody MissionDTO missionDTO) {
+  public com.mfa.report.endpoint.rest.model.RestEntity.Mission createOrUpdateMission(
+          @RequestParam(name = "directionId") String directionId,
+          @RequestParam(name = "userId") String userId,
+          @RequestBody MissionDTO missionDTO) {
+
     Direction direction = directionService.getDirectionById(directionId);
     directionValidator.acceptUser(direction, userId);
     missionDTO.setPostedBy(userId);
 
     Service service1 = serviceService.getServiceById(missionDTO.getServiceId());
-    Mission mission = mapper.toRest(missionDTO, direction, service1);
+    Mission mission;
 
-    List<Activity> activityList =
-        missionDTO.getActivityList().stream()
-            .map(
-                activityDTO -> {
-                  Activity activity = activityMapper.toRest(activityDTO);
+    if (missionDTO.getId() != null) {
+      // Récupère la mission existante
+      mission = service.getMissionById(missionDTO.getId());
 
-                  return associatedEntitiesService.AttachEntitiesToActivity(
-                      activity,
-                      activityDTO.getTask(),
-                      activityDTO.getNextTask(),
-                      activityDTO.getPerformanceRealization());
-                })
-            .peek(activityService::crUpdateActivity)
-            .collect(Collectors.toList());
+      // Clone la liste des activités existantes dans une liste modifiable
 
-    mission.setActivity(activityList);
+      List<Activity> newActivities = missionDTO.getActivityList().stream()
+              .map(activityDTO -> {
+                Activity activity = activityMapper.toRest(activityDTO);
+                activity.setMission(mission);
+                return associatedEntitiesService.AttachEntitiesToActivity(
+                        activity,
+                        activityDTO.getTask(),
+                        activityDTO.getNextTask(),
+                        activityDTO.getPerformanceRealization());
+              })
+              .peek(activityService::crUpdateActivity)
+              .collect(Collectors.toCollection(ArrayList::new));
+    } else {
+      // Crée une nouvelle mission
+      mission = mapper.toRest(missionDTO, direction, service1);
+
+      List<Activity> activityList = missionDTO.getActivityList().stream()
+              .map(activityDTO -> {
+                Activity activity = activityMapper.toRest(activityDTO);
+                return associatedEntitiesService.AttachEntitiesToActivity(
+                        activity,
+                        activityDTO.getTask(),
+                        activityDTO.getNextTask(),
+                        activityDTO.getPerformanceRealization());
+              })
+              .peek(activityService::crUpdateActivity)
+              .collect(Collectors.toCollection(ArrayList::new));
+
+      mission.setActivity(activityList);
+    }
+
+    // Enregistre la mission
     service.crUpdateMission(mission);
     eventPublisher.publishEvent(new MissionPostedEvent(mission, direction));
+
     return mapper.toDomainWithService(mission);
   }
+
+
+
 
   @PutMapping("/mission/update")
   @Transactional
