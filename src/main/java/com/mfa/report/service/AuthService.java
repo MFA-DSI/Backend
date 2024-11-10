@@ -137,7 +137,7 @@ public class AuthService {
         User existingUser = userService.getUserByPhoneNumbers(phoneNumbers);
         if (existingUser != null) {
           throw new DuplicateKeyException(
-              "User with the phone numbers: " + phoneNumbers + " already exists.");
+              "Un utilisateur avec le numéro téléphone: " + phoneNumbers + " éxiste déjà.");
         }
       }
 
@@ -145,7 +145,7 @@ public class AuthService {
         User existingUser = userService.getUserByUserMail(email);
         if (existingUser != null) {
           throw new DuplicateKeyException(
-              "User with the email address: " + email + " already exists.");
+              "Un utilisateur avec l'adresse email : " + email + " éxiste déjà.");
         }
       }
     }
