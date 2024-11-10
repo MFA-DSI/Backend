@@ -42,7 +42,6 @@ public class User implements Serializable {
   private String firstname;
 
   @Column(name = "last_name")
-  @NotBlank(message = "lastname is mandatory")
   private String lastname;
 
   @Column(unique = true)
