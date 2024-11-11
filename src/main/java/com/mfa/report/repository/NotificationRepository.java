@@ -2,6 +2,7 @@ package com.mfa.report.repository;
 
 import com.mfa.report.model.Mission;
 import com.mfa.report.model.Notification;
+import com.mfa.report.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,4 +23,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
   @Transactional
   @Query("DELETE FROM Notification n WHERE n.mission = :mission")
   void deleteAllNotificationFromMission_Id(Mission mission);
+
+  @Modifying
+  @Transactional
+  @Query("DELETE FROM Notification n WHERE n.id = :notificationId AND n.user.id = :userId")
+  void deleteNotificationByIdAndUserId(String notificationId, String userId);
+
 }

@@ -3,6 +3,8 @@ package com.mfa.report.model.validator;
 import com.mfa.report.model.Notification;
 import java.util.List;
 import java.util.function.Consumer;
+
+import com.mfa.report.repository.exception.ForbiddenException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -26,4 +28,16 @@ public class NotificationValidator implements Consumer<Notification> {
     // throw  new BadRequestException(constraintViolation);
     // }
   }
-}
+
+  public void acceptResponsible (Notification notification,String userId){
+    boolean isResponsible = notification.getUser().getId().equals(userId);
+    if(!isResponsible){
+      throw new ForbiddenException(
+              "You are not allowed this notification");
+    }
+    if(!notification.isViewStatus()){
+      throw new ForbiddenException(
+              "Unread notification cannot be deleted");
+    }
+    }
+  }

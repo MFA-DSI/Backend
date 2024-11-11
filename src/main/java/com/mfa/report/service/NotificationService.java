@@ -41,6 +41,12 @@ public class NotificationService {
     repository.deleteAllNotificationFromMission_Id(mission);
   }
 
+  public Notification getNotificationById(String id){
+   return repository.findById(id).orElseThrow(() -> new NotFoundException("Notification with id:" + id + " not found"));
+  }
+  public void deleteNotification(Notification notification,String userId){
+    repository.deleteNotificationByIdAndUserId(notification.getId(),userId);
+  }
   public void sendRecommendationNotificationToResponsible(
       List<User> responsibles, Recommendation recommandation) {
     for (User responsible : responsibles) {
