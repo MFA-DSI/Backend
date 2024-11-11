@@ -4,6 +4,8 @@ import com.mfa.report.model.*;
 import com.mfa.report.model.NotificationAttached.MissionAddedNotification;
 import com.mfa.report.model.NotificationAttached.NextTaskNotification;
 import com.mfa.report.model.NotificationAttached.RecommendationNotification;
+import com.mfa.report.model.NotificationAttached.UserCreatedNotification;
+import com.mfa.report.model.event.UserCreatedEvent;
 import com.mfa.report.repository.NotificationRepository;
 import com.mfa.report.repository.exception.NotFoundException;
 
@@ -79,6 +81,11 @@ public class NotificationService {
 
   public void createMissionNotification(User user, Mission mission) {
     MissionAddedNotification notification = new MissionAddedNotification(mission, user);
+    repository.save(notification);
+  }
+
+  public void  createUserDirectionNotification(User admin,User user){
+    UserCreatedNotification notification = new UserCreatedNotification(admin,user);
     repository.save(notification);
   }
 

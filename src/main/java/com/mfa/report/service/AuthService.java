@@ -1,5 +1,6 @@
 package com.mfa.report.service;
 
+import com.mfa.report.endpoint.event.UserCreatedListener;
 import com.mfa.report.endpoint.rest.model.Auth;
 import com.mfa.report.endpoint.rest.model.AuthResponse;
 import com.mfa.report.endpoint.rest.model.RestEntity.NewUser;
@@ -7,6 +8,8 @@ import com.mfa.report.endpoint.rest.model.SignUp;
 import com.mfa.report.model.User;
 import com.mfa.report.model.enumerated.Grade;
 import com.mfa.report.model.enumerated.Role;
+import com.mfa.report.model.event.MissionPostedEvent;
+import com.mfa.report.model.event.UserCreatedEvent;
 import com.mfa.report.model.validator.UserValidator;
 import com.mfa.report.repository.exception.BadRequestException;
 import com.mfa.report.repository.exception.ForbiddenException;
@@ -15,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +35,10 @@ public class AuthService {
   private final int BEARER_PREFIX_COUNT = 7;
   private final DirectionService directionService;
   private final UserValidator userValidator;
+
+  @Autowired
+  private ApplicationEventPublisher eventPublisher;
+
 
   public Object signIn(Auth toAuth) {
     String email = toAuth.getEmail();
@@ -171,7 +180,7 @@ public class AuthService {
             .get(0);
 
     directionService.saveNewUserToResponsible(toSignUp.getDirectionId(), createdUser);
-
+    eventPublisher.publishEvent(new UserCreatedEvent(createdUser, createdUser.getDirection()));
     return NewUser.builder()
         .id(createdUser.getId())
         .identity((getValidIdentity(createdUser.getEmail(), createdUser.getPhoneNumbers())))

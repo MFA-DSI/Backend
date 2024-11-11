@@ -4,5 +4,6 @@ public enum NotificationStatus {
     demand,
     recommendation,
     mission,
-    task
+    task,
+    user_added
 }
