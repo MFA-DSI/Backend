@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -94,10 +97,15 @@ public class FileController {
   public ResponseEntity<byte[]> generateExcel(@RequestBody List<String> missionIds)
       throws IOException {
     List<Mission> missions = missionService.findMissionsByIds(missionIds);
-    log.info(String.valueOf(missions.size()));
+    Set<String> directions = missions.stream()
+            .map(mission -> mission.getDirection().getName()) // Récupère le nom de chaque direction
+            .collect(Collectors.toSet()); // Utilise un Set pour éviter les doublons
+
+    // Construire le nom du fichier en fonction des directions
+    String filename = "missions_" + String.join(" - ", directions) + ".xlsx";
     byte[] resource = fileService.createMissionReportExcel(missions);
     return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=missions.xlsx")
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+filename)
         .contentLength(resource.length)
         .body(resource);
   }
