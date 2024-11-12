@@ -40,5 +40,19 @@ public class LocalDateUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return date.format(formatter);
     }
+    public String formatDateRange(LocalDate startDate, LocalDate endDate) {
+        // Formatter pour obtenir le jour et le mois en majuscules
+        DateTimeFormatter dayMonthFormatter = DateTimeFormatter.ofPattern("d MMMM", Locale.FRENCH).withLocale(Locale.FRENCH);
+        // Formatter pour obtenir l'année
+        DateTimeFormatter yearFormatter = DateTimeFormatter.ofPattern("yyyy", Locale.FRENCH);
+
+        String formattedStart = startDate.format(dayMonthFormatter).toUpperCase();
+        String formattedEnd = endDate.format(dayMonthFormatter).toUpperCase();
+        String year = endDate.format(yearFormatter); // Utilisez l'année de endDate
+
+        // Combine les parties pour créer la chaîne finale
+        return String.format("%s AU %s %s", formattedStart, formattedEnd, year);
+    }
+
 
 }

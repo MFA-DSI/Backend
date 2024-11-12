@@ -26,6 +26,7 @@ public class UserController {
     user.setLastname(userInfoUpdate.getLastname());
     user.setGrade(Grade.valueOf(userInfoUpdate.getGrade()));
     user.setEmail(userInfoUpdate.getMail());
+    user.setFunction(userInfoUpdate.getFonction());
     user.setPhoneNumbers(userInfoUpdate.getPhoneNumbers());
     service.crupdateUser(user);
     return ResponseEntity.ok(mapper.toDomain(user));

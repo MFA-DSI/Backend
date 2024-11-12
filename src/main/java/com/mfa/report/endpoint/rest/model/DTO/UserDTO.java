@@ -15,7 +15,7 @@ public class UserDTO {
   private String firstname;
   private String mail;
   private String phoneNumbers;
-  private String function;
+  private String fonction;
   private boolean staff;
   private String grade;
   private String directionId;

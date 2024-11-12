@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/direction/")
-@CrossOrigin(origins = "*")
+@CrossOrigin(value = {"*"}, exposedHeaders = {"Content-Disposition"})
 public class FileController {
     private final FileService fileService;
     private final MissionService missionService;
@@ -104,12 +104,13 @@ public class FileController {
     @PostMapping("/mydirection/mission/export/week/excel")
     public ResponseEntity<byte[]> generateWeekReport(@RequestParam String directionId, @RequestParam LocalDate date, @RequestParam int pageSize) throws IOException {
         String reportTitle = localDateUtils.generateReportTitleForWeek(date);
+        LocalDate endDate = date.plusDays(5);
         log.info(reportTitle);
        Direction direction = directionService.getDirectionById(directionId);
         List<Activity> activities = activityService.getActivitiesForWeek(date, directionId, 1, pageSize);
         byte[] resource = fileService.createActivityReportExcel(direction.getName(), date,activities);
         String formattedDate = date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        String fileName = direction.getName() + " Activités + - semaine du+" + formattedDate + ".xlsx";
+        String fileName = localDateUtils.formatDateRange(date,endDate)+" -CR ACTIVITES HEBDOMADAIRES"+".xlsx";
 
         log.info(fileName);
         return ResponseEntity.ok()
