@@ -13,6 +13,7 @@ import com.mfa.report.model.event.UserCreatedEvent;
 import com.mfa.report.model.validator.UserValidator;
 import com.mfa.report.repository.exception.BadRequestException;
 import com.mfa.report.repository.exception.ForbiddenException;
+import com.mfa.report.repository.exception.NotFoundException;
 import com.mfa.report.service.Auth.TokenService;
 import java.util.List;
 import java.util.Map;
@@ -49,15 +50,15 @@ public class AuthService {
     }
 
     if (user == null) {
-      throw new BadRequestException("Invalid credentials");
+      throw new NotFoundException("Utilisateur non trouvée,veillez contactez l'administrateur de votre direction");
     }
 
     if (!user.getApproved()) {
-      throw new BadRequestException("You must be approved by your admin");
+      throw new BadRequestException("Vous devez être accepté par une administrateur pour être un membre");
     }
     boolean isPasswordMatch = passwordEncoder.matches(toAuth.getPassword(), user.getPassword());
     if (!isPasswordMatch) {
-      throw new BadRequestException("Invalid credentials");
+      throw new BadRequestException("Vos identifiants de connexion sont incorrectes");
     }
 
     if (user.isFirstLogin()) {

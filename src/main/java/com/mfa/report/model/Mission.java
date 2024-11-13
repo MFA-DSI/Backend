@@ -32,7 +32,7 @@ public class Mission {
   @JoinColumn(name = "direction_id")
   private Direction direction;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.ALL)
   @NotBlank(message = "service mission is mandatory")
   @JoinColumn(name = "service_id")
   private Service service;

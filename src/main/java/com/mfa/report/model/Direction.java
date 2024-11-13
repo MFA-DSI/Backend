@@ -1,12 +1,7 @@
 package com.mfa.report.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -35,5 +30,18 @@ public class Direction {
 
   @OneToMany private List<User> responsible;
 
-  @OneToMany(mappedBy = "direction") @JsonIgnore private List<Mission> mission;
+  @NotBlank(message = "Direction abbreviation (acronym) is mandatory")
+  private String acronym;
+
+  @ManyToOne
+  @JoinColumn(name = "parent_id")
+  @JsonIgnore
+  private Direction parentDirection;
+
+  @OneToMany(mappedBy = "parentDirection")
+  private List<Direction> subDirections;
+
+  @OneToMany(mappedBy = "direction")
+  @JsonIgnore
+  private List<Mission> mission;
 }
