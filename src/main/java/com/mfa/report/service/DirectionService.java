@@ -19,6 +19,9 @@ public class DirectionService {
         .orElseThrow(() -> new NotFoundException("Direction with id:" + id + " not found"));
   }
 
+  public List<Direction> getSubDirectionByDirectionId(String id){
+      return repository.findById(id).get().getSubDirections();
+  }
   public Direction save(Direction direction) {
     return repository.save(direction);
   }
