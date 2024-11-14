@@ -133,7 +133,7 @@ public class FileService {
       if (missionsForDirection.isEmpty()) {
         Row noActivityRow = sheet.createRow(rowIdx);
         Cell noActivityCell = noActivityRow.createCell(0);
-        noActivityCell.setCellValue("Aucune activité cette semaine");
+        noActivityCell.setCellValue("Aucune mission et activité");
         noActivityCell.setCellStyle(noActivityCellStyle); // Apply custom style if needed
       } else {
         for (Mission mission : missionsForDirection) {

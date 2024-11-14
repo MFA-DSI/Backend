@@ -144,6 +144,35 @@ public class FileController {
             .body(resource);
   }
 
+  @PostMapping("/mydirection/mission/export/monthly/excel")
+  public ResponseEntity<byte[]> generateMonthReport(
+          @RequestParam String directionId,
+          @RequestParam int year,
+          @RequestParam int month,
+          @RequestParam int pageSize)
+          throws IOException {
+    // TODO: verify user and make a validation if not responsible
+    String monthName = localDateUtils.getMonthName(month);
+
+    Direction direction = directionService.getDirectionById(directionId);
+    List<Mission> missions =
+            missionService.getMissionActivitiesForMonth(year, month, directionId, 1, pageSize);
+    byte[] resource =
+            fileService.createMissionReportExcelForDirection(missions, monthName, directionId);
+    String fileName =
+            "BILAN MENSUEL des activités de la "
+                    + direction.getName()
+                    + " - mois du "
+                    + monthName
+                    + " "
+                    + year
+                    + ".xlsx";
+    return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+            .contentLength(resource.length)
+            .body(resource);
+  }
+
 
   @PostMapping("/mydirection/mission/export/quarter/excel")
   public ResponseEntity<byte[]> generateQuarterReport(
