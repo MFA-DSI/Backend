@@ -35,6 +35,6 @@ public class DirectionMapper {
   }
 
   public DirectionNameDTO toSignDomain(Direction direction) {
-    return DirectionNameDTO.builder().id(direction.getId()).name(direction.getName()).build();
+    return DirectionNameDTO.builder().id(direction.getId()).name(direction.getName()).acronym(direction.getAcronym()).build();
   }
 }

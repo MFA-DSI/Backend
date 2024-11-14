@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 public class Mission {
     String id;
+    String directionName;
     String description;
     Service service;
     String postedBy;

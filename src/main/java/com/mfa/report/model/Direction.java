@@ -26,6 +26,7 @@ public class Direction {
   private String id;
 
   @NotBlank(message = "direction name is mandatory")
+  @Column(columnDefinition = "TEXT")
   private String name;
 
   @OneToMany private List<User> responsible;

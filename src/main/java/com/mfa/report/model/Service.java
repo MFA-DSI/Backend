@@ -30,6 +30,9 @@ public class Service {
   @NotBlank(message = "service name is mandatory")
   private String name;
 
+  @NotBlank(message = "service acronym is mandatory")
+  private String acronym;
+
   @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "direction_id")
   private Direction direction;

@@ -34,6 +34,7 @@ public class ServiceMapper {
     return  com.mfa.report.endpoint.rest.model.RestEntity.Service.builder()
             .id(service.getId())
             .name(service.getName())
+            .acronym(service.getAcronym())
             .build();
   }
 

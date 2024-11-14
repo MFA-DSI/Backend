@@ -50,6 +50,7 @@ public class MissionMapper {
     return com.mfa.report.endpoint.rest.model.RestEntity.Mission.builder()
         .id(mission.getId())
         .description(mission.getDescription())
+        .directionName(mission.getDirection().getAcronym())
         .service(serviceMapper.toRest(mission.getService()))
         .activityList(
             mission.getActivity().stream()
