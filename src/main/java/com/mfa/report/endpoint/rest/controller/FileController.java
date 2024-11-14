@@ -135,7 +135,7 @@ public class FileController {
       resource =  fileService.createActivityReportExcelWithSubDirections(direction.getId(), date, mainActivities);
     }
 
-    String fileName = localDateUtils.formatDateRange(date, endDate) + " - CR ACTIVITES HEBDOMADAIRES" + ".xlsx";
+    String fileName = localDateUtils.formatDateRange(date, endDate) + " - CR ACTIVITES HEBDOMADAIRES - "+direction.getAcronym() + ".xlsx";
     log.info(fileName);
 
     return ResponseEntity.ok()
