@@ -120,7 +120,7 @@ public class ActivityDAO {
       Long completedActivities = (Long) result[3];
       Long ongoingActivities = (Long) result[4];
       Double averagePerformanceIndicator = (Double) result[5];
-      Double efficiencyPercentage = (Double) result[6];
+      Double efficiencyPercentage = (Double) result[6]/10;
 
       // Calculer l'efficacité si les indicateurs sont valides
       resultMap.put("completedActivities", completedActivities);

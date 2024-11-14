@@ -472,237 +472,27 @@ public class FileService {
       CellStyle headerCellStyle = createHeaderCellStyle(workbook);
       CellStyle titleCellStyle = createTitleCellStyle(workbook);
       CellStyle activityCellStyle = createActivityCellStyle(workbook);
-      CellStyle noActivityCellStyle = createNoActivityCellStyle(workbook);
-
-
+      CellStyle subtitleStyle = createTitleCellStyle(workbook);
 
       // Filter activities for the main direction
-      List<Activity> mainDirectionActivities = allActivities.stream()
-              .filter(activity -> activity.getMission().getDirection() != null && activity.getMission().getDirection().getId().equals(mainDirectionId))
-              .collect(Collectors.toList());
-
-      // Create a sheet for the main direction
+      List<Activity> mainDirectionActivities = filterActivitiesByDirection(allActivities, mainDirectionId);
       String mainDirectionName = getDirectionDescriptionById(mainDirectionId);
-      String sheetName = "Direction " + (mainDirectionName != null ? mainDirectionName : "Inconnue");
-      sheetName = truncateSheetName(sheetName, 25);
-      sheetName = getUniqueSheetName(workbook, sheetName); // Ensure unique name
+      String mainDirectionAcronym = getDirectionAcronymDescriptionById(mainDirectionId);
 
-
-      activityCellStyle.setWrapText(true);
-      activityCellStyle.setAlignment(HorizontalAlignment.LEFT);
-
-      // Enable word wrap for header cell style as well
-      headerCellStyle.setWrapText(true);
-      headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
-
-      // Styles for direction and title rows
-      CellStyle titleStyle = workbook.createCellStyle();
-      Font titleFont = workbook.createFont();
-      titleFont.setBold(true);
-      titleFont.setFontHeightInPoints((short) 16);  // Title font size
-      titleStyle.setFont(titleFont);
-
-      CellStyle subtitleStyle = workbook.createCellStyle();
-      Font subtitleFont = workbook.createFont();
-      subtitleFont.setBold(true);
-      subtitleFont.setFontHeightInPoints((short) 14);  // Subtitle font size
-      subtitleStyle.setFont(subtitleFont);
-      subtitleStyle.setAlignment(HorizontalAlignment.CENTER);
-
-      // Create a sheet
-      Sheet sheet = workbook.createSheet("Activities");
-
-      // Add direction name at the top
-      Row directionRow = sheet.createRow(0);
-      Cell directionCell = directionRow.createCell(0);
-      directionCell.setCellValue("Direction: " + mainDirectionName);
-      directionCell.setCellStyle(titleStyle);
-
-      // Merge cells for direction title for a more centered display
-      sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
-
-      // Add report title with date range on the second row
-      Row titleRow = sheet.createRow(1);
-      Cell titleCell = titleRow.createCell(0);
-      titleCell.setCellValue("COMPTE RENDU DES ACTIVITES HEBDOMADAIRES DE LA " + mainDirectionName + " DU " + dateUtils.formatDate(startDate)  + " AU " + dateUtils.formatDate(endDate));
-      titleCell.setCellStyle(subtitleStyle);
-
-      // Merge cells for the title row
-      sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 4));
-
-      // Create header row for the table
-      Row headerRow = sheet.createRow(3);
-      headerRow.setHeightInPoints(40); // Increase header row height for readability
-
-      String[] headers = {
-              "ACTIVITÉS MENSUELLES PRÉVUES",
-              "SOUS-ACTIVITÉS RÉALISÉES (OU TÂCHES) HEBDOMADAIRES",
-              "SOUS-ACTIVITÉS À RÉALISER POUR LA SEMAINE PROCHAINE",
-              "OBSERVATIONS",
-              "PRÉVISION"
-      };
-
-      for (int i = 0; i < headers.length; i++) {
-        Cell cell = headerRow.createCell(i);
-        cell.setCellValue(headers[i]);
-        cell.setCellStyle(headerCellStyle);
-      }
-
-      // Populate activities and related lists
-      int rowIdx = 4;
-      for (Activity activity : mainDirectionActivities) {
-        Row activityRow = sheet.createRow(rowIdx++);
-
-        // Activity description
-        activityRow.createCell(0).setCellValue(activity.getDescription());
-
-        // Realized weekly tasks
-        String realizedTasks = activity.getTaskList().stream()
-                .map(task -> "- " + task.getDescription())
-                .collect(Collectors.joining("\n"));
-        Cell taskCell = activityRow.createCell(1);
-        taskCell.setCellValue(realizedTasks);
-        taskCell.setCellStyle(activityCellStyle);
-
-        // Next week's tasks
-        String nextWeekTasks = activity.getNexTaskList().stream()
-                .map(nextTask -> "- " + nextTask.getDescription())
-                .collect(Collectors.joining("\n"));
-        Cell nextTaskCell = activityRow.createCell(2);
-        nextTaskCell.setCellValue(nextWeekTasks);
-        nextTaskCell.setCellStyle(activityCellStyle);
-
-        // Observations and predictions
-        Cell observationCell = activityRow.createCell(3);
-        observationCell.setCellValue(activity.getObservation());
-        observationCell.setCellStyle(activityCellStyle);
-
-        Cell predictionCell = activityRow.createCell(4);
-        predictionCell.setCellValue(activity.getPrediction());
-        predictionCell.setCellStyle(activityCellStyle);
-      }
-
-      // Auto-size columns for readability
-      for (int i = 0; i < headers.length; i++) {
-        sheet.autoSizeColumn(i);
-      }
-
-
+      // Create main direction sheet
+      createDirectionSheet(workbook,mainDirectionAcronym, mainDirectionName, startDate, endDate, mainDirectionActivities, headerCellStyle, titleCellStyle, activityCellStyle, subtitleStyle);
 
       // Handle sub-directions
       List<Direction> subDirections = directionService.getSubDirectionByDirectionId(mainDirectionId);
       if (subDirections != null) {
         for (Direction subDirection : subDirections) {
-          List<Activity> subDirectionActivities = activityService.getActivitiesForWeek(startDate,subDirection.getId(),1,100);
-
-          String directionName = getDirectionDescriptionById(subDirection.getId());
-          String sheetSubDirection = "Direction " + (mainDirectionName != null ? mainDirectionName : "Inconnue");
-          sheetName = truncateSheetName(sheetName, 25);
-          sheetName = getUniqueSheetName(workbook, sheetName); // Ensure unique name
-
-
-          activityCellStyle.setWrapText(true);
-          activityCellStyle.setAlignment(HorizontalAlignment.LEFT);
-
-          // Enable word wrap for header cell style as well
-          headerCellStyle.setWrapText(true);
-          headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
-
-          // Styles for direction and title rows
-          CellStyle titleStyleSub = workbook.createCellStyle();
-          Font titleFontSub = workbook.createFont();
-          titleFont.setBold(true);
-          titleFont.setFontHeightInPoints((short) 16);  // Title font size
-          titleStyle.setFont(titleFont);
-
-          CellStyle subtitleStyleSub = workbook.createCellStyle();
-          Font subtitleSub = workbook.createFont();
-          subtitleSub.setBold(true);
-          subtitleFont.setFontHeightInPoints((short) 14);  // Subtitle font size
-          subtitleStyle.setFont(subtitleFont);
-          subtitleStyle.setAlignment(HorizontalAlignment.CENTER);
-
-          // Create a sheet
-          Sheet subsheet = workbook.createSheet("Activities");
-
-          // Add direction name at the top
-          Row subDirectionRow = sheet.createRow(0);
-          Cell subDirectionCell = directionRow.createCell(0);
-          directionCell.setCellValue("Direction: " + directionName);
-          directionCell.setCellStyle(titleStyle);
-
-          // Merge cells for direction title for a more centered display
-          sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
-
-          // Add report title with date range on the second row
-          Row titleRowSub = sheet.createRow(1);
-          Cell titleCellSub = titleRow.createCell(0);
-          titleCellSub.setCellValue("COMPTE RENDU DES ACTIVITES HEBDOMADAIRES DE LA " + directionName + " DU " + dateUtils.formatDate(startDate)  + " AU " + dateUtils.formatDate(endDate));
-          titleCellSub.setCellStyle(subtitleStyle);
-
-          // Merge cells for the title row
-          sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 4));
-
-          // Create header row for the table
-          Row headerRowSub = sheet.createRow(3);
-          headerRowSub.setHeightInPoints(40); // Increase header row height for readability
-
-          String[] subheaders = {
-                  "ACTIVITÉS MENSUELLES PRÉVUES",
-                  "SOUS-ACTIVITÉS RÉALISÉES (OU TÂCHES) HEBDOMADAIRES",
-                  "SOUS-ACTIVITÉS À RÉALISER POUR LA SEMAINE PROCHAINE",
-                  "OBSERVATIONS",
-                  "PRÉVISION"
-          };
-
-          for (int i = 0; i < subheaders.length; i++) {
-            Cell cell = subDirectionRow.createCell(i);
-            cell.setCellValue(subheaders[i]);
-            cell.setCellStyle(headerCellStyle);
-          }
-
-          // Populate activities and related lists
-          for (Activity activity : mainDirectionActivities) {
-            Row activityRow = sheet.createRow(rowIdx++);
-
-            // Activity description
-            activityRow.createCell(0).setCellValue(activity.getDescription());
-
-            // Realized weekly tasks
-            String realizedTasks = activity.getTaskList().stream()
-                    .map(task -> "- " + task.getDescription())
-                    .collect(Collectors.joining("\n"));
-            Cell taskCell = activityRow.createCell(1);
-            taskCell.setCellValue(realizedTasks);
-            taskCell.setCellStyle(activityCellStyle);
-
-            // Next week's tasks
-            String nextWeekTasks = activity.getNexTaskList().stream()
-                    .map(nextTask -> "- " + nextTask.getDescription())
-                    .collect(Collectors.joining("\n"));
-            Cell nextTaskCell = activityRow.createCell(2);
-            nextTaskCell.setCellValue(nextWeekTasks);
-            nextTaskCell.setCellStyle(activityCellStyle);
-
-            // Observations and predictions
-            Cell observationCell = activityRow.createCell(3);
-            observationCell.setCellValue(activity.getObservation());
-            observationCell.setCellStyle(activityCellStyle);
-
-            Cell predictionCell = activityRow.createCell(4);
-            predictionCell.setCellValue(activity.getPrediction());
-            predictionCell.setCellStyle(activityCellStyle);
-          }
-
-          // Auto-size columns for readability
-          for (int i = 0; i < headers.length; i++) {
-            sheet.autoSizeColumn(i);
-          }
+          List<Activity> subDirectionActivities = activityService.getActivitiesForWeek(startDate, subDirection.getId(), 1, 100);
+          String subDirectionName = getDirectionDescriptionById(subDirection.getId());
+          String directionAcronym = getDirectionAcronymDescriptionById(subDirection.getId());
+          // Create sub-direction sheet
+          createDirectionSheet(workbook,directionAcronym, subDirectionName, startDate, endDate, subDirectionActivities, headerCellStyle, titleCellStyle, activityCellStyle, subtitleStyle);
         }
       }
-
-      // Auto-size columns for the main direction sheet
-      autoSizeColumns(sheet);
 
       // Write workbook to output stream
       workbook.write(byteArrayOutputStream);
@@ -710,9 +500,106 @@ public class FileService {
 
     } catch (Exception e) {
       e.printStackTrace();
+      return null;
     }
-    return null;
   }
+
+  private void createDirectionSheet(XSSFWorkbook workbook,String directionAcronym, String directionName, LocalDate startDate, LocalDate endDate,
+                                    List<Activity> activities, CellStyle headerCellStyle, CellStyle titleCellStyle,
+                                    CellStyle activityCellStyle, CellStyle subtitleStyle) {
+
+    String sheetName = truncateSheetName("Direction " + (directionAcronym != null ? directionAcronym : "Inconnue"), 25);
+    sheetName = getUniqueSheetName(workbook, sheetName);
+    Sheet sheet = workbook.createSheet(sheetName);
+
+    // Add direction name at the top
+    Row directionRow = sheet.createRow(0);
+    Cell directionCell = directionRow.createCell(0);
+    directionCell.setCellValue("Direction: " + directionAcronym);
+    directionCell.setCellStyle(titleCellStyle);
+    sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
+
+    // Add report title with date range
+    Row titleRow = sheet.createRow(1);
+    Cell titleCell = titleRow.createCell(0);
+    titleCell.setCellValue("COMPTE RENDU DES ACTIVITES HEBDOMADAIRES DE LA " + directionName + " DU " + dateUtils.formatDate(startDate) + " AU " + dateUtils.formatDate(endDate));
+    titleCell.setCellStyle(subtitleStyle);
+    sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 4));
+
+    // Create table headers
+    createTableHeaders(sheet, headerCellStyle);
+
+    // Populate activities in the sheet
+    populateActivities(sheet, activities, activityCellStyle);
+
+    // Auto-size columns for readability
+    autoSizeColumns(sheet);
+  }
+
+  private void createTableHeaders(Sheet sheet, CellStyle headerCellStyle) {
+    Row headerRow = sheet.createRow(3);
+    headerRow.setHeightInPoints(40); // Increase header row height for readability
+
+    String[] headers = {
+            "ACTIVITÉS MENSUELLES PRÉVUES",
+            "SOUS-ACTIVITÉS RÉALISÉES (OU TÂCHES) HEBDOMADAIRES",
+            "SOUS-ACTIVITÉS À RÉALISER POUR LA SEMAINE PROCHAINE",
+            "OBSERVATIONS",
+            "PRÉVISION"
+    };
+
+    for (int i = 0; i < headers.length; i++) {
+      Cell cell = headerRow.createCell(i);
+      cell.setCellValue(headers[i]);
+      cell.setCellStyle(headerCellStyle);
+    }
+  }
+
+  private void populateActivities(Sheet sheet, List<Activity> activities, CellStyle activityCellStyle) {
+    int rowIdx = 4;
+    for (Activity activity : activities) {
+      Row activityRow = sheet.createRow(rowIdx++);
+
+      // Activity description
+      activityRow.createCell(0).setCellValue(activity.getDescription());
+
+      // Realized weekly tasks
+      String realizedTasks = formatTaskList(activity.getTaskList());
+      Cell taskCell = activityRow.createCell(1);
+      taskCell.setCellValue(realizedTasks);
+      taskCell.setCellStyle(activityCellStyle);
+
+      // Next week's tasks
+      String nextWeekTasks = formatNextTasks(activity.getNexTaskList());
+      Cell nextTaskCell = activityRow.createCell(2);
+      nextTaskCell.setCellValue(nextWeekTasks);
+      nextTaskCell.setCellStyle(activityCellStyle);
+
+      // Observations and predictions
+      Cell observationCell = activityRow.createCell(3);
+      observationCell.setCellValue(activity.getObservation());
+      observationCell.setCellStyle(activityCellStyle);
+
+      Cell predictionCell = activityRow.createCell(4);
+      predictionCell.setCellValue(activity.getPrediction());
+      predictionCell.setCellStyle(activityCellStyle);
+    }
+  }
+
+  private String formatTaskList(List<Task> tasks) {
+    return tasks.stream()
+            .map(task -> "- " + task.getDescription())
+            .collect(Collectors.joining("\n"));
+  }
+
+  private List<Activity> filterActivitiesByDirection(List<Activity> allActivities, String directionId) {
+    return allActivities.stream()
+            .filter(activity -> activity.getMission().getDirection() != null && activity.getMission().getDirection().getId().equals(directionId))
+            .collect(Collectors.toList());
+  }
+
+
+
 
   private int generateActivityTable(Sheet sheet, String directionName, LocalDate startDate, LocalDate endDate, List<Activity> activities, int startRow, CellStyle titleStyle, CellStyle headerCellStyle, CellStyle activityCellStyle) {
     // Title for direction and date range
@@ -1052,6 +939,15 @@ public class FileService {
     sheet.addMergedRegion(new CellRangeAddress(0, 0, 2, 6));
   }
 
+  private void createSubTitleRow(Sheet sheet, CellStyle titleCellStyle, String dates) {
+    Row titleRow = sheet.createRow(0);
+    Cell titleCell = titleRow.createCell(2);
+    titleCell.setCellValue("Rapport des activités  " + dates);
+    titleCell.setCellStyle(titleCellStyle);
+    sheet.addMergedRegion(new CellRangeAddress(0, 0, 2, 6));
+  }
+
+
   private void createDirectionRow(Sheet sheet, CellStyle directionCellStyle, String directionName) {
     Row directionRow = sheet.createRow(1);
     Cell directionCell = directionRow.createCell(0);
@@ -1157,5 +1053,9 @@ public class FileService {
   private String getDirectionDescriptionById(String directionId) {
     return directionService.getDirectionById(directionId).getName();
   }
+  private String getDirectionAcronymDescriptionById(String directionId) {
+    return directionService.getDirectionById(directionId).getAcronym();
+  }
+
 
 }
