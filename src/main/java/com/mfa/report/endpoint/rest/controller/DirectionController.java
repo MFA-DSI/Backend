@@ -53,6 +53,12 @@ public class DirectionController {
         .collect(Collectors.toList());
   }
 
+
+  @GetMapping("/sub_direction")
+  public List<DirectionNameDTO> getAllSubDirectionName(@RequestParam String directionId){
+    return service.getSubDirectionByDirectionId(directionId).stream().map(mapper::toSignDomain).collect(Collectors.toUnmodifiableList());
+  }
+
   @PutMapping("/edit")
   public ResponseEntity<DirectionNameDTO> crUpdateDirection(
       @RequestBody DirectionDTO directionDTO,

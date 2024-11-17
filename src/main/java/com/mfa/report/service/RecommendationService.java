@@ -25,7 +25,6 @@ public class RecommendationService {
   private final ActivityService activityService;
   private final UserService userService;
   private final RecommendationMapper mapper;
-  private final NotificationService notificationService;
 
   @Autowired
   private ApplicationEventPublisher eventPublisher;

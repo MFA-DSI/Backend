@@ -1,9 +1,11 @@
 package com.mfa.report.model.enumerated;
 
 public enum NotificationStatus {
-    demand,
+    report_demand,
     recommendation,
     mission,
     task,
-    user_added
+    user_added,
+    report_confirmation,
+    report_accepted
 }

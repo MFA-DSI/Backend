@@ -1,5 +1,6 @@
 package com.mfa.report.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
@@ -50,4 +51,9 @@ public class Activity {
 
   @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Recommendation> recommendations;
+
+  @JsonIgnore
+  @ManyToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "report_request_id")
+  private ReportRequest reportRequest;
 }

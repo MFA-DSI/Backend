@@ -1,15 +1,13 @@
 package com.mfa.report.service;
 
 import com.mfa.report.model.*;
-import com.mfa.report.model.NotificationAttached.MissionAddedNotification;
-import com.mfa.report.model.NotificationAttached.NextTaskNotification;
-import com.mfa.report.model.NotificationAttached.RecommendationNotification;
-import com.mfa.report.model.NotificationAttached.UserCreatedNotification;
-import com.mfa.report.model.event.UserCreatedEvent;
+import com.mfa.report.model.NotificationAttached.*;
+import com.mfa.report.model.enumerated.RequestReportStatus;
 import com.mfa.report.repository.NotificationRepository;
+import com.mfa.report.repository.ReportRequestRepository;
 import com.mfa.report.repository.exception.NotFoundException;
-
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -23,12 +21,13 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class NotificationService {
   private final NotificationRepository repository;
+  private final ReportRequestRepository reportRequestRepository;
   private final NextTaskService nextTaskService;
   private final UserService userService;
 
   public List<Notification> getNotification(String userId, int page, int pageSize) {
     Pageable pageable =
-        PageRequest.of(page - 1, pageSize,Sort.by("creationDatetime").descending());
+        PageRequest.of(page - 1, pageSize, Sort.by("creationDatetime").descending());
 
     return repository.findAllByUserId(userId, pageable).getContent();
   }
@@ -41,12 +40,16 @@ public class NotificationService {
     repository.deleteAllNotificationFromMission_Id(mission);
   }
 
-  public Notification getNotificationById(String id){
-   return repository.findById(id).orElseThrow(() -> new NotFoundException("Notification with id:" + id + " not found"));
+  public Notification getNotificationById(String id) {
+    return repository
+        .findById(id)
+        .orElseThrow(() -> new NotFoundException("Notification with id:" + id + " not found"));
   }
-  public void deleteNotification(Notification notification,String userId){
-    repository.deleteNotificationByIdAndUserId(notification.getId(),userId);
+
+  public void deleteNotification(Notification notification, String userId) {
+    repository.deleteNotificationByIdAndUserId(notification.getId(), userId);
   }
+
   public void sendRecommendationNotificationToResponsible(
       List<User> responsibles, Recommendation recommandation) {
     for (User responsible : responsibles) {
@@ -70,6 +73,18 @@ public class NotificationService {
     }
   }
 
+  @Scheduled(cron = "0 0 0 * * ?")
+  public void expireOldRequests() {
+    List<ReportRequest> pendingRequests =
+        reportRequestRepository.findByStatusAndExpirationAtBefore(
+            RequestReportStatus.PENDING, LocalDateTime.now());
+
+    for (ReportRequest request : pendingRequests) {
+      request.setStatus(RequestReportStatus.EXPIRED);
+      reportRequestRepository.save(request);
+    }
+  }
+
   @Async
   public void sendTaskNotification(NextTask task, User user) {
     NextTaskNotification notification = new NextTaskNotification(task, user);
@@ -85,13 +100,35 @@ public class NotificationService {
     return repository.save(notification);
   }
 
+  public void createRequestReportNotification(User user, ReportRequest request) {
+    ReportRequestNotification notification = new ReportRequestNotification(request, user);
+    repository.save(notification);
+  }
+
+  public void createConfirmationNotification(User responsible, ReportRequest request) {
+    String confirmationMessage =
+        "Votre demande de "
+            + request.getDescription()
+            + " a éfé approuvé par "
+            + request.getTargetDirection().getAcronym();
+    RequestConfirmationNotification notification =
+        new RequestConfirmationNotification(request, responsible, confirmationMessage);
+    repository.save(notification);
+  }
+
+  public void createConfirmedReportNotification(User directionResponsible, ReportRequest request) {
+    RequestConfirmedNotification notification =
+        new RequestConfirmedNotification(request, directionResponsible);
+    repository.save(notification);
+  }
+
   public void createMissionNotification(User user, Mission mission) {
     MissionAddedNotification notification = new MissionAddedNotification(mission, user);
     repository.save(notification);
   }
 
-  public void  createUserDirectionNotification(User admin,User user){
-    UserCreatedNotification notification = new UserCreatedNotification(admin,user);
+  public void createUserDirectionNotification(User admin, User user) {
+    UserCreatedNotification notification = new UserCreatedNotification(admin, user);
     repository.save(notification);
   }
 
