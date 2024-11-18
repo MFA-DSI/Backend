@@ -3,6 +3,8 @@ package com.mfa.report.model;
 import com.mfa.report.model.enumerated.RequestReportStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -35,17 +37,17 @@ public class ReportRequest {
 
   @ManyToOne
   @JoinColumn(name = "requesting_direction_id", nullable = false)
-  private Direction requestingDirection;
+  private Direction requesterDirection;
 
   @ManyToOne
   @JoinColumn(name = "target_direction_id", nullable = false)
   private Direction targetDirection;
 
   @Column(nullable = false)
-  private LocalDateTime createdAt;
+  private LocalDate createdAt;
 
   @Column(nullable = false)
-  private LocalDateTime expirationAt; // Date d'expiration
+  private LocalDate expirationAt; // Date d'expiration
 
   @Enumerated(EnumType.STRING)
   private RequestReportStatus

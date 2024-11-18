@@ -107,9 +107,9 @@ public class NotificationService {
 
   public void createConfirmationNotification(User responsible, ReportRequest request) {
     String confirmationMessage =
-        "Votre demande de "
+        "Your report request about  "
             + request.getDescription()
-            + " a éfé approuvé par "
+            + "is sent successfuly to  "
             + request.getTargetDirection().getAcronym();
     RequestConfirmationNotification notification =
         new RequestConfirmationNotification(request, responsible, confirmationMessage);

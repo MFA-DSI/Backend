@@ -14,9 +14,11 @@ import java.util.concurrent.CompletableFuture;
 import com.mfa.report.repository.exception.BadRequestException;
 import com.mfa.report.repository.exception.NotFoundException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class RequestReportService {
@@ -40,11 +42,11 @@ public class RequestReportService {
     ReportRequest request = new ReportRequest();
 
     User user = userService.getUserById(responsibleId);
-    String description = "Demande de rapport des activités hebdomadaires de la semaine du "+weekStartDate.toString();
+    String description = "Demande de rapport des activites hebdomadaires de la semaine du "+weekStartDate.toString();
     request.setDescription(description);
     request.setResponsible(user);
     // Récupérer et définir la direction demandeuse
-    request.setRequestingDirection(
+    request.setRequesterDirection(
         directionRepository
             .findById(requestingDirectionId)
             .orElseThrow(() -> new IllegalArgumentException("Invalid requesting direction ID")));
@@ -66,15 +68,15 @@ public class RequestReportService {
 
     // Définir le statut initial, la date de création et la date d'expiration
     request.setStatus(RequestReportStatus.PENDING);
-    request.setCreatedAt(LocalDateTime.now());
-    request.setExpirationAt(LocalDateTime.now().plusDays(7));
+    request.setCreatedAt(LocalDate.now());
+    request.setExpirationAt(LocalDate.now().plusDays(7));
     return repository.save(request);
   }
 
   public ReportRequest respondToRequest(String requestId, String targetDirectionId, String status, String comment) {
     // Recherche de la demande par ID
     ReportRequest request =
-        repository.findById(requestId).orElseThrow(() -> new NotFoundException("La demande est introuvable"));
+        repository.findById(requestId).orElseThrow(() -> new NotFoundException("Demand not found"));
 
     // Validation de la direction cible
     if (!request.getTargetDirection().getId().equals(targetDirectionId)) {

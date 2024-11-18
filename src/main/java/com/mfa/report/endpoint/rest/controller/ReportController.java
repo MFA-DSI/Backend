@@ -1,5 +1,7 @@
 package com.mfa.report.endpoint.rest.controller;
 
+import com.mfa.report.endpoint.rest.mapper.ReportRequestMapper;
+import com.mfa.report.endpoint.rest.model.DTO.ReportRequestDTO;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.ReportRequest;
 import com.mfa.report.model.event.ReportRequestEvent;
@@ -27,20 +29,21 @@ public class ReportController {
   @Autowired private final RequestReportService reportRequestService;
   private DirectionService directionService;
 
+  private ReportRequestMapper mapper;
   private DirectionValidator directionValidator;
 
   @Autowired private ApplicationEventPublisher eventPublisher;
 
   /** Création de demandes de rapports personnalisés pour une liste de sous-directions. */
   @PostMapping("/report/other_direction/create")
-  public ResponseEntity<List<ReportRequest>> createRequests(
-      @RequestParam String requestingDirectionId,
+  public ResponseEntity<List<ReportRequestDTO>> createRequests(
+      @RequestParam String requesterDirectionId,
       @RequestParam String responsibleId,
       @RequestParam List<String> subDirectionIds,
       @RequestParam LocalDate weekStartDate,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "15") int pageSize) {
-    Direction direction = directionService.getDirectionById(requestingDirectionId);
+    Direction direction = directionService.getDirectionById(requesterDirectionId);
     directionValidator.acceptUser(direction, responsibleId);
 
     List<ReportRequest> requests =
@@ -49,7 +52,7 @@ public class ReportController {
                 subDirectionId -> {
                   ReportRequest request =
                       reportRequestService.createRequest(
-                          requestingDirectionId, subDirectionId, weekStartDate,responsibleId, page, pageSize);
+                          requesterDirectionId, subDirectionId, weekStartDate,responsibleId, page, pageSize);
 
                   // Publier un événement après la création de chaque demande
                   eventPublisher.publishEvent(new ReportRequestEvent(request, "CREATED"));
@@ -57,12 +60,14 @@ public class ReportController {
                 })
             .collect(Collectors.toList());
 
-    return ResponseEntity.ok(requests);
+
+    List<ReportRequestDTO>  reportRequestDTOS = requests.stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
+    return ResponseEntity.ok(reportRequestDTOS);
   }
 
   /** Répondre à une demande de rapport. */
   @PostMapping("/{requestId}/respond")
-  public ResponseEntity<ReportRequest> respondToRequest(
+  public ResponseEntity<ReportRequestDTO> respondToRequest(
       @PathVariable String requestId,
       @RequestParam String targetDirectionId,
       @RequestParam String status,
@@ -72,6 +77,6 @@ public class ReportController {
         reportRequestService.respondToRequest(requestId, targetDirectionId, status, comment);
     // Publier un événement de confirmation après réponse à la demande
     eventPublisher.publishEvent(new ReportRequestEvent(request, "APPROVED"));
-    return ResponseEntity.ok(request);
+    return ResponseEntity.ok(mapper.toDomain(request));
   }
 }

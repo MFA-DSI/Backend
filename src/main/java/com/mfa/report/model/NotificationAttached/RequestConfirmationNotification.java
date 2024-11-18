@@ -26,7 +26,7 @@ public class RequestConfirmationNotification extends Notification {
     public RequestConfirmationNotification() {}
 
     public RequestConfirmationNotification(ReportRequest reportRequest, User recipient, String confirmationMessage) {
-        super.setDescription("Votre demande de rapport a été bien envoyée");
+        super.setDescription("Your report request has been sent successfully.");
         super.setUser(recipient);
         super.setCreationDatetime(LocalDateTime.now());
         super.setNotificationType(NotificationStatus.report_confirmation);

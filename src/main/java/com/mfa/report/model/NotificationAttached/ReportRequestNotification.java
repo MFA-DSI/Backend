@@ -23,7 +23,7 @@ public class ReportRequestNotification extends Notification {
     public ReportRequestNotification() {
     }
     public  ReportRequestNotification (ReportRequest request, User recipient){
-        super.setDescription("[DEMANDE DE RAPPORT] - "+request.getRequestingDirection().getAcronym()+" "+request.getDescription());
+        super.setDescription("[DEMANDE DE RAPPORT] - "+request.getRequesterDirection().getAcronym()+" "+request.getDescription());
         super.setUser(recipient);
         super.setCreationDatetime(LocalDateTime.now());
         super.setNotificationType(NotificationStatus.report_demand);

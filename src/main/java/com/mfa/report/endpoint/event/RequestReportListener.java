@@ -34,16 +34,16 @@ public class RequestReportListener {
         // Envoie une notification à chaque administrateur de la direction cible
 
         adminUsers.forEach(admin -> {
-            CompletableFuture.runAsync(()->{
+
                 notificationService.createRequestReportNotification(admin, reportRequest);
-            });
+
         });
 
         // Envoie une confirmation de création au demandeur
         User responsible = reportRequest.getResponsible();
-        CompletableFuture.runAsync(()->{
+
             notificationService.createConfirmationNotification(responsible, reportRequest);
-        });
+
         }
 
 
