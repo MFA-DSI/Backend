@@ -13,7 +13,9 @@ import java.util.List;
 @Repository
 @EnableJpaRepositories
 public interface ReportRequestRepository extends JpaRepository<ReportRequest, String> {
+
   List<ReportRequest> findAllByRequesterDirectionId(String directionId);
+  List<ReportRequest> findAllByTargetDirectionId(String directionId);
 
   List<ReportRequest> findByStatusAndExpirationAtBefore(
       @Param("status") RequestReportStatus status, @Param("expirationAt") LocalDateTime expiration);

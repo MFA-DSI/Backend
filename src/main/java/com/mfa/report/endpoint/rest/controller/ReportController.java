@@ -6,6 +6,7 @@ import com.mfa.report.model.Direction;
 import com.mfa.report.model.ReportRequest;
 import com.mfa.report.model.event.ReportRequestEvent;
 import com.mfa.report.model.validator.DirectionValidator;
+import com.mfa.report.repository.exception.BadRequestException;
 import com.mfa.report.service.DirectionService;
 import com.mfa.report.service.RequestReportService;
 import lombok.AllArgsConstructor;
@@ -39,7 +40,7 @@ public class ReportController {
   public ResponseEntity<List<ReportRequestDTO>> createRequests(
       @RequestParam String requesterDirectionId,
       @RequestParam String responsibleId,
-      @RequestParam List<String> subDirectionIds,
+      @RequestBody List<String> subDirectionIds,
       @RequestParam LocalDate weekStartDate,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "15") int pageSize) {
@@ -66,17 +67,30 @@ public class ReportController {
   }
 
   /** Répondre à une demande de rapport. */
-  @PostMapping("/{requestId}/respond")
+  @PostMapping("/report/{requestId}/respond")
   public ResponseEntity<ReportRequestDTO> respondToRequest(
-      @PathVariable String requestId,
-      @RequestParam String targetDirectionId,
-      @RequestParam String status,
-      @RequestParam(required = false) String comment) {
-
+          @PathVariable String requestId,
+          @RequestParam String targetDirectionId,
+          @RequestParam String status,
+          @RequestBody(required = false) String comment) {
+    if("REJECTED".equalsIgnoreCase(status) && comment == null || comment.isBlank()){
+      throw new BadRequestException("Un commentaire est requis lors du rejet d'une demande.");
+    }
     ReportRequest request =
         reportRequestService.respondToRequest(requestId, targetDirectionId, status, comment);
+
+
     // Publier un événement de confirmation après réponse à la demande
-    eventPublisher.publishEvent(new ReportRequestEvent(request, "APPROVED"));
+    eventPublisher.publishEvent(new ReportRequestEvent(request, status));
     return ResponseEntity.ok(mapper.toDomain(request));
+  }
+
+  @GetMapping("/report/all_request")
+  public List<ReportRequestDTO> getAllRequestByDirectionId(@RequestParam String directionId){
+    return reportRequestService.getAllRequest(directionId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
+  }
+  @GetMapping("/report/all_targeted")
+  public List<ReportRequestDTO> getAllTargetedRequestByDirectionId(@RequestParam String directionId){
+    return reportRequestService.getAllTargetedRequest(directionId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
   }
 }

@@ -22,5 +22,6 @@ public class ReportRequestDTO {
     private DirectionNameDTO targetDirection;
     private LocalDate createdAt;
     private String status;
+    private String comment;
     private List<Activity> activityList;
 }

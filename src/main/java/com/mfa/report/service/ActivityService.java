@@ -26,9 +26,6 @@ public class ActivityService {
   private final ActivityDAO activityDAO;
   private final NotificationService notificationService;
 
-  public String toString(Object object) {
-    return "YourClass [attribute1=" + object;
-  }
 
   public Activity getActivitiesByMissionId(String id) {
     return repository.findByMissionId(id);

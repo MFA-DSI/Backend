@@ -83,23 +83,19 @@ public class RequestReportService {
       throw new BadRequestException("Cette direction n'est pas autorisée à répondre à cette demande.");
     }
 
-    // Validation et mise à jour du statut
-    if ("APPROVED".equalsIgnoreCase(status)) {
-      request.setStatus(RequestReportStatus.APPROVED);
-      request.setComment(null);
-    } else if ("REJECTED".equalsIgnoreCase(status)) {
-      if (comment == null || comment.isBlank()) {
-        throw new BadRequestException("Un commentaire est requis lors du rejet d'une demande.");
-      }
-      request.setStatus(RequestReportStatus.REJECTED);
-      request.setComment(comment);
-    } else {
-      throw new BadRequestException(
-          "Statut non valide fourni. Les valeurs autorisées sont « APPROUVÉ » ou « REJETÉ ».");
-    }
+  request.setStatus(RequestReportStatus.valueOf(status));
+    request.setComment(comment);
 
     // Mise à jour de la demande dans la base
     return repository.save(request);
+  }
+
+  public List<ReportRequest> getAllRequest(String directionId){
+    return  repository.findAllByRequesterDirectionId(directionId);
+  }
+
+  public List<ReportRequest> getAllTargetedRequest(String directionId){
+    return  repository.findAllByTargetDirectionId(directionId);
   }
 
 }

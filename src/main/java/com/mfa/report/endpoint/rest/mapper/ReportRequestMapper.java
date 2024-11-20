@@ -22,6 +22,7 @@ public class ReportRequestMapper {
                 .targetDirection(directionMapper.toSignDomain(request.getTargetDirection()))
                 .createdAt(request.getCreatedAt())
                 .status(String.valueOf(request.getStatus()))
+                .comment(request.getComment()==null ? "Aucune commentaire" : request.getComment() )
                 .activityList(request.getActivities().stream().map(activityMapper::toDomainList).collect(Collectors.toUnmodifiableList()))
                 .build();
     }
