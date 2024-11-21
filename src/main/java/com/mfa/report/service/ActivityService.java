@@ -135,4 +135,8 @@ public class ActivityService {
     return activityDAO.findMonthlyActivityCountByYearAndDirection(
         year, directionId, page, pageSize);
   }
+
+  public List<Activity> getByReport(String reportId){
+    return  repository.findByReportRequestId(reportId);
+  }
 }

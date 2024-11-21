@@ -26,6 +26,7 @@ public class RecommendationNotification extends Notification {
         super.setDescription("Nouvelle recommandation: " + recommendation.getDescription());
         super.setUser(recipient);
         super.setCreationDatetime(LocalDateTime.now());
+        super.setResponsibleDirection("Responsable: "+recommendation.getResponsible().getGrade()+" "+recommendation.getResponsible().getLastname()+" "+recommendation.getResponsible().getLastname()+" "+recommendation.getResponsible().getDirection().getAcronym());
         super.setNotificationType(NotificationStatus.recommendation);
         this.recommendation = recommendation;
     }

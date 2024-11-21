@@ -7,18 +7,23 @@ import com.mfa.report.model.ReportRequest;
 import com.mfa.report.model.event.ReportRequestEvent;
 import com.mfa.report.model.validator.DirectionValidator;
 import com.mfa.report.repository.exception.BadRequestException;
+import com.mfa.report.repository.exception.NotFoundException;
 import com.mfa.report.service.DirectionService;
 import com.mfa.report.service.RequestReportService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,34 +42,56 @@ public class ReportController {
 
   /** Création de demandes de rapports personnalisés pour une liste de sous-directions. */
   @PostMapping("/report/other_direction/create")
-  public ResponseEntity<List<ReportRequestDTO>> createRequests(
-      @RequestParam String requesterDirectionId,
-      @RequestParam String responsibleId,
-      @RequestBody List<String> subDirectionIds,
-      @RequestParam LocalDate weekStartDate,
-      @RequestParam(defaultValue = "1") int page,
-      @RequestParam(defaultValue = "15") int pageSize) {
+  public ResponseEntity<List<Map<String, Object>>> createRequests(
+          @RequestParam String requesterDirectionId,
+          @RequestParam String responsibleId,
+          @RequestBody List<String> subDirectionIds,
+          @RequestParam LocalDate weekStartDate,
+          @RequestParam(defaultValue = "1") int page,
+          @RequestParam(defaultValue = "15") int pageSize) {
+
+    // Vérification des prérequis
     Direction direction = directionService.getDirectionById(requesterDirectionId);
     directionValidator.acceptUser(direction, responsibleId);
 
-    List<ReportRequest> requests =
-        subDirectionIds.stream()
-            .map(
-                subDirectionId -> {
-                  ReportRequest request =
-                      reportRequestService.createRequest(
-                          requesterDirectionId, subDirectionId, weekStartDate,responsibleId, page, pageSize);
+    // Liste pour les résultats
+    List<Map<String, Object>> results = new ArrayList<>();
 
-                  // Publier un événement après la création de chaque demande
-                  eventPublisher.publishEvent(new ReportRequestEvent(request, "CREATED"));
-                  return request;
-                })
-            .collect(Collectors.toList());
+    // Parcourir chaque sous-direction pour traitement individuel
+    for (String subDirectionId : subDirectionIds) {
+      Map<String, Object> result = new HashMap<>();
+      result.put("subDirectionId", subDirectionId);
 
+      try {
+        // Création de la demande
+        ReportRequest request = reportRequestService.createRequest(
+                requesterDirectionId, subDirectionId, weekStartDate, responsibleId, page, pageSize);
 
-    List<ReportRequestDTO>  reportRequestDTOS = requests.stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
-    return ResponseEntity.ok(reportRequestDTOS);
+        // Publier un événement en cas de succès
+        eventPublisher.publishEvent(new ReportRequestEvent(request, "CREATED"));
+
+        // Ajouter les détails de la demande réussie
+        result.put("status", "SUCCESS");
+        result.put("data", mapper.toDomain(request));
+
+      } catch (BadRequestException e) {
+        // Erreurs métier, comme une activité vide
+        result.put("status", "ERROR");
+        result.put("message", e.getMessage());
+      } catch (Exception e) {
+        // Autres erreurs non anticipées
+        result.put("status", "ERROR");
+        result.put("message", "Erreur inattendue : " + e.getMessage());
+      }
+
+      // Ajouter le résultat dans la liste des résultats
+      results.add(result);
+    }
+
+    // Retourner tous les résultats au client
+    return ResponseEntity.ok(results);
   }
+
 
   /** Répondre à une demande de rapport. */
   @PostMapping("/report/{requestId}/respond")
@@ -93,4 +120,44 @@ public class ReportController {
   public List<ReportRequestDTO> getAllTargetedRequestByDirectionId(@RequestParam String directionId){
     return reportRequestService.getAllTargetedRequest(directionId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
   }
+
+  @DeleteMapping("/delete/reports/{reportId}")
+  public ResponseEntity<String> deleteReport(@PathVariable String reportId) {
+    try {
+      // Vérification si le rapport existe
+      ReportRequest report = reportRequestService.getReportRequestById(reportId);
+      if (report == null) {
+        throw new NotFoundException("Le rapport avec l'ID " + reportId + " n'existe pas.");
+      }
+
+      // Suppression du rapport
+      reportRequestService.deleteReportById(reportId);
+      return ResponseEntity.ok("Rapport supprimé avec succès !");
+    } catch (NotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la suppression du rapport.");
+    }
+  }
+  @PostMapping("/recall/report/{reportId}")
+  public ResponseEntity<String> recallReport(@PathVariable String reportId) {
+    try {
+      // Vérification si le rapport existe
+      ReportRequest report = reportRequestService.getReportRequestById(reportId);
+      if (report == null) {
+        throw new NotFoundException("Le rapport avec l'ID " + reportId + " n'existe pas.");
+      }
+
+      // Relancer un événement pour notifier
+      eventPublisher.publishEvent(new ReportRequestEvent(report, "RECALL"));
+
+      return ResponseEntity.ok("Rapport rappelé et notification envoyée avec succès !");
+    } catch (NotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors du rappel du rapport.");
+    }
+  }
+
+
 }

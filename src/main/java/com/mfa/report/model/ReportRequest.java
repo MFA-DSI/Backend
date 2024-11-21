@@ -35,6 +35,8 @@ public class ReportRequest {
   @JoinColumn(name = "responsible_id", nullable = false)
   private User responsible;
 
+  private LocalDate startedAt;
+
   @ManyToOne
   @JoinColumn(name = "requesting_direction_id", nullable = false)
   private Direction requesterDirection;
@@ -47,7 +49,7 @@ public class ReportRequest {
   private LocalDate createdAt;
 
   @Column(nullable = false)
-  private LocalDate expirationAt; // Date d'expiration
+  private LocalDate expirationAt;
 
   @Enumerated(EnumType.STRING)
   private RequestReportStatus

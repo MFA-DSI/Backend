@@ -101,20 +101,28 @@ public class NotificationService {
   }
 
   public void createRequestReportNotification(User user, ReportRequest request) {
-    ReportRequestNotification notification = new ReportRequestNotification(request, user);
+    ReportRequestNotification notification = new ReportRequestNotification(request, user,false);
+    repository.save(notification);
+  }
+
+  public void createRecallRequestReportNotification(User user, ReportRequest request) {
+    ReportRequestNotification notification = new ReportRequestNotification(request, user,true);
     repository.save(notification);
   }
 
   public void createConfirmationNotification(User responsible, ReportRequest request) {
     String confirmationMessage =
-        "Your report request about  "
+        "Votre demande  "
             + request.getDescription()
-            + "is sent successfuly to  "
+            + "été bien envoyée au  "
             + request.getTargetDirection().getAcronym();
+
     RequestConfirmationNotification notification =
         new RequestConfirmationNotification(request, responsible, confirmationMessage);
     repository.save(notification);
   }
+
+
 
   public void createConfirmedReportNotification(User directionResponsible, ReportRequest request) {
     RequestConfirmedNotification notification =

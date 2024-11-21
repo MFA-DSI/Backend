@@ -12,4 +12,5 @@ import org.springframework.stereotype.Repository;
 @EnableJpaRepositories
 public interface ActivityRepository extends JpaRepository<Activity, String> {
   Activity findByMissionId(String id);
+  List<Activity> findByReportRequestId(String id);
 }

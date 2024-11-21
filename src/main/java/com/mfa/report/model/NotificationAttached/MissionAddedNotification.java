@@ -22,6 +22,7 @@ public class MissionAddedNotification extends Notification {
     public MissionAddedNotification(Mission mission, User recipient) {
         super.setDescription(mission.getPostedBy().getGrade()+" "+mission.getPostedBy().getLastname()+" "+mission.getPostedBy().getLastname()+" "+"a ajouté une mission: " + mission.getDescription());
         super.setUser(recipient);
+        super.setResponsibleDirection("Responsable: "+mission.getPostedBy().getGrade()+" "+mission.getPostedBy().getLastname()+" "+mission.getPostedBy().getLastname()+" "+mission.getPostedBy().getDirection().getAcronym());
         super.setCreationDatetime(LocalDateTime.now());
         super.setNotificationType(NotificationStatus.mission);
         this.mission = mission;

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,6 +17,7 @@ public interface ReportRequestRepository extends JpaRepository<ReportRequest, St
 
   List<ReportRequest> findAllByRequesterDirectionId(String directionId);
   List<ReportRequest> findAllByTargetDirectionId(String directionId);
+  ReportRequest findByStartedAtAndTargetDirectionId(LocalDate startedAt,String directionId);
 
   List<ReportRequest> findByStatusAndExpirationAtBefore(
       @Param("status") RequestReportStatus status, @Param("expirationAt") LocalDateTime expiration);

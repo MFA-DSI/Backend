@@ -16,6 +16,7 @@ public class NotificationDTO {
   private String description;
   private String activityId;
   private boolean viewStatus;
+  private String responsibleDirection;
   private String status;
   private String userId;
   private LocalDateTime creationDatetime;

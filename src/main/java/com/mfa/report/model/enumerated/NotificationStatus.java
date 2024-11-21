@@ -7,5 +7,6 @@ public enum NotificationStatus {
     task,
     user_added,
     report_confirmation,
-    report_accepted
+    report_accepted,
+    report_recall
 }

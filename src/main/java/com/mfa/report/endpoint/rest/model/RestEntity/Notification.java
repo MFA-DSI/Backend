@@ -17,5 +17,6 @@ public class Notification{
     private boolean viewStatus;
     private String status;
     private LocalDateTime creationDatetime;
+    private String responsibleDirection;
 
 }

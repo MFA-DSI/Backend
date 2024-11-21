@@ -26,10 +26,11 @@ public class RequestConfirmationNotification extends Notification {
     public RequestConfirmationNotification() {}
 
     public RequestConfirmationNotification(ReportRequest reportRequest, User recipient, String confirmationMessage) {
-        super.setDescription("Your report request has been sent successfully.");
+    super.setDescription("[DEMANDE DE RAPPORT] - Votre demande sur les activités hebdomadaires de semaine du "+reportRequest.getStartedAt()+" a été bien envoyée au "+ reportRequest.getTargetDirection().getAcronym());
         super.setUser(recipient);
         super.setCreationDatetime(LocalDateTime.now());
         super.setNotificationType(NotificationStatus.report_confirmation);
+        super.setResponsibleDirection("Responsable: "+reportRequest.getResponsible().getGrade()+" "+reportRequest.getResponsible().getLastname()+" "+reportRequest.getResponsible().getLastname()+" "+reportRequest.getResponsible().getDirection().getAcronym());
         this.reportRequest = reportRequest;
         this.confirmationMessage = confirmationMessage;
     }

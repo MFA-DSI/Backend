@@ -5,11 +5,9 @@ import com.mfa.report.endpoint.rest.mapper.MissionMapper;
 import com.mfa.report.model.Activity;
 import com.mfa.report.model.Direction;
 import com.mfa.report.model.Mission;
+import com.mfa.report.model.ReportRequest;
 import com.mfa.report.model.validator.DirectionValidator;
-import com.mfa.report.service.ActivityService;
-import com.mfa.report.service.DirectionService;
-import com.mfa.report.service.FileService;
-import com.mfa.report.service.MissionService;
+import com.mfa.report.service.*;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -40,6 +38,7 @@ public class FileController {
   private final DirectionService directionService;
   private final ActivityService activityService;
   private final LocalDateUtils localDateUtils;
+  private final RequestReportService requestReportService;
   private final DirectionValidator directionValidator;
 
   @PostMapping("/activity/export/excel")
@@ -121,28 +120,42 @@ public class FileController {
     log.info(reportTitle);
 
     Direction direction = directionService.getDirectionById(directionId);
-    List<Direction> subDirection = directionService.getSubDirectionByDirectionId(directionId);
-
-    byte[] resource;
-    if (subDirection.isEmpty()) {
-      // Pas de sous-directions, génère un rapport pour la direction seule
+         // Pas de sous-directions, génère un rapport pour la direction seule
       List<Activity> activities = activityService.getActivitiesForWeek(date, directionId, 1, pageSize);
-      resource = fileService.createActivityReportExcel(direction.getName(), date, activities);
-    } else {
-      // Génère un rapport pour la direction principale et ses sous-directions
-      List<Activity> mainActivities = activityService.getActivitiesForWeek(date, directionId, 1, pageSize);
-      List<Direction> subDirections = directionService.getSubDirectionByDirectionId(directionId);
-      resource =  fileService.createActivityReportExcelWithSubDirections(direction.getId(), date, mainActivities);
-    }
+    byte[] resource = fileService.createActivityReportExcel(direction.getName(), date, activities);
 
     String fileName = localDateUtils.formatDateRange(date, endDate) + " - CR ACTIVITES HEBDOMADAIRES - "+direction.getAcronym() + ".xlsx";
     log.info(fileName);
-
     return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
             .contentLength(resource.length)
             .body(resource);
   }
+
+
+
+  @PostMapping("/other_direction/mission/export/week/excel")
+  public ResponseEntity<byte[]> generateOtherDirectionWeekReport(
+          @RequestParam String directionId)
+          throws IOException {
+    ReportRequest reportRequest = requestReportService.getReportRequestById(directionId);
+
+    String reportTitle = localDateUtils.generateReportTitleForWeek(reportRequest.getStartedAt());
+    LocalDate endDate = reportRequest.getStartedAt().plusDays(6);
+    log.info(reportTitle);
+
+    Direction direction = directionService.getDirectionById(reportRequest.getTargetDirection().getId());
+    // Pas de sous-directions, génère un rapport pour la direction seule
+    List<Activity> activities = activityService.getByReport(directionId);
+    byte[] resource = fileService.createActivityReportExcel(direction.getName(), reportRequest.getStartedAt(), activities);
+
+    String fileName = localDateUtils.formatDateRange(reportRequest.getStartedAt(), endDate) + " - CR ACTIVITES HEBDOMADAIRES - "+direction.getAcronym() + ".xlsx";
+    return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+            .contentLength(resource.length)
+            .body(resource);
+  }
+
 
   @PostMapping("/mydirection/mission/export/monthly/excel")
   public ResponseEntity<byte[]> generateMonthReport(

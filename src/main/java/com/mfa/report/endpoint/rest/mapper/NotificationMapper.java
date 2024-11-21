@@ -19,10 +19,12 @@ public class NotificationMapper {
         .viewStatus(notification.isViewStatus())
         .description(notification.getDescription())
         .userId(notification.getUser().getId())
+        .responsibleDirection(notification.getResponsibleDirection())
         .status(String.valueOf(notification.getNotificationType()))
         .creationDatetime(notification.getCreationDatetime())
         .build();
-  };
+  }
+  ;
 
   public com.mfa.report.endpoint.rest.model.RestEntity.Notification toDomainView(
       Notification notification) {
@@ -31,7 +33,9 @@ public class NotificationMapper {
         .viewStatus(notification.isViewStatus())
         .description(notification.getDescription())
         .status(String.valueOf(notification.getNotificationType()))
+        .responsibleDirection(notification.getResponsibleDirection())
         .creationDatetime(notification.getCreationDatetime())
         .build();
-  };
+  }
+  ;
 }
