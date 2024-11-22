@@ -55,8 +55,8 @@ public class ReportRequest {
   private RequestReportStatus
       status; // Statut de la demande: "PENDING", "APPROVED", "REJECTED", "EXPIRED"
 
-  @OneToMany(mappedBy = "reportRequest", cascade = CascadeType.ALL)
-  private List<Activity> activities; // Liste des activités associées
+  @OneToMany(mappedBy = "reportRequest", cascade = CascadeType.DETACH)
+  private List<Activity> activities;
 
   @Column(length = 500)
   private String comment; // Commentaire (obligatoire en cas de rejet)
