@@ -1,5 +1,6 @@
 package com.mfa.report.model;
 
+import com.mfa.report.model.enumerated.ActivityStatus;
 import com.mfa.report.model.enumerated.RealizationType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,4 +31,7 @@ public class PerformanceRealization {
   private RealizationType realizationType;
 
   @OneToOne private Activity activity;
+
+  @Enumerated(EnumType.STRING)
+  private ActivityStatus status;
 }

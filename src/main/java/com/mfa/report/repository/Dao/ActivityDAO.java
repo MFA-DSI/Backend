@@ -77,7 +77,7 @@ public class ActivityDAO {
         predicates.add(cb.greaterThanOrEqualTo(activity.get("dueDatetime"), startDate));
       }
     }
-
+    Predicate finishedCondition = cb.equal(performance.get("status"), RealizationType.number);
     Predicate percentageCondition = cb.equal(performance.get("realizationType"), RealizationType.percentage);
     Predicate completedCondition = cb.and(
             cb.equal(performance.get("KPI"), 100),
