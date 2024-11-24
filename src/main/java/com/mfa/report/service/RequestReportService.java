@@ -51,8 +51,7 @@ public class RequestReportService {
         throw new  BadRequestException(reportRequest.getRequesterDirection().getAcronym()+": Une rapport de cette semaine a été déja demandée par"+reportRequest.getResponsible().getGrade()+" "+reportRequest.getResponsible().getLastname()+" "+reportRequest.getResponsible().getFirstname());
     }
     User user = userService.getUserById(responsibleId);
-    String description = "Demande de rapport des activites hebdomadaires de la semaine du "+localDateUtils.formatDate(weekStartDate);
-    request.setDescription(description);
+
     request.setResponsible(user);
     request.setStartedAt(weekStartDate);
     // Récupérer et définir la direction demandeuse
@@ -65,7 +64,8 @@ public class RequestReportService {
     request.setTargetDirection(
         directionRepository
             .getDirectionById(subDirectionId));
-
+    String description = request.getTargetDirection().getAcronym()+": Demande de rapport des activites hebdomadaires de la semaine du "+localDateUtils.formatDate(weekStartDate);
+    request.setDescription(description);
 
     // Récupérer les activités via getActivitiesForWeek
     List<Activity> activities =

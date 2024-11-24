@@ -7,23 +7,22 @@ import com.mfa.report.model.enumerated.Role;
 import com.mfa.report.model.event.ReportRequestEvent;
 import com.mfa.report.service.NotificationService;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RequestReportListener {
+public class ReportRequestListener {
 
   @Autowired private NotificationService notificationService;
 
   @EventListener(condition = "#event.type == 'CREATED'")
-  public void onRequestReportCreated(ReportRequestEvent event) {
+  public void onReportRequestCreated(ReportRequestEvent event) {
     ReportRequest reportRequest = event.getReportRequest();
     Direction targetDirection = reportRequest.getTargetDirection();
 
-    // Récupère les utilisateurs ayant le rôle ADMIN ou SUPER_ADMIN dans la direction cible
+    // Retrieves users with the ADMIN or SUPER_ADMIN role in the target direction
     List<User> adminUsers =
         targetDirection.getResponsible().stream()
             .filter(
@@ -31,17 +30,17 @@ public class RequestReportListener {
                     user.getRole().equals(Role.ADMIN) || user.getRole().equals(Role.SUPER_ADMIN))
             .collect(Collectors.toList());
 
-    // Envoie une notification à chaque administrateur de la direction cible
-
+    // Sends a notification to each administrator in the target direction
     adminUsers.forEach(
         admin -> {
           notificationService.createRequestReportNotification(admin, reportRequest);
         });
 
-    // Envoie une confirmation de création au demandeur
+    // Sends a creation confirmation to the requester
     User responsible = reportRequest.getResponsible();
     notificationService.createConfirmationNotification(responsible, reportRequest);
   }
+
 
   @EventListener(condition = "#event.type == 'APPROVED'")
   public void onRequestReportApproved(ReportRequestEvent event) {

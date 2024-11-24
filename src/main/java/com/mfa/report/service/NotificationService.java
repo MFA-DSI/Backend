@@ -100,8 +100,8 @@ public class NotificationService {
     return repository.save(notification);
   }
 
-  public void createRequestReportNotification(User user, ReportRequest request) {
-    ReportRequestNotification notification = new ReportRequestNotification(request, user,false);
+  public void createRequestReportNotification(User recipient, ReportRequest request) {
+    ReportRequestNotification notification = new ReportRequestNotification(request, recipient,false);
     repository.save(notification);
   }
 

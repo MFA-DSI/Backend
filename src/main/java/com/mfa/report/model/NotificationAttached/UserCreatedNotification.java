@@ -24,6 +24,7 @@ public class UserCreatedNotification extends Notification {
     // Constructeur avec l'utilisateur créé et le destinataire
     public UserCreatedNotification(User newUser, User recipient) {
         super.setDescription("L'utilisateur " + newUser.getGrade()+" "+newUser.getFirstname()+ " "+newUser.getLastname() + " a besoin d'approbation au membre de votre direction");
+        super.setResponsibleDirection("");
         super.setUser(recipient);  // Destinataire de la notification
         super.setCreationDatetime(LocalDateTime.now());  // Date et heure de création de la notification
         super.setNotificationType(NotificationStatus.user_added);  // Type de la notification

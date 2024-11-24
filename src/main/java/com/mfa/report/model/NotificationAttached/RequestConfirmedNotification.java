@@ -23,7 +23,7 @@ public class RequestConfirmedNotification extends Notification {
   private ReportRequest reportRequest;
 
   public RequestConfirmedNotification(ReportRequest reportRequest, User recipient) {
-    super.setDescription("Votre demande : " + reportRequest.getDescription() + " a été approuvée");
+    super.setDescription("[RAPPORT-"+reportRequest.getTargetDirection().getAcronym()+"] - " + reportRequest.getDescription() + " a été approuvée");
     super.setUser(recipient);
     super.setResponsibleDirection("Responsable: "+reportRequest.getResponsible().getGrade()+" "+reportRequest.getResponsible().getLastname()+" "+reportRequest.getResponsible().getLastname()+" - "+reportRequest.getResponsible().getDirection().getAcronym());
     super.setCreationDatetime(LocalDateTime.now());
