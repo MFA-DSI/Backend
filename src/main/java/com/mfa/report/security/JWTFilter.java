@@ -34,6 +34,10 @@ public class JWTFilter extends OncePerRequestFilter {
 
   private final JWTVerifier jwtVerifier;
 
+  @Autowired
+  private Bucket4jRateLimiter rateLimiter;
+
+
   @Override
   protected void doFilterInternal(
           HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -46,6 +50,9 @@ public class JWTFilter extends OncePerRequestFilter {
       log.debug("Authorization header absent ou invalide");
       filterChain.doFilter(request, response);
       return;
+    }
+    if (!rateLimiter.tryConsume(request, response)) {
+      return; // If rate limit exceeded, stop further processing
     }
 
     String token = authorizationHeader.substring(7);
