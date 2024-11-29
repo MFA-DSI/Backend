@@ -36,49 +36,49 @@ public class JWTFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
+          HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+          throws ServletException, IOException {
+
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+    log.debug("Authorization Header: " + authorizationHeader); // Debug
 
     if (authorizationHeader == null || !authorizationHeader.toLowerCase().startsWith("bearer ")) {
+      log.debug("Authorization header absent ou invalide");
       filterChain.doFilter(request, response);
       return;
     }
 
-    String token = "";
-    if (authorizationHeader.toLowerCase().startsWith("bearer ")) {
-      token = authorizationHeader.substring(7);
+    String token = authorizationHeader.substring(7);
 
-      try {
-        if (StringUtils.isNotBlank(token)) {
-          DecodedJWT decodedJWT = jwtVerifier.verify(token);
+    try {
+      DecodedJWT decodedJWT = jwtVerifier.verify(token);
 
-          Date expiresAt = decodedJWT.getExpiresAt();
-          if (expiresAt != null && expiresAt.before(new Date())) {
-            throw new JWTVerificationException("Token has expired");
-          }
-
-          List<String> roles = decodedJWT.getClaim("role").asList(String.class);
-          String userId = String.valueOf(decodedJWT.getClaim("userId"));
-
-          List<SimpleGrantedAuthority> rolesList =
-              roles.stream()
-                  .map(
-                      thisRolesString ->
-                          new SimpleGrantedAuthority(
-                              String.format("%s%s", "ROLE_", thisRolesString)))
-                  .toList();
-
-          UsernamePasswordAuthenticationToken user =
-              new UsernamePasswordAuthenticationToken(decodedJWT, token, rolesList);
-          SecurityContextHolder.getContext().setAuthentication(user);
-        }
-      } catch (JWTVerificationException jwtException) {
-        log.debug("Problem in token", jwtException);
-        throw jwtException;
+      Date expiresAt = decodedJWT.getExpiresAt();
+      if (expiresAt != null && expiresAt.before(new Date())) {
+        throw new JWTVerificationException("Token has expired");
       }
+
+      List<String> roles = decodedJWT.getClaim("role").asList(String.class);
+      log.debug("Rôles extraits du token: " + roles);
+
+      String userId = String.valueOf(decodedJWT.getClaim("userId"));
+      log.debug("User ID extrait du token: " + userId);
+
+      List<SimpleGrantedAuthority> rolesList = roles.stream()
+              .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+              .toList();
+
+      UsernamePasswordAuthenticationToken user =
+              new UsernamePasswordAuthenticationToken(decodedJWT, token, rolesList);
+      SecurityContextHolder.getContext().setAuthentication(user);
+
+    } catch (JWTVerificationException jwtException) {
+      log.error("JWT Verification failed", jwtException);
+      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      return;
     }
 
     filterChain.doFilter(request, response);
   }
+
 }

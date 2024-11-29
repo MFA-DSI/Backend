@@ -25,9 +25,10 @@ public class SecurityConf {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
     return httpSecurity
-        .cors(AbstractHttpConfigurer::disable)
-        .csrf(AbstractHttpConfigurer::disable)
-        .sessionManagement(AbstractHttpConfigurer::disable)
+            .cors()  // Active la gestion CORS dans Spring Security
+            .and()
+            .csrf().disable()
+            .sessionManagement(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             (auth) -> {
               auth.requestMatchers("/users/login")
@@ -39,10 +40,11 @@ public class SecurityConf {
                   .requestMatchers(GET, "/direction/all")
                   .permitAll()
                   .anyRequest()
-                  .permitAll();
+                  .authenticated();
             })
         .exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/error"))
         .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
         .build();
   }
 

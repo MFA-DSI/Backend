@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/direction/")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*", originPatterns = "*")
 @Slf4j
 public class ServiceController {
     private final ServiceService service;

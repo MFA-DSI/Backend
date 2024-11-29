@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/direction/")
-@CrossOrigin(origins = "*")
 @Slf4j
+@CrossOrigin(origins = "*", allowedHeaders = "*", originPatterns = "*")
 public class RecommendationController {
     private final RecommendationService service;
     private  final NotificationService notificationService;

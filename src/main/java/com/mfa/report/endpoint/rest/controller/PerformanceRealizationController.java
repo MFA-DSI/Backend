@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/direction")
+@CrossOrigin(origins = "*", allowedHeaders = "*", originPatterns = "*")
 public class PerformanceRealizationController {
     private final PerformanceRealizationService service;
     private final ActivityService activityService;

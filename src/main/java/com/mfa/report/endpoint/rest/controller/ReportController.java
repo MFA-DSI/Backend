@@ -151,7 +151,7 @@ public class ReportController {
   }
 
   @PostMapping("/recall/report/{reportId}")
-  public ResponseEntity<String> recallReport(@PathVariable String reportId) {
+  public ResponseEntity<Map<String, String>> recallReport(@PathVariable String reportId) {
     try {
       // Vérification si le rapport existe
       ReportRequest report = reportRequestService.getReportRequestById(reportId);
@@ -162,13 +162,23 @@ public class ReportController {
       // Relancer un événement pour notifier
       eventPublisher.publishEvent(new ReportRequestEvent(report, "RECALL"));
 
-      return ResponseEntity.ok("Rapport rappelé et notification envoyée avec succès !");
+      // Retourner un message de succès
+      Map<String, String> response = new HashMap<>();
+      response.put("message", "Rapport rappelé et notification envoyée avec succès !");
+      return ResponseEntity.ok(response);
     } catch (NotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+      // Retourner un message en cas de rapport non trouvé
+      Map<String, String> response = new HashMap<>();
+      response.put("message", e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors du rappel du rapport.");
+      // Retourner un message générique en cas d'erreur serveur
+      Map<String, String> response = new HashMap<>();
+      response.put("message", "Erreur lors du rappel du rapport.");
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }
+
 
 
 }

@@ -17,6 +17,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/direction")
+@CrossOrigin(origins = "*", allowedHeaders = "*", originPatterns = "*")
 public class NextTaskController {
     private final NextTaskService service;
     private final ActivityService activityService;

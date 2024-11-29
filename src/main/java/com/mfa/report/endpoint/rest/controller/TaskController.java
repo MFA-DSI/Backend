@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/direction")
+@CrossOrigin(origins = "*", allowedHeaders = "*", originPatterns = "*")
 public class TaskController {
     private final ActivityService activityService;
     private  final TaskService service;

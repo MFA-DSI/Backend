@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/direction")
+@CrossOrigin(origins = "*", allowedHeaders = "*", originPatterns = "*")
 public class NotificationController {
     private final NotificationService service;
     private final NotificationMapper mapper;
