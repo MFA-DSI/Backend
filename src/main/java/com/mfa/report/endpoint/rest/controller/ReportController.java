@@ -122,7 +122,7 @@ public class ReportController {
   }
 
   @DeleteMapping("/delete/reports/{reportId}")
-  public ResponseEntity<String> deleteReport(@PathVariable String reportId) {
+  public ResponseEntity<Map<String, String>> deleteReport(@PathVariable String reportId) {
     try {
       // Vérification si le rapport existe
       ReportRequest report = reportRequestService.getReportRequestById(reportId);
@@ -132,13 +132,24 @@ public class ReportController {
 
       // Suppression du rapport
       reportRequestService.deleteReportById(reportId);
-      return ResponseEntity.ok("Rapport supprimé avec succès !");
+
+      // Retourner un message de succès
+      Map<String, String> response = new HashMap<>();
+      response.put("message", "Rapport supprimé avec succès !");
+      return ResponseEntity.ok(response);
     } catch (NotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+      // Retourner un message en cas de rapport non trouvé
+      Map<String, String> response = new HashMap<>();
+      response.put("message", e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la suppression du rapport.");
+      // Retourner un message générique en cas d'erreur serveur
+      Map<String, String> response = new HashMap<>();
+      response.put("message", "Erreur lors de la suppression du rapport.");
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }
+
   @PostMapping("/recall/report/{reportId}")
   public ResponseEntity<String> recallReport(@PathVariable String reportId) {
     try {

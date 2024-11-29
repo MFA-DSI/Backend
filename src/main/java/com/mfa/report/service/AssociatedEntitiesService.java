@@ -8,7 +8,6 @@ import com.mfa.report.endpoint.rest.model.DTO.NextTaskDTO;
 import com.mfa.report.endpoint.rest.model.DTO.PerfRealizationDTO;
 import com.mfa.report.endpoint.rest.model.DTO.TaskDTO;
 import com.mfa.report.model.Activity;
-import com.mfa.report.model.Mission;
 import com.mfa.report.model.NextTask;
 import com.mfa.report.model.PerformanceRealization;
 import com.mfa.report.model.Task;
@@ -55,56 +54,51 @@ public class AssociatedEntitiesService {
 
   @Async
   public PerformanceRealization savePerformanceRealizationAsync(
-          PerformanceRealization performanceRealization) {
+      PerformanceRealization performanceRealization) {
     return performanceRealizationService.crUpdatePerformance(performanceRealization);
   }
 
   public Activity AttachEntitiesToActivity(
-          Activity activity,
-          List<TaskDTO> taskList,
-          List<NextTaskDTO> nextTaskList,
-          List<PerfRealizationDTO> perfRealizationDTO) {
+      Activity activity,
+      List<TaskDTO> taskList,
+      List<NextTaskDTO> nextTaskList,
+      List<PerfRealizationDTO> perfRealizationDTO) {
 
-    if(taskList != null && !taskList.isEmpty()){
+    if (taskList != null && !taskList.isEmpty()) {
       taskList.forEach(
-              task -> {
-                task.setActivityId(activity.getId());
-                saveTaskAsync(taskMapper.ToRestSave(task, activity));
-              });
+          task -> {
+            task.setActivityId(activity.getId());
+            saveTaskAsync(taskMapper.ToRestSave(task, activity));
+          });
       activity.setTaskList(taskList.stream().map(taskMapper::toRest).toList());
     }
 
-
-    if(nextTaskList != null && !nextTaskList.isEmpty()){
+    if (nextTaskList != null && !nextTaskList.isEmpty()) {
       nextTaskList.forEach(
-              nextTaskDTO -> {
-                nextTaskDTO.setActivityId(activity.getId());
-                saveNextTaskAsync(nextTaskMapper.toRestSave(nextTaskDTO, activity));
-              });
+          nextTaskDTO -> {
+            nextTaskDTO.setActivityId(activity.getId());
+            saveNextTaskAsync(nextTaskMapper.toRestSave(nextTaskDTO, activity));
+          });
 
       activity.setNexTaskList(nextTaskList.stream().map(nextTaskMapper::toRest).toList());
-
     }
-    if(perfRealizationDTO != null && ! perfRealizationDTO.isEmpty()){
+    if (perfRealizationDTO != null && !perfRealizationDTO.isEmpty()) {
       perfRealizationDTO.forEach(
-              (perfRealizationDTO1 -> {
-                perfRealizationDTO1.setActivityId(activity.getId());
-                log.info(String.valueOf(perfRealizationDTO1));
-                savePerformanceRealizationAsync(perfRealizationMapper.toRestSave(perfRealizationDTO1,activity));
-              }));
+          (perfRealizationDTO1 -> {
+            perfRealizationDTO1.setActivityId(activity.getId());
+            log.info(String.valueOf(perfRealizationDTO1));
+            savePerformanceRealizationAsync(
+                perfRealizationMapper.toRestSave(perfRealizationDTO1, activity));
+          }));
       activity.setPerformanceRealization(
-              perfRealizationDTO.stream().map(perfRealizationMapper::toRest).toList());
-
+          perfRealizationDTO.stream().map(perfRealizationMapper::toRest).toList());
     }
-
 
     return activity;
   }
 
-
-
- // @Async
- // public void attachActivitiesToMission(List<Activity> activity, Mission mission) {
- //   activity.forEach(activity1 -> activity1.setMission(mission));
- // }
+  // @Async
+  // public void attachActivitiesToMission(List<Activity> activity, Mission mission) {
+  //   activity.forEach(activity1 -> activity1.setMission(mission));
+  // }
 }

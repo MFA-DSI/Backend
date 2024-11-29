@@ -41,7 +41,6 @@ public class ReportRequestListener {
     notificationService.createConfirmationNotification(responsible, reportRequest);
   }
 
-
   @EventListener(condition = "#event.type == 'APPROVED'")
   public void onRequestReportApproved(ReportRequestEvent event) {
     ReportRequest reportRequest = event.getReportRequest();
