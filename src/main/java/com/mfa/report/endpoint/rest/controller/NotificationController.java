@@ -1,6 +1,5 @@
 package com.mfa.report.endpoint.rest.controller;
 
-
 import com.mfa.report.endpoint.rest.mapper.NotificationMapper;
 import com.mfa.report.endpoint.rest.model.DTO.NotificationDTO;
 import com.mfa.report.endpoint.rest.model.RestEntity.Notification;
@@ -18,29 +17,33 @@ import java.util.stream.Collectors;
 @RequestMapping("/direction")
 @CrossOrigin(origins = "*", allowedHeaders = "*", originPatterns = "*")
 public class NotificationController {
-    private final NotificationService service;
-    private final NotificationMapper mapper;
+  private final NotificationService service;
+  private final NotificationMapper mapper;
 
-    private final NotificationValidator validator;
+  private final NotificationValidator validator;
 
-    @GetMapping("/notification/user")
-    public List<NotificationDTO> getAllNotification(@RequestParam String userId,@RequestParam(defaultValue = "1") int page,
-    @RequestParam(defaultValue = "15") int pageSize){
-        return service.getNotification(userId,page,pageSize).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
-    }
+  @GetMapping("/notification/user")
+  public List<NotificationDTO> getAllNotification(
+      @RequestParam String userId,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "100") int pageSize) {
+    return service.getNotification(userId, page, pageSize).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toUnmodifiableList());
+  }
 
+  @PutMapping("/notification/update")
+  public ResponseEntity<Notification> updateNotification(@RequestParam String id) {
+    return ResponseEntity.ok().body(mapper.toDomainView(service.updateNotificationStatus(id)));
+  }
 
-    @PutMapping("/notification/update")
-    public ResponseEntity<Notification> updateNotification(@RequestParam String id){
-        return ResponseEntity.ok().body(mapper.toDomainView(service.updateNotificationStatus(id)));}
+  @PostMapping("/notification/delete")
+  public ResponseEntity<String> deleteNotification(
+      @RequestParam String id, @RequestParam String userId) {
+    com.mfa.report.model.Notification notification = service.getNotificationById(id);
+    validator.acceptResponsible(notification, userId);
+    service.deleteNotification(notification, userId);
 
-    @PostMapping("/notification/delete")
-    public ResponseEntity<String> deleteNotification(@RequestParam String id,@RequestParam String userId){
-        com.mfa.report.model.Notification notification = service.getNotificationById(id);
-        validator.acceptResponsible(notification,userId);
-        service.deleteNotification(notification,userId);
-
-        return ResponseEntity.ok("notification deleted successfully");
-    }
+    return ResponseEntity.ok("notification deleted successfully");
+  }
 }
-

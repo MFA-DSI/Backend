@@ -3,6 +3,7 @@ package com.mfa.report.endpoint.rest.mapper;
 import com.mfa.report.endpoint.rest.model.DTO.PerfRealizationDTO;
 import com.mfa.report.model.Activity;
 import com.mfa.report.model.PerformanceRealization;
+import com.mfa.report.model.enumerated.ActivityStatus;
 import com.mfa.report.model.enumerated.RealizationType;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -40,11 +41,29 @@ public class PerfRealizationMapper {
 
   public PerformanceRealization toRestSave(
       PerfRealizationDTO performanceRealizationDTO, Activity activity) {
+
+    RealizationType realizationType =
+        RealizationType.valueOf(performanceRealizationDTO.getRealizationType());
+    Double indicators = performanceRealizationDTO.getIndicators();
+    ActivityStatus status;
+
+    // Déterminer le status en fonction des règles
+    if (realizationType == RealizationType.number) {
+      status =
+          ActivityStatus.valueOf(
+              performanceRealizationDTO.getStatus()); // Utiliser le statut passé en paramètre
+    } else if (realizationType == RealizationType.percentage && indicators == 100) {
+      status = ActivityStatus.finished;
+    } else {
+      status = ActivityStatus.pending;
+    }
+
     return PerformanceRealization.builder()
         .id(performanceRealizationDTO.getId())
         .realization(performanceRealizationDTO.getRealization())
         .KPI(performanceRealizationDTO.getIndicators())
-        .realizationType(RealizationType.valueOf(performanceRealizationDTO.getRealizationType()))
+        .realizationType(realizationType)
+        .status(status)
         .activity(activity)
         .build();
   }

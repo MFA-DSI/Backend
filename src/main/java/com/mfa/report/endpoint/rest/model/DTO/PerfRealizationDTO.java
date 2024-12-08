@@ -16,4 +16,5 @@ public class PerfRealizationDTO {
   private String realization;
   private String activityId;
   private String realizationType;
+  private String status;
 }
