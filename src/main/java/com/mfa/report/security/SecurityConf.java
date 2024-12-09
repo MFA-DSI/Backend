@@ -42,7 +42,7 @@ public class SecurityConf {
                   .requestMatchers(GET, "/direction/all")
                   .permitAll()
                   .anyRequest()
-                  .authenticated();
+                  .permitAll();
             })
         .exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/error"))
         .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class)
