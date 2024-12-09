@@ -2,7 +2,6 @@ package com.mfa.report.security;
 
 import static org.springframework.http.HttpMethod.GET;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,15 +24,18 @@ public class SecurityConf {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
     return httpSecurity
-            .cors()  // Active la gestion CORS dans Spring Security
-            .and()
-            .csrf().disable()
-            .sessionManagement(AbstractHttpConfigurer::disable)
+        .cors() // Active la gestion CORS dans Spring Security
+        .and()
+        .csrf()
+        .disable()
+        .sessionManagement(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             (auth) -> {
               auth.requestMatchers("/users/login")
                   .permitAll()
                   .requestMatchers("/users/signup")
+                  .permitAll()
+                  .requestMatchers("/users/first_login")
                   .permitAll()
                   .requestMatchers("/ping")
                   .permitAll()
@@ -44,7 +46,6 @@ public class SecurityConf {
             })
         .exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/error"))
         .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class)
-
         .build();
   }
 

@@ -10,13 +10,9 @@ import com.mfa.report.service.DirectionService;
 import com.mfa.report.service.ServiceService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,32 +23,44 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*", allowedHeaders = "*", originPatterns = "*")
 @Slf4j
 public class ServiceController {
-    private final ServiceService service;
-    private final DirectionService directionService;
-    private  final ServiceMapper mapper;
-    private final DirectionValidator directionValidator;
+  private final ServiceService service;
+  private final DirectionService directionService;
+  private final ServiceMapper mapper;
+  private final DirectionValidator directionValidator;
 
+  @GetMapping("/service/all")
+  public List<Service> getAllDirectionService(@RequestParam String directionId) {
+    return service.getAllServiceByDirectionId(directionId).stream()
+        .map(mapper::toDomain)
+        .collect(Collectors.toUnmodifiableList());
+  }
 
+  @PutMapping("/service/update")
+  public Service createService(
+      @RequestParam String directionId,
+      @RequestParam String userId,
+      @RequestBody ServiceDTO serviceDTO) {
+    Direction direction1 = directionService.getDirectionById(directionId);
+    directionValidator.acceptUser(direction1, userId);
+    Service service1;
 
-    @GetMapping("/service/all")
-    public List<Service> getAllDirectionService(@RequestParam String directionId){
-        return service.getAllServiceByDirectionId(directionId).stream().map(mapper::toDomain).collect(Collectors.toUnmodifiableList());
+    if (serviceDTO.getId() != null) {
+      com.mfa.report.model.Service tempService = service.getServiceById(serviceDTO.getId());
+      tempService.setName(serviceDTO.getName());
+      service1 = mapper.toRest(tempService);
+      service.saveNewService(tempService);
+      return service1;
     }
+    return mapper.toDomain(service.saveNewService(mapper.toRest(serviceDTO, direction1)));
+  }
 
-    @PutMapping("/service/update")
-    public Service createService(@RequestParam String directionId, @RequestParam String userId, @RequestBody ServiceDTO serviceDTO){
-        Direction direction1 = directionService.getDirectionById(directionId);
-        directionValidator.acceptUser(direction1,userId);
-        Service service1;
-
-        if(serviceDTO.getId()!= null){
-            com.mfa.report.model.Service tempService = service.getServiceById(serviceDTO.getId());
-            tempService.setName(serviceDTO.getName());
-            service1 = mapper.toRest(tempService);
-            service.saveNewService(tempService);
-            return  service1;
-
-        }
-       return mapper.toDomain(service.saveNewService(mapper.toRest(serviceDTO,direction1)));
-    }
+  @PostMapping("/directions/{directionId}/services")
+  public ResponseEntity<Service> createService(
+      @PathVariable String directionId, @RequestBody ServiceDTO serviceToSave) {
+    Direction direction = directionService.getDirectionById(directionId);
+    com.mfa.report.model.Service service1 = mapper.toRest(serviceToSave, direction);
+    service1.setDirection(direction);
+    com.mfa.report.model.Service savedService = service.saveNewService(service1);
+    return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDomain(savedService));
+  }
 }

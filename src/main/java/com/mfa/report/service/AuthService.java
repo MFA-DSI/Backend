@@ -37,9 +37,7 @@ public class AuthService {
   private final DirectionService directionService;
   private final UserValidator userValidator;
 
-  @Autowired
-  private ApplicationEventPublisher eventPublisher;
-
+  @Autowired private ApplicationEventPublisher eventPublisher;
 
   public Object signIn(Auth toAuth) {
     String email = toAuth.getEmail();
@@ -50,11 +48,13 @@ public class AuthService {
     }
 
     if (user == null) {
-      throw new NotFoundException("Utilisateur non trouvée,veillez contactez l'administrateur de votre direction");
+      throw new NotFoundException(
+          "Utilisateur non trouvée,veillez contactez l'administrateur de votre direction");
     }
 
     if (!user.getApproved()) {
-      throw new BadRequestException("Vous devez être accepté par une administrateur pour être un membre");
+      throw new BadRequestException(
+          "Vous devez être accepté par une administrateur pour être un membre");
     }
     boolean isPasswordMatch = passwordEncoder.matches(toAuth.getPassword(), user.getPassword());
     if (!isPasswordMatch) {
@@ -176,6 +176,7 @@ public class AuthService {
                         .function(toSignUp.getFunction())
                         .password(null)
                         .approved(false)
+                        .staff(toSignUp.isStaff())
                         .firstLogin(true)
                         .build()))
             .get(0);
