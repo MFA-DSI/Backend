@@ -17,5 +17,13 @@ VALUES (
   'f',
   'true'
 );
+
+INSERT INTO direction_responsible (id, responsible_id, direction_id)
+VALUES (
+    '4c926d77-f488-40a2-b14c-937dada08193',
+    '6b9b7b55-79e2-43ac-9858-1d15abab68da',
+    '550e8400-e29b-41d4-a716-446655440032'
+);
+
 COMMIT;
 ROLLBACK;

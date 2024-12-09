@@ -45,25 +45,13 @@ public class PerfRealizationMapper {
     RealizationType realizationType =
         RealizationType.valueOf(performanceRealizationDTO.getRealizationType());
     Double indicators = performanceRealizationDTO.getIndicators();
-    ActivityStatus status;
 
-    // Déterminer le status en fonction des règles
-    if (realizationType == RealizationType.number) {
-      status =
-          ActivityStatus.valueOf(
-              performanceRealizationDTO.getStatus()); // Utiliser le statut passé en paramètre
-    } else if (realizationType == RealizationType.percentage && indicators == 100) {
-      status = ActivityStatus.finished;
-    } else {
-      status = ActivityStatus.pending;
-    }
 
     return PerformanceRealization.builder()
         .id(performanceRealizationDTO.getId())
         .realization(performanceRealizationDTO.getRealization())
         .KPI(performanceRealizationDTO.getIndicators())
         .realizationType(realizationType)
-        .status(status)
         .activity(activity)
         .build();
   }
